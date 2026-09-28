@@ -1,0 +1,404 @@
+// Mirrors the backend DTOs and responses (backend/src). `erasableSyntaxOnly`
+// rules out TS enums, so enums are `as const` objects plus a union type.
+
+export type Language = 'en' | 'uk'
+/** ISO 8601 string: dates arrive as JSON strings. */
+export type IsoDate = string
+
+// ---------- Auth ----------
+
+export interface User {
+  id: string
+  email: string
+}
+
+export interface AuthSession {
+  accessToken: string
+  user: User
+}
+
+export interface MessageResponse {
+  message: string
+}
+
+// ---------- De-identification ----------
+
+export const Framework = {
+  HIPAA: 'HIPAA',
+  EU_GDPR: 'EU_GDPR',
+  UK_GDPR: 'UK_GDPR',
+  SWISS_FADP: 'SWISS_FADP',
+} as const
+export type Framework = (typeof Framework)[keyof typeof Framework]
+
+export const DeidMethod = {
+  SAFE_HARBOR: 'SAFE_HARBOR',
+  EXPERT_DETERMINATION: 'EXPERT_DETERMINATION',
+  ANONYMISATION: 'ANONYMISATION',
+  CUSTOM: 'CUSTOM',
+} as const
+export type DeidMethod = (typeof DeidMethod)[keyof typeof DeidMethod]
+
+export const OutputMode = {
+  REDACT: 'REDACT',
+  MASK: 'MASK',
+  PLACEHOLDER: 'PLACEHOLDER',
+  PSEUDONYMIZE: 'PSEUDONYMIZE',
+} as const
+export type OutputMode = (typeof OutputMode)[keyof typeof OutputMode]
+
+export const Sensitivity = {
+  CONSERVATIVE: 'CONSERVATIVE',
+  BALANCED: 'BALANCED',
+  AGGRESSIVE: 'AGGRESSIVE',
+} as const
+export type Sensitivity = (typeof Sensitivity)[keyof typeof Sensitivity]
+
+export type IdentifierKey =
+  | 'names'
+  | 'geographic'
+  | 'dates'
+  | 'phone'
+  | 'fax'
+  | 'email'
+  | 'ssn'
+  | 'mrn'
+  | 'health_plan'
+  | 'account'
+  | 'license'
+  | 'vehicle'
+  | 'device'
+  | 'url'
+  | 'ip'
+  | 'biometric'
+  | 'photo'
+  | 'other'
+  | 'organization'
+  | 'special_category'
+
+export interface MethodOption {
+  id: DeidMethod
+  name: string
+  description: string
+  recommended: boolean
+  /** When true the user picks from `identifiers`; otherwise all are applied. */
+  customizable: boolean
+  requiresReview: boolean
+  identifiers: { key: IdentifierKey; label: string }[]
+  defaultIdentifiers: IdentifierKey[]
+}
+
+export interface FrameworkOption {
+  id: Framework
+  name: string
+  description: string
+  region: string
+  methods: MethodOption[]
+}
+
+export interface AnalysisOptions {
+  frameworks: FrameworkOption[]
+  outputModes: { id: OutputMode; name: string; description: string }[]
+  sensitivities: Sensitivity[]
+  languages: Language[]
+}
+
+export interface ExtractTextResponse {
+  text: string
+  characters: number
+}
+
+/** Text limits enforced by the backend (pasted text is capped lower in the UI). */
+export const MIN_TEXT_LENGTH = 50
+export const MAX_TEXT_LENGTH = 20_000
+export const MAX_PASTED_TEXT_LENGTH = 5_000
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+/** Entities scoring below this are flagged `lowConfidence`. */
+export const LOW_CONFIDENCE_BELOW = 0.7
+
+export interface CreateAnalysisRequest {
+  text: string
+  language: Language
+  framework: Framework
+  method: DeidMethod
+  /** Only for customizable methods; defaults to the method's default set. */
+  identifiers?: IdentifierKey[]
+  outputMode?: OutputMode
+  sensitivity?: Sensitivity
+}
+
+export interface DetectedEntity {
+  id: string
+  /** Presidio entity type, e.g. PERSON, DATE_TIME. */
+  type: string
+  identifier: IdentifierKey | undefined
+  text: string
+  start: number
+  end: number
+  score: number
+  lowConfidence: boolean
+  included: boolean
+  replacement: string | null
+}
+
+export interface Analysis {
+  id: string
+  createdAt: IsoDate
+  framework: Framework
+  method: DeidMethod
+  identifiers: IdentifierKey[]
+  outputMode: OutputMode
+  language: Language
+  sensitivity: Sensitivity
+  stats: {
+    detected: number
+    processed: number
+    avgConfidence: number | null
+    processingMs: number
+  }
+  entities: DetectedEntity[]
+  deidentifiedText: string
+}
+
+/**
+ * The server keeps no text, so render and source-from-analysis requests carry
+ * the original text and entity choices back.
+ */
+export interface EntityState {
+  id: string
+  type: string
+  start: number
+  end: number
+  score: number
+  included: boolean
+}
+
+export interface RenderAnalysisRequest {
+  text: string
+  outputMode: OutputMode
+  entities: EntityState[]
+}
+
+// ---------- Synthetic data ----------
+
+export const DatasetType = {
+  PATIENT_RECORDS: 'PATIENT_RECORDS',
+  CLINICAL_NOTES: 'CLINICAL_NOTES',
+  LAB_RESULTS: 'LAB_RESULTS',
+  PRESCRIPTIONS: 'PRESCRIPTIONS',
+} as const
+export type DatasetType = (typeof DatasetType)[keyof typeof DatasetType]
+
+export const SourceDatasetType = {
+  FROM_FILE: 'FROM_FILE',
+  FROM_DOCUMENT: 'FROM_DOCUMENT',
+} as const
+export type SourceDatasetType =
+  (typeof SourceDatasetType)[keyof typeof SourceDatasetType]
+
+export type AnyDatasetType = DatasetType | SourceDatasetType
+
+export const OutputFormat = {
+  CSV: 'CSV',
+  JSON: 'JSON',
+  XLSX: 'XLSX',
+} as const
+export type OutputFormat = (typeof OutputFormat)[keyof typeof OutputFormat]
+
+export const MAX_RECORDS = 100_000
+
+export interface ColumnDefinition {
+  key: string
+  label: string
+  type: 'string' | 'number' | 'boolean' | 'date' | 'text'
+  role?: 'id' | 'code'
+}
+
+export interface SyntheticOptions {
+  datasetTypes: {
+    id: DatasetType
+    name: string
+    description: string
+    columns: ColumnDefinition[]
+    previewColumns: string[]
+  }[]
+  frameworks: { id: Framework; name: string; description: string }[]
+  formats: OutputFormat[]
+  languages: Language[]
+  maxRecords: number
+  /** Estimated bytes per record: bytesPerRecord[datasetType][format]. */
+  bytesPerRecord: Record<DatasetType, Record<OutputFormat, number>>
+}
+
+/** Give either a built-in `datasetType` or a `sourceId`. */
+export type CreateDatasetRequest = {
+  framework: Framework
+  recordCount: number
+  format: OutputFormat
+  /** Ignored for document sources, which keep the document's language. */
+  language?: Language
+} & (
+  | { datasetType: DatasetType; sourceId?: never }
+  | { sourceId: string; datasetType?: never }
+)
+
+export interface Dataset {
+  id: string
+  datasetType: AnyDatasetType
+  sourceId: string | null
+  framework: Framework
+  language: Language
+  format: OutputFormat
+  records: number
+  fields: number
+  columns: ColumnDefinition[]
+  previewColumns: string[]
+  estimatedBytes: number
+  createdAt: IsoDate
+  /** After this the dataset answers 410 Gone and must be regenerated. */
+  expiresAt: IsoDate
+}
+
+export type CellValue = string | number | boolean | null
+export type RecordQuality = 'GOOD' | 'FAIR'
+
+export interface DatasetRecord {
+  recordId: string
+  quality: RecordQuality
+  issues: string[]
+  values: Record<string, CellValue>
+}
+
+export interface ListRecordsParams {
+  offset?: number
+  /** 1–100, default 8. */
+  limit?: number
+  /** Column keys; defaults to the dataset's preview columns. */
+  columns?: string[]
+}
+
+export interface RecordsPage {
+  total: number
+  offset: number
+  limit: number
+  columns: string[]
+  rows: DatasetRecord[]
+}
+
+export type Level3 = 'HIGH' | 'MEDIUM' | 'LOW'
+
+export interface ValidationCheck {
+  id:
+    | 'dates_transformed'
+    | 'free_text_checked'
+    | 'export_format_validated'
+    | 'synthetic_identifiers_generated'
+    | 'direct_identifiers_removed'
+  label: string
+  passed: boolean
+  detail: string
+}
+
+export interface ValidationReport {
+  datasetId: string
+  compliance: {
+    framework: Framework
+    riskLevel: Level3
+    riskFactors: string[]
+    directIdentifiers: 'DETECTED' | 'NOT_DETECTED'
+  }
+  quality: {
+    quality: 'GOOD' | 'FAIR' | 'POOR'
+    consistency: Level3
+    consistencyRate: number
+    fidelity: number | null
+    warnings: number
+  }
+  lowConfidenceFields: { field: string; reason: string }[]
+  checks: ValidationCheck[]
+  findings: { recordId: string | null; field: string; entityType: string }[]
+  sampleSize: { consistency: number; scan: number }
+}
+
+// ---------- Synthetic sources ----------
+
+export const SourceKind = {
+  FILE: 'FILE',
+  DOCUMENT: 'DOCUMENT',
+} as const
+export type SourceKind = (typeof SourceKind)[keyof typeof SourceKind]
+
+export interface SourceColumnSummary {
+  key: string
+  kind: 'identifier' | 'number' | 'date' | 'age' | 'boolean' | 'category' | 'excluded'
+  /** Why the column was replaced or dropped. */
+  reason?: string
+  lowConfidence: string[]
+}
+
+export interface FileSourceSummary {
+  rows: number
+  columns: SourceColumnSummary[]
+}
+
+export interface DocumentSourceSummary {
+  analysisId: string
+  framework: Framework
+  method: DeidMethod
+  requiresReview: boolean | undefined
+  identifiersReplaced: number
+  lowConfidenceSlots: number
+  excludedEntities: number
+}
+
+interface SourceBase {
+  id: string
+  language: Language
+  createdAt: IsoDate
+  expiresAt: IsoDate
+}
+
+export type Source =
+  | (SourceBase & { kind: 'FILE'; summary: FileSourceSummary })
+  | (SourceBase & { kind: 'DOCUMENT'; summary: DocumentSourceSummary })
+
+export interface SourceFromAnalysisRequest {
+  analysisId: string
+  text: string
+  entities: EntityState[]
+}
+
+// ---------- Activity / dashboard ----------
+
+export const AuditAction = {
+  LOGIN: 'auth.login',
+  LOGOUT: 'auth.logout',
+  REFRESH_TOKEN_REUSE: 'auth.refresh_token_reuse',
+  ANALYSIS_CREATED: 'analysis.created',
+  TEXT_EXTRACTED: 'document.text_extracted',
+  SOURCE_CREATED: 'synthetic.source_created',
+  DATASET_CREATED: 'synthetic.dataset_created',
+  DATASET_DOWNLOADED: 'synthetic.dataset_downloaded',
+} as const
+export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
+
+export interface ActivityEvent {
+  id: string
+  action: AuditAction
+  resourceId: string | null
+  metadata: Record<string, string | number | boolean | null>
+  createdAt: IsoDate
+}
+
+export interface ListActivityParams {
+  /** 1–100, default 20. */
+  limit?: number
+  /** Cursor: `createdAt` of the last event from the previous page. */
+  before?: IsoDate
+}
+
+export interface Dashboard {
+  analyses: { count: number; entitiesDetected: number }
+  datasets: { count: number; recordsGenerated: number; active: number }
+  recentActivity: ActivityEvent[]
+}
