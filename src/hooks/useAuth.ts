@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { resetSession } from '../api/queryClient'
 import { queryKeys } from '../api/queryKeys'
 import type { Language } from '../api/types'
@@ -7,17 +7,20 @@ import { authService } from '../services'
 /**
  * Restores the session from the refresh cookie once per app load. `data` is
  * null when signed out; verify, logout and session expiry keep it up to date.
+ * Shared with the route loaders, which read it via `ensureQueryData`.
  */
+export const sessionQuery = queryOptions({
+  queryKey: queryKeys.auth.session,
+  queryFn: authService.restoreSession,
+  staleTime: Infinity,
+  gcTime: Infinity,
+  // Refreshing rotates the token, so never refetch in the background.
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+})
+
 export function useSession() {
-  return useQuery({
-    queryKey: queryKeys.auth.session,
-    queryFn: authService.restoreSession,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    // Refreshing rotates the token, so never refetch in the background.
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  })
+  return useQuery(sessionQuery)
 }
 
 export function useMe(enabled = true) {
