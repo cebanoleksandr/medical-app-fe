@@ -3,17 +3,9 @@ import type {
   Analysis,
   AnalysisOptions,
   CreateAnalysisRequest,
-  DetectedEntity,
-  EntityState,
   ExtractTextResponse,
   RenderAnalysisRequest,
 } from '../api/types'
-
-/** Strips a detected entity down to what render / source requests accept. */
-export function toEntityState(entity: DetectedEntity): EntityState {
-  const { id, type, start, end, score, included } = entity
-  return { id, type, start, end, score, included }
-}
 
 export const analysesService = {
   /** Frameworks, methods, output modes: everything the wizard needs. */
@@ -32,7 +24,8 @@ export const analysesService = {
 
   /**
    * Re-applies the output after toggling entities or changing the mode. The
-   * server keeps no text, so `text` must be the exact text that was analysed.
+   * server keeps no text, so `text` must be the exact text that was analysed;
+   * `entities` can be the analysis' own entities with `included` toggled.
    */
   render(id: string, request: RenderAnalysisRequest) {
     return api.post<Analysis>(`/analyses/${id}/render`, request)

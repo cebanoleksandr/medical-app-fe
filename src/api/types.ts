@@ -162,7 +162,9 @@ export interface Analysis {
 
 /**
  * The server keeps no text, so render and source-from-analysis requests carry
- * the original text and entity choices back.
+ * the original text and entity choices back. Entities can be sent exactly as
+ * the analysis returned them (DetectedEntity): the server ignores and
+ * recomputes `text`, `identifier`, `lowConfidence` and `replacement`.
  */
 export interface EntityState {
   id: string
@@ -171,6 +173,10 @@ export interface EntityState {
   end: number
   score: number
   included: boolean
+  text?: string
+  identifier?: string
+  lowConfidence?: boolean
+  replacement?: string | null
 }
 
 export interface RenderAnalysisRequest {
@@ -366,6 +372,30 @@ export interface SourceFromAnalysisRequest {
   analysisId: string
   text: string
   entities: EntityState[]
+}
+
+// ---------- Contact ----------
+
+/** Backend limits for the landing page contact form (after trimming). */
+export const CONTACT_LIMITS = {
+  firstName: 100,
+  lastName: 100,
+  company: 200,
+  email: 254,
+  message: 5000,
+} as const
+
+export interface ContactMessageRequest {
+  firstName: string
+  lastName: string
+  company?: string
+  email: string
+  message?: string
+  /**
+   * Honeypot: render as a hidden input and leave empty. A filled value makes
+   * the backend drop the message while still answering 202.
+   */
+  website?: string
 }
 
 // ---------- Activity / dashboard ----------
