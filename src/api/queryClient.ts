@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, hashKey } from '@tanstack/react-query'
 import { setSessionExpiredHandler } from './client'
 import { ApiError } from './errors'
 import { queryKeys } from './queryKeys'
@@ -31,10 +31,17 @@ export const queryClient = new QueryClient({
   },
 })
 
+const sessionHash = hashKey(queryKeys.auth.session)
+
 /** Drops every user's cached data and marks the session as signed out. */
 export function resetSession() {
-  queryClient.clear()
+  // Update the session query in place: useSession observers are subscribed to
+  // it, and clear() would remove it from under them, so the null never reached
+  // AppLayout and nothing redirected to the sign-in page.
   queryClient.setQueryData(queryKeys.auth.session, null)
+  queryClient.removeQueries({
+    predicate: (query) => query.queryHash !== sessionHash,
+  })
 }
 
 setSessionExpiredHandler(resetSession)

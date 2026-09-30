@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlotOutlined'
 import SettingsIcon from '@mui/icons-material/SettingsOutlined'
@@ -8,8 +8,8 @@ import dashboardIcon from '../../../assets/icons/dashboard.svg'
 import databaseIcon from '../../../assets/icons/database.svg'
 import deIdentifyIcon from '../../../assets/icons/de-identify.svg'
 import logo from '../../../assets/logo.svg'
-import { useLogout } from '../../../hooks'
 import { colors, radius, typography } from '../../../theme'
+import { LogoutPopup } from '../../popups/LogoutPopup'
 import { Button, MaskIcon } from '../../ui'
 
 export const SIDEBAR_WIDTH = 260
@@ -55,6 +55,19 @@ const Brand = styled('div')({
   ...typography.labelS,
   '& img': { width: 32, height: 34, flexShrink: 0 },
 })
+
+// Spans the sidebar like the nav items above it; hovers dark like them too,
+// since the ghost button's light hover would be a big pale block here.
+const signOutSx = {
+  alignSelf: 'stretch',
+  justifyContent: 'flex-start',
+  marginInline: '12px',
+  '&:hover, &.Mui-focusVisible': {
+    backgroundColor: colors.primary[700],
+    color: colors.accent[400],
+  },
+  '&:active': { backgroundColor: colors.primary[600], color: colors.accent[400] },
+} as const
 
 const Items = styled('nav')({
   display: 'flex',
@@ -115,7 +128,7 @@ function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
 }
 
 export function Sidebar() {
-  const logout = useLogout()
+  const [confirmingLogout, setConfirmingLogout] = useState(false)
 
   return (
     <Root>
@@ -133,16 +146,18 @@ export function Sidebar() {
         ))}
       </Items>
 
-      {/* AppLayout redirects to login once the session is cleared. */}
       <Button
         variant="ghost"
         endIcon={<ArrowForwardIcon />}
-        disabled={logout.isPending}
-        onClick={() => logout.mutate()}
-        sx={{ alignSelf: 'flex-start' }}
+        onClick={() => setConfirmingLogout(true)}
+        sx={signOutSx}
       >
         Sign out
       </Button>
+      <LogoutPopup
+        isVisible={confirmingLogout}
+        onClose={() => setConfirmingLogout(false)}
+      />
     </Root>
   )
 }
