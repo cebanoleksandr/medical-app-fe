@@ -16,6 +16,7 @@ import GenerationSettingsPage from '../pages/GenerationSettingsPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import ReviewStepPage from '../pages/ReviewStepPage'
 import LoginPage from '../pages/auth/LoginPage'
+import VerifyPage from '../pages/auth/VerifyPage'
 import ContactUsPage from '../pages/landing/ContactUsPage'
 import SolutionsPage from '../pages/landing/SolutionsPage'
 import type { RouteHandle } from './handle'
@@ -131,6 +132,11 @@ export const routes: RouteObject[] = [
           {
             path: 'login',
             Component: LoginPage,
+          },
+          {
+            // The magic link from the email: /auth/verify?token=…
+            path: 'verify',
+            Component: VerifyPage,
           },
         ],
       },

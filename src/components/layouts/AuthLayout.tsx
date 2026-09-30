@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles'
+import { MotionConfig } from 'framer-motion'
 import { Link, Outlet } from 'react-router-dom'
 import logo from '../../assets/logo-landing.svg'
 import { colors, radius, shadows, typography } from '../../theme'
@@ -60,22 +61,24 @@ const Card = styled('div')({
 /** Sign-in screens: logo on a dark band and the page in a centered card. */
 const AuthLayout = () => {
   return (
-    <Root>
-      <Header>
-        <LogoLink to="/">
-          <img src={logo} alt="" />
-          <span>
-            <div className="AuthLayout-title">De-ID Studio</div>
-            <div className="AuthLayout-subtitle">De-ID &amp; Synthesis</div>
-          </span>
-        </LogoLink>
-      </Header>
-      <Main>
-        <Card>
-          <Outlet />
-        </Card>
-      </Main>
-    </Root>
+    <MotionConfig reducedMotion="user">
+      <Root>
+        <Header>
+          <LogoLink to="/">
+            <img src={logo} alt="" />
+            <span>
+              <div className="AuthLayout-title">De-ID Studio</div>
+              <div className="AuthLayout-subtitle">De-ID &amp; Synthesis</div>
+            </span>
+          </LogoLink>
+        </Header>
+        <Main>
+          <Card>
+            <Outlet />
+          </Card>
+        </Main>
+      </Root>
+    </MotionConfig>
   )
 }
 
