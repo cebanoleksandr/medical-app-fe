@@ -4,6 +4,7 @@ export { syntheticService, saveFile, type DownloadedFile } from './synthetic.ser
 export { sourcesService } from './sources.service'
 export { activityService } from './activity.service'
 export { healthService } from './health.service'
+export { contactService, type ContactMessage } from './contact.service'
 export { ApiError } from '../api/errors'
 export { setSessionExpiredHandler } from '../api/client'
 export * from '../api/types'

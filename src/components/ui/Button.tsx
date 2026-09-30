@@ -5,10 +5,13 @@ import { colors, radius, typography } from '../../theme'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostSecondary'
 export type ButtonSize = 'large' | 'medium'
+export type ButtonSurface = 'light' | 'dark'
 
 export interface ButtonProps extends Omit<ButtonBaseProps, 'children'> {
   variant?: ButtonVariant
   size?: ButtonSize
+  /** `dark` restyles the disabled state for the navy landing background. */
+  surface?: ButtonSurface
   startIcon?: ReactNode
   endIcon?: ReactNode
   children?: ReactNode
@@ -22,6 +25,13 @@ const filledDisabled: CSSObject = {
   backgroundColor: 'transparent',
   borderColor: colors.neutral[300],
   color: colors.neutral[400],
+}
+
+// Filled buttons on the landing background (Figma: Disabled on dark).
+const darkDisabled: CSSObject = {
+  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  borderColor: 'rgba(255, 255, 255, 0.6)',
+  color: 'rgba(255, 255, 255, 0.38)',
 }
 
 const ghostDisabled: CSSObject = {
@@ -90,8 +100,12 @@ const padding = {
 } as const
 
 const Root = styled(ButtonBase, {
-  shouldForwardProp: (prop) => prop !== 'variant' && prop !== 'size',
-})<{ variant: ButtonVariant; size: ButtonSize }>(({ variant, size }) => {
+  shouldForwardProp: (prop) => prop !== 'variant' && prop !== 'size' && prop !== 'surface',
+})<{ variant: ButtonVariant; size: ButtonSize; surface: ButtonSurface }>(({
+  variant,
+  size,
+  surface,
+}) => {
   const isGhost = variant === 'ghost' || variant === 'ghostSecondary'
   const [py, px] = padding[size][isGhost ? 'ghost' : 'filled']
   return {
@@ -103,6 +117,7 @@ const Root = styled(ButtonBase, {
     whiteSpace: 'nowrap',
     transition: 'background-color 150ms, border-color 150ms, color 150ms',
     ...variantStyles[variant],
+    ...(surface === 'dark' && !isGhost && { '&.Mui-disabled': darkDisabled }),
   }
 })
 
@@ -117,13 +132,14 @@ const Icon = styled('span')({
 export function Button({
   variant = 'primary',
   size = 'large',
+  surface = 'light',
   startIcon,
   endIcon,
   children,
   ...props
 }: ButtonProps) {
   return (
-    <Root variant={variant} size={size} disableRipple {...props}>
+    <Root variant={variant} size={size} surface={surface} disableRipple {...props}>
       {startIcon && <Icon>{startIcon}</Icon>}
       {children}
       {endIcon && <Icon>{endIcon}</Icon>}

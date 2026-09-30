@@ -1,4 +1,6 @@
 import { styled } from '@mui/material/styles'
+import { motion } from 'framer-motion'
+import { fadeUp, reveal } from '../../landing/motion'
 import { colors, typography } from '../../../theme'
 import { Logo } from './Logo'
 import { Container, landingBorder } from './styles'
@@ -9,7 +11,7 @@ const Root = styled('footer')({
   backgroundColor: colors.primary[800],
 })
 
-const Brand = styled('div')({
+const Brand = styled(motion.div)({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
@@ -22,7 +24,7 @@ const Brand = styled('div')({
   },
 })
 
-const Copyright = styled('p')({
+const Copyright = styled(motion.p)({
   ...typography.labelS,
   margin: 0,
   paddingTop: 32,
@@ -34,14 +36,14 @@ export function LandingFooter() {
   return (
     <Root>
       <Container>
-        <Brand>
+        <Brand {...reveal} variants={fadeUp}>
           <Logo />
           <p>
             Enterprise-grade clinical data de-identification and synthetic data
             generation platform
           </p>
         </Brand>
-        <Copyright>
+        <Copyright {...reveal} variants={fadeUp}>
           © {new Date().getFullYear()} Clinical Data Studio. All rights reserved.
         </Copyright>
       </Container>
