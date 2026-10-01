@@ -101,6 +101,16 @@ export interface AnalysisOptions {
   outputModes: { id: OutputMode; name: string; description: string }[]
   sensitivities: Sensitivity[]
   languages: Language[]
+  /** GDPR, UK GDPR, FADP: risk levels and their method per entity type. */
+  entityConfig: EntityConfigOptions
+}
+
+export interface EntityConfigOptions {
+  riskLevels: RiskLevel[]
+  entityMethods: EntityMethod[]
+  /** `detectable: false`: configurable, but no recognizer finds it yet. */
+  entityTypes: { type: EntityType; special: boolean; detectable: boolean }[]
+  riskPresets: Record<RiskLevel, EntityMethods>
 }
 
 export interface ExtractTextResponse {
@@ -116,6 +126,46 @@ export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 /** Entities scoring below this are flagged `lowConfidence`. */
 export const LOW_CONFIDENCE_BELOW = 0.7
 
+/** Data-protection frameworks (GDPR, UK GDPR, FADP): privacy risk preset. */
+export const RiskLevel = { LOW: 'LOW', MEDIUM: 'MEDIUM', HIGH: 'HIGH' } as const
+export type RiskLevel = (typeof RiskLevel)[keyof typeof RiskLevel]
+
+/** Entity types configured one by one under data-protection frameworks. */
+export type EntityType =
+  | 'PERSON'
+  | 'ORGANIZATION'
+  | 'LOCATION'
+  | 'DATE_TIME'
+  | 'IP'
+  | 'GEOPOINT'
+  | 'NATIONAL_ID'
+  | 'ID_NUMBER'
+  | 'PASSPORT'
+  | 'CREDIT_CARD'
+  | 'BANK_ACCOUNT'
+  | 'EMAIL'
+  | 'PHONE'
+  | 'MEDICAL_RECORD_NUMBER'
+  | 'DEVICE_ID'
+  | 'FREE_TEXT'
+  | 'BIOLOGICAL_DATA'
+  | 'PHOTO'
+
+/** How one entity type is processed. */
+export const EntityMethod = {
+  REDACT: 'REDACT',
+  PLACEHOLDER: 'PLACEHOLDER',
+  TOKEN: 'TOKEN',
+  SYNTHETIC: 'SYNTHETIC',
+  MASK: 'MASK',
+  HASH: 'HASH',
+  GENERALISE: 'GENERALISE',
+  PSEUDONYMISE: 'PSEUDONYMISE',
+  NLP_REDACTION: 'NLP_REDACTION',
+} as const
+export type EntityMethod = (typeof EntityMethod)[keyof typeof EntityMethod]
+export type EntityMethods = Record<EntityType, EntityMethod>
+
 export interface CreateAnalysisRequest {
   text: string
   language: Language
@@ -125,6 +175,12 @@ export interface CreateAnalysisRequest {
   identifiers?: IdentifierKey[]
   outputMode?: OutputMode
   sensitivity?: Sensitivity
+  /**
+   * Data-protection frameworks only: a method per entity type instead of
+   * `outputMode`. `entityMethods` overrides the risk level's preset.
+   */
+  riskLevel?: RiskLevel
+  entityMethods?: Partial<EntityMethods>
 }
 
 export interface DetectedEntity {
@@ -139,6 +195,8 @@ export interface DetectedEntity {
   lowConfidence: boolean
   included: boolean
   replacement: string | null
+  /** Analyses run with a risk level: the entity type that set its method. */
+  entityType?: EntityType
 }
 
 export interface Analysis {
@@ -150,6 +208,8 @@ export interface Analysis {
   outputMode: OutputMode
   language: Language
   sensitivity: Sensitivity
+  riskLevel: RiskLevel | null
+  entityMethods: EntityMethods | null
   stats: {
     detected: number
     processed: number
@@ -177,11 +237,15 @@ export interface EntityState {
   identifier?: string
   lowConfidence?: boolean
   replacement?: string | null
+  entityType?: string
 }
 
 export interface RenderAnalysisRequest {
   text: string
-  outputMode: OutputMode
+  /** Required for output-mode analyses (HIPAA). */
+  outputMode?: OutputMode
+  /** Risk-level analyses: new overrides of the preset. */
+  entityMethods?: Partial<EntityMethods>
   entities: EntityState[]
 }
 

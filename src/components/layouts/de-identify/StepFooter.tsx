@@ -2,21 +2,18 @@ import type { ReactNode } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { createPortal } from 'react-dom'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../../ui'
+import { useDeIdentify } from './context'
 import { stepUrl, steps } from './steps'
-
-export interface DeIdentifyContext {
-  /** Where StepFooter renders; null until the layout has mounted. */
-  footerSlot: HTMLElement | null
-  stepIndex: number
-}
 
 export interface StepFooterProps {
   /** Defaults to going to the next step. */
   onContinue?: () => void
   continueDisabled?: boolean
   continueLabel?: string
+  /** Defaults to an arrow. */
+  continueIcon?: ReactNode
   /** Replaces the Back button, e.g. "New analysis" on the last step. */
   start?: ReactNode
   /** Replaces the Continue button. */
@@ -31,10 +28,11 @@ export function StepFooter({
   onContinue,
   continueDisabled = false,
   continueLabel = 'Continue',
+  continueIcon = <ArrowForwardIcon />,
   start,
   end,
 }: StepFooterProps) {
-  const { footerSlot, stepIndex } = useOutletContext<DeIdentifyContext>()
+  const { footerSlot, stepIndex } = useDeIdentify()
   const navigate = useNavigate()
   if (!footerSlot) return null
 
@@ -56,7 +54,7 @@ export function StepFooter({
       {end ?? (
         <Button
           variant="secondary"
-          endIcon={<ArrowForwardIcon />}
+          endIcon={continueIcon}
           disabled={continueDisabled || (isLast && !onContinue)}
           onClick={onContinue ?? (() => navigate(stepUrl(stepIndex + 1)))}
         >
