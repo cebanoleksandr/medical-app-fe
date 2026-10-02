@@ -1,4 +1,6 @@
+import type { Ref } from 'react'
 import { styled } from '@mui/material/styles'
+import { motion } from 'framer-motion'
 import type { DetectedEntity } from '../../api/types'
 import warningIcon from '../../assets/configuration/warning.svg'
 import arrowIcon from '../../assets/review/arrow-small.svg'
@@ -11,9 +13,11 @@ export interface EntityRowProps {
   onToggle: () => void
   /** Briefly highlighted after a click on the entity in the document. */
   flash?: boolean
+  /** Lets AnimatePresence measure the row while it leaves. */
+  ref?: Ref<HTMLLIElement>
 }
 
-const Root = styled('li')({
+const Root = styled(motion.li)({
   display: 'grid',
   gridTemplateColumns: '62px minmax(0, 1fr) auto',
   alignItems: 'start',
@@ -83,12 +87,20 @@ const Score = styled('span')({
 })
 
 /** One detected entity: type, value, what it becomes, and the include toggle. */
-export function EntityRow({ entity, onToggle, flash = false }: EntityRowProps) {
+export function EntityRow({ entity, onToggle, flash = false, ref }: EntityRowProps) {
   const category = categoryOf(entity)
   const review = entity.included && entity.lowConfidence
 
   return (
     <Root
+      ref={ref}
+      // Glides to its new place when the order or filter changes; "position"
+      // keeps the text from stretching mid-move.
+      layout="position"
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
+      transition={{ type: 'spring', stiffness: 500, damping: 40, mass: 0.8 }}
       id={`entity-row-${entity.id}`}
       data-review={review || undefined}
       data-excluded={!entity.included || undefined}

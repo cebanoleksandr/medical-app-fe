@@ -29,19 +29,26 @@ export interface DropdownOption<T extends string = string> {
   disabled?: boolean
 }
 
-export type DropdownSize = 'default' | 'compact'
+/**
+ * `default`: trigger shows the selected option's icon and description.
+ * `compact`: 36px trigger, one-line items, check mark on the left.
+ * `field`: form field with a fixed `triggerIcon`; items as in `compact`, plus
+ * their descriptions.
+ */
+export type DropdownSize = 'default' | 'compact' | 'field'
 
 export interface DropdownProps<T extends string = string> {
   options: DropdownOption<T>[]
   value: T | null
   onChange: (value: T) => void
-  /** `compact`: 36px trigger, one-line items, check mark on the left. */
   size?: DropdownSize
   placeholder?: string
   /** Fixed trigger text instead of the selected option, e.g. "Sort by". */
   triggerLabel?: string
   /** Replaces the selected option's description in the trigger. */
   triggerDescription?: string
+  /** `field` size: icon in the trigger whatever is selected. */
+  triggerIcon?: ReactNode
   /** Extra trigger content before the chevron, e.g. an "Auto-detected" badge. */
   triggerTrailing?: ReactNode
   disabled?: boolean
@@ -78,6 +85,17 @@ const Trigger = styled(ButtonBase, {
     color: colors.neutral[300],
     '& .Dropdown-description, & .Dropdown-icon': { color: 'inherit' },
   },
+  ...(size === 'field' && {
+    color: colors.neutral[700],
+    '& .Dropdown-icon': { color: colors.neutral[400] },
+    '& .Dropdown-chevron': { color: colors.neutral[500] },
+    // Not applicable rather than broken: the field stays white.
+    '&.Mui-disabled': {
+      backgroundColor: colors.white,
+      color: colors.neutral[400],
+      '& .Dropdown-icon, & .Dropdown-chevron': { color: colors.neutral[300] },
+    },
+  }),
 }))
 
 const TriggerLeading = styled('span')({
@@ -125,8 +143,8 @@ const Item = styled(MenuItem, {
   shouldForwardProp: (prop) => prop !== 'size',
 })<{ size: DropdownSize }>(({ size }) => ({
   gap: 12,
-  minHeight: size === 'compact' ? 0 : 56,
-  padding: size === 'compact' ? '4px 12px' : '8px 12px',
+  minHeight: size === 'default' ? 56 : 0,
+  padding: size === 'default' ? '8px 12px' : '4px 12px',
   backgroundColor: colors.white,
   color: colors.neutral[900],
   whiteSpace: 'normal',
@@ -165,6 +183,7 @@ export function Dropdown<T extends string = string>({
   placeholder = 'Select…',
   triggerLabel,
   triggerDescription,
+  triggerIcon,
   triggerTrailing,
   disabled = false,
   id,
@@ -176,10 +195,14 @@ export function Dropdown<T extends string = string>({
   const triggerId = id ?? generatedId
   const listId = `${triggerId}-list`
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
+  // Kept after closing so the menu doesn't shrink while it fades out.
+  const [menuWidth, setMenuWidth] = useState<number>()
   const open = anchor !== null
 
   const selected = options.find((option) => option.value === value)
   const isCompact = size === 'compact'
+  // Check mark on the left, as in `compact`.
+  const listCompact = size !== 'default'
   const description = triggerDescription ?? selected?.description
   const hasIcons = options.some((option) => option.icon)
 
@@ -189,8 +212,10 @@ export function Dropdown<T extends string = string>({
     if (option.value !== value) onChange(option.value)
   }
 
-  const openMenu = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) =>
+  const openMenu = (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
+    setMenuWidth(event.currentTarget.offsetWidth)
     setAnchor(event.currentTarget)
+  }
 
   const onTriggerKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -199,7 +224,7 @@ export function Dropdown<T extends string = string>({
     }
   }
 
-  const chevron = isCompact
+  const chevron = listCompact
     ? open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
     : open ? <KeyboardArrowDownIcon /> : <ChevronRightIcon />
 
@@ -220,14 +245,24 @@ export function Dropdown<T extends string = string>({
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
       >
-        {!isCompact && selected?.icon && (
-          <TriggerLeading className="Dropdown-icon">{selected.icon}</TriggerLeading>
+        {size === 'field' ? (
+          triggerIcon && <TriggerLeading className="Dropdown-icon">{triggerIcon}</TriggerLeading>
+        ) : (
+          !isCompact &&
+          selected?.icon && (
+            <TriggerLeading className="Dropdown-icon">{selected.icon}</TriggerLeading>
+          )
         )}
         <Text>
-          <Label sx={{ color: selected || triggerLabel ? undefined : colors.neutral[400] }}>
+          <Label
+            sx={{
+              // A field's placeholder names the field, so it isn't greyed out.
+              color: selected || triggerLabel || size === 'field' ? undefined : colors.neutral[400],
+            }}
+          >
             {triggerLabel ?? selected?.label ?? placeholder}
           </Label>
-          {!isCompact && description && (
+          {size === 'default' && description && (
             <span
               className="Dropdown-description"
               style={{ ...typography.bodyM, color: colors.neutral[500] }}
@@ -237,7 +272,7 @@ export function Dropdown<T extends string = string>({
           )}
         </Text>
         {triggerTrailing}
-        <Icon>{chevron}</Icon>
+        <Icon className="Dropdown-chevron">{chevron}</Icon>
       </Trigger>
 
       <Menu
@@ -249,7 +284,7 @@ export function Dropdown<T extends string = string>({
         slotProps={{
           paper: {
             sx: {
-              width: anchor?.offsetWidth,
+              width: menuWidth,
               boxSizing: 'border-box',
               maxHeight: 440,
               // Overlaps the trigger's bottom border so they share one line.
@@ -282,7 +317,7 @@ export function Dropdown<T extends string = string>({
                 disableRipple
                 onClick={() => select(option)}
               >
-                {isCompact ? (
+                {listCompact ? (
                   // The leading slot is kept on every row so labels line up.
                   <Icon className="Dropdown-icon">{isSelected && <CheckIcon />}</Icon>
                 ) : (
@@ -295,7 +330,7 @@ export function Dropdown<T extends string = string>({
                   )}
                 </Text>
                 {option.trailing}
-                {!isCompact && isSelected && (
+                {size === 'default' && isSelected && (
                   <Icon className="Dropdown-icon">
                     <CheckIcon />
                   </Icon>

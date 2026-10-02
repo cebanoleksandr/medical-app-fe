@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { styled } from '@mui/material/styles'
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import type { DetectedEntity } from '../../api/types'
 import { colors, typography } from '../../theme'
 import { Dropdown, FilterChip } from '../ui'
@@ -14,7 +15,7 @@ export interface EntityPanelProps {
   focusedId: string | null
 }
 
-const Root = styled('section')({
+const Root = styled(motion.section)({
   display: 'flex',
   flexDirection: 'column',
   gap: 16,
@@ -90,65 +91,71 @@ export function EntityPanel({ entities, onToggle, focusedId }: EntityPanelProps)
   )
 
   return (
-    <Root aria-labelledby="entities-heading">
-      <Header>
-        <h2 id="entities-heading">Detected entities</h2>
-        <Count aria-label={`${entities.length} entities`}>{entities.length}</Count>
-      </Header>
+    <MotionConfig reducedMotion="user">
+      {/* layoutScroll: rows animate correctly while the panel is scrolled. */}
+      <Root aria-labelledby="entities-heading" layoutScroll>
+        <Header>
+          <h2 id="entities-heading">Detected entities</h2>
+          <Count aria-label={`${entities.length} entities`}>{entities.length}</Count>
+        </Header>
 
-      {entities.length > 0 && (
-        <Sort>
-          <Dropdown
-            size="compact"
-            options={SORT_OPTIONS}
-            value={order}
-            onChange={setOrder}
-            triggerLabel="Sort by"
-            aria-label="Sort entities"
-          />
-        </Sort>
-      )}
-
-      <Chips role="group" aria-label="Filter by type">
-        <FilterChip
-          active={!activeFilter}
-          disabled={entities.length === 0}
-          onClick={() => setFilter(null)}
-        >
-          All ({entities.length})
-        </FilterChip>
-        {categories.map((category) => (
-          <FilterChip
-            key={category}
-            active={category === activeFilter}
-            onClick={() => setFilter(category === activeFilter ? null : category)}
-          >
-            {category}
-          </FilterChip>
-        ))}
-      </Chips>
-
-      {entities.length === 0 ? (
-        <Empty>
-          <EmptyEntitiesPicture />
-          <p>
-            No entities detected.
-            <br />
-            The document appears to contain no identifiable patient data.
-          </p>
-        </Empty>
-      ) : (
-        <List>
-          {visible.map((entity) => (
-            <EntityRow
-              key={entity.id}
-              entity={entity}
-              flash={entity.id === focusedId}
-              onToggle={() => onToggle(entity.id)}
+        {entities.length > 0 && (
+          <Sort>
+            <Dropdown
+              size="compact"
+              options={SORT_OPTIONS}
+              value={order}
+              onChange={setOrder}
+              triggerLabel="Sort by"
+              aria-label="Sort entities"
             />
+          </Sort>
+        )}
+
+        <Chips role="group" aria-label="Filter by type">
+          <FilterChip
+            active={!activeFilter}
+            disabled={entities.length === 0}
+            onClick={() => setFilter(null)}
+          >
+            All ({entities.length})
+          </FilterChip>
+          {categories.map((category) => (
+            <FilterChip
+              key={category}
+              active={category === activeFilter}
+              onClick={() => setFilter(category === activeFilter ? null : category)}
+            >
+              {category}
+            </FilterChip>
           ))}
-        </List>
-      )}
-    </Root>
+        </Chips>
+
+        {entities.length === 0 ? (
+          <Empty>
+            <EmptyEntitiesPicture />
+            <p>
+              No entities detected.
+              <br />
+              The document appears to contain no identifiable patient data.
+            </p>
+          </Empty>
+        ) : (
+          <List>
+            {/* popLayout: leaving rows stop taking space, so the rest move up at once. */}
+            <AnimatePresence mode="popLayout" initial={false}>
+              {visible.map((entity) => (
+                <EntityRow
+                  key={entity.id}
+                  entity={entity}
+                  flash={entity.id === focusedId}
+                  onToggle={() => onToggle(entity.id)}
+                />
+              ))}
+            </AnimatePresence>
+          </List>
+        )}
+      </Root>
+    </MotionConfig>
   )
 }

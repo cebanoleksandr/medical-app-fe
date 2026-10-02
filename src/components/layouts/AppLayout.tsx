@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { styled } from '@mui/material/styles'
 import { Navigate, Outlet, useMatches } from 'react-router-dom'
+import { wakeDetectionService } from '../../api/wakeDetection'
 import { useSession } from '../../hooks'
 import type { RouteHandle } from '../../routes/handle'
 import { colors } from '../../theme'
@@ -34,6 +36,16 @@ const AppLayout = () => {
   const handle = useMatches()
     .map((match) => match.handle as RouteHandle | undefined)
     .findLast((handle) => handle?.title)
+
+  // Wakes the detection service before the user gets to Analyze.
+  useEffect(() => {
+    wakeDetectionService()
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') wakeDetectionService()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [])
 
   // The loader only runs on navigation; this catches logout and session
   // expiry while the user stays on a page.
