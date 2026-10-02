@@ -11,7 +11,7 @@ export interface UploadedFile {
 }
 
 /**
- * What the wizard has collected so far. Lives in DeIdentifyLayout's memory
+ * What the wizard has collected so far. Kept in memory by DraftProvider (AppLayout)
  * only: the text is patient data, so it isn't written to browser storage.
  *
  * `text` is what gets analysed: the pasted text or the uploaded file's text,
@@ -35,6 +35,8 @@ export interface DeIdentifyContext {
   draft: DeIdentifyDraft
   /** Merges `patch` into the draft. */
   updateDraft: (patch: DraftPatch) => void
+  /** Clears everything, for a new analysis. */
+  resetDraft: () => void
 }
 
 /** Wizard state for the step pages under DeIdentifyLayout. */

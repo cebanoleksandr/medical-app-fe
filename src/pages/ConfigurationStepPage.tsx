@@ -37,6 +37,9 @@ const Header = styled('div')({
 function describeAnalyzeError(error: ApiError) {
   if (error.isRateLimited) return 'Too many analyses in a short time. Please wait a minute and try again.'
   if (error.isNetworkError) return "Couldn't reach the server. Check your connection and try again."
+  // The detection service sleeps when idle and takes up to a minute to start.
+  if (error.status === 503)
+    return 'The detection service is starting up. Please try again in a minute.'
   if (error.status >= 500) return 'Something went wrong on our side. Please try again.'
   return error.message
 }
@@ -84,7 +87,8 @@ const ConfigurationStepPage = () => {
         </p>
       </Header>
 
-      {options.isError ? (
+      {/* A failed background refetch keeps the cached settings. */}
+      {options.isError && !options.data ? (
         <Banner role="alert" data-tone="error">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>

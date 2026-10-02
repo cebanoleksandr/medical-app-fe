@@ -63,7 +63,8 @@ const ComplianceStepPage = () => {
         <p>Choose the regulation that applies to your data</p>
       </Header>
 
-      {options.isError ? (
+      {/* A failed background refetch keeps the cached frameworks. */}
+      {options.isError && !options.data ? (
         <LoadError role="alert">
           Couldn&apos;t load the compliance frameworks.
           <Button variant="ghostSecondary" size="medium" onClick={() => options.refetch()}>

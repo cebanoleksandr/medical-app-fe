@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { styled } from '@mui/material/styles'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { colors } from '../../theme'
 import { Stepper } from '../ui'
-import type { DeIdentifyContext, DeIdentifyDraft, DraftPatch } from './de-identify/context'
+import type { DeIdentifyContext } from './de-identify/context'
+import { resumeUrl, useDraftStore } from './de-identify/draftStore'
 import { DE_IDENTIFY_BASE, steps } from './de-identify/steps'
 
 // Fills AppLayout's content area: stepper and footer stay put, the step scrolls.
@@ -48,21 +49,13 @@ const Footer = styled('div')({
 const DeIdentifyLayout = () => {
   const { pathname } = useLocation()
   const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null)
-  const [draft, setDraft] = useState<DeIdentifyDraft>({})
-  const updateDraft = useCallback(
-    (patch: DraftPatch) =>
-      setDraft((prev) => {
-        const changes = typeof patch === 'function' ? patch(prev) : patch
-        // An analysis only matches the settings it was run with.
-        return { ...prev, ...changes, analysis: changes.analysis }
-      }),
-    [],
-  )
+  const { draft, updateDraft, resetDraft } = useDraftStore()
   const stepIndex = steps.findIndex(
     (step) => pathname === `${DE_IDENTIFY_BASE}/${step.path}`,
   )
 
-  if (stepIndex === -1) return <Navigate to={`${DE_IDENTIFY_BASE}/${steps[0].path}`} replace />
+  // /app/de-identify (the sidebar link) resumes where the draft left off.
+  if (stepIndex === -1) return <Navigate to={resumeUrl(draft)} replace />
 
   return (
     <Root>
@@ -71,7 +64,9 @@ const DeIdentifyLayout = () => {
       </StepperBar>
       <Body>
         <Outlet
-          context={{ footerSlot, stepIndex, draft, updateDraft } satisfies DeIdentifyContext}
+          context={
+            { footerSlot, stepIndex, draft, updateDraft, resetDraft } satisfies DeIdentifyContext
+          }
         />
       </Body>
       <Footer ref={setFooterSlot} />

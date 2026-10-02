@@ -3,6 +3,7 @@ import { Navigate, Outlet, useMatches } from 'react-router-dom'
 import { useSession } from '../../hooks'
 import type { RouteHandle } from '../../routes/handle'
 import { colors } from '../../theme'
+import { DraftProvider } from './de-identify/DraftProvider'
 import { Header } from './app/Header'
 import { Sidebar } from './app/Sidebar'
 
@@ -48,7 +49,9 @@ const AppLayout = () => {
           email={session?.user.email}
         />
         <Content>
-          <Outlet />
+          <DraftProvider>
+            <Outlet />
+          </DraftProvider>
         </Content>
       </Main>
     </Root>

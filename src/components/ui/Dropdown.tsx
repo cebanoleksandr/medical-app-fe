@@ -38,6 +38,8 @@ export interface DropdownProps<T extends string = string> {
   /** `compact`: 36px trigger, one-line items, check mark on the left. */
   size?: DropdownSize
   placeholder?: string
+  /** Fixed trigger text instead of the selected option, e.g. "Sort by". */
+  triggerLabel?: string
   /** Replaces the selected option's description in the trigger. */
   triggerDescription?: string
   /** Extra trigger content before the chevron, e.g. an "Auto-detected" badge. */
@@ -161,6 +163,7 @@ export function Dropdown<T extends string = string>({
   onChange,
   size = 'default',
   placeholder = 'Select…',
+  triggerLabel,
   triggerDescription,
   triggerTrailing,
   disabled = false,
@@ -221,8 +224,8 @@ export function Dropdown<T extends string = string>({
           <TriggerLeading className="Dropdown-icon">{selected.icon}</TriggerLeading>
         )}
         <Text>
-          <Label sx={{ color: selected ? undefined : colors.neutral[400] }}>
-            {selected?.label ?? placeholder}
+          <Label sx={{ color: selected || triggerLabel ? undefined : colors.neutral[400] }}>
+            {triggerLabel ?? selected?.label ?? placeholder}
           </Label>
           {!isCompact && description && (
             <span

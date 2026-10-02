@@ -71,10 +71,7 @@ export const routes: RouteObject[] = [
               subtitle: 'Configure your anonymization pipeline',
             } satisfies RouteHandle,
             children: [
-              {
-                index: true,
-                loader: () => redirect('/app/de-identify/compliance'),
-              },
+              // No index route: DeIdentifyLayout resumes at the draft's step.
               {
                 path: 'compliance',
                 Component: ComplianceStepPage,
