@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="table_chart_view">
+<mask id="mask0_0_709" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+<rect id="Bounding box" width="24" height="24" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_709)">
+<path id="table_chart_view_2" d="M4.93333 14.6667L4 13.7333L8.6 9.11667L10.9333 11.45L14.3833 8L15.3333 8.95L10.9333 13.3333L8.6 11L4.93333 14.6667ZM2.66667 14C2.3 14 1.98611 13.8694 1.725 13.6083C1.46389 13.3472 1.33333 13.0333 1.33333 12.6667V3.33333C1.33333 2.96667 1.46389 2.65278 1.725 2.39167C1.98611 2.13056 2.3 2 2.66667 2H12C12.3667 2 12.6806 2.13056 12.9417 2.39167C13.2028 2.65278 13.3333 2.96667 13.3333 3.33333V6.13333H2.66667V14ZM2.66667 4.8H12V3.33333H2.66667V4.8Z" fill="#374151"/>
+</g>
+</g>
+</svg>
