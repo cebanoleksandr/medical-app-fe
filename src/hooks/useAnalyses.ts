@@ -39,8 +39,12 @@ export function useCreateAnalysis() {
 
 /** Re-renders the output after toggling entities or changing the output mode. */
 export function useRenderAnalysis() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, request }: { id: string; request: RenderAnalysisRequest }) =>
       analysesService.render(id, request),
+    // Excluding entities changes the dashboard's anonymization rate.
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.activity.all }),
   })
 }

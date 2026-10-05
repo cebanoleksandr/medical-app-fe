@@ -1,4 +1,4 @@
-import type { ListRecordsParams } from './types'
+import type { DashboardParams, ListAnalysesParams, ListRecordsParams } from './types'
 
 // Hierarchical keys: invalidating a prefix (e.g. queryKeys.activity.all)
 // refreshes everything under it.
@@ -25,6 +25,9 @@ export const queryKeys = {
   activity: {
     all: ['activity'] as const,
     list: (limit: number) => ['activity', 'list', limit] as const,
-    dashboard: ['activity', 'dashboard'] as const,
+    // Under `activity` so creating or reviewing an analysis refreshes them.
+    dashboard: (params: DashboardParams = {}) => ['activity', 'dashboard', params] as const,
+    analyses: (params: Omit<ListAnalysesParams, 'before'>) =>
+      ['activity', 'analyses', params] as const,
   },
 }

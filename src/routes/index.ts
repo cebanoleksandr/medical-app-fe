@@ -61,7 +61,10 @@ export const routes: RouteObject[] = [
           {
             index: true,
             Component: DashboardPage,
-            handle: { title: 'Dashboard' } satisfies RouteHandle,
+            handle: {
+              title: 'Dashboard',
+              subtitle: 'Monitor anonymization activity and compliance performance',
+            } satisfies RouteHandle,
           },
           {
             path: 'de-identify',

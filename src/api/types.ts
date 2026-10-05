@@ -491,8 +491,54 @@ export interface ListActivityParams {
   before?: IsoDate
 }
 
+/** Without `from` totals cover all time and the chart the last 7 days. */
+export interface DashboardParams {
+  from?: IsoDate
+  to?: IsoDate
+  framework?: Framework
+  /** IANA zone the chart's days are counted in. */
+  tz?: string
+}
+
+/** One past analysis: settings and counts only, the server keeps no text. */
+export interface AnalysisSummary {
+  id: string
+  createdAt: IsoDate
+  framework: Framework
+  method: DeidMethod
+  riskLevel: RiskLevel | null
+  language: Language
+  characters: number
+  detected: number
+  /** Entities still anonymized after review. */
+  processed: number
+}
+
+export interface ListAnalysesParams {
+  /** 1–100, default 20. */
+  limit?: number
+  /** Cursor: `createdAt` of the last analysis from the previous page. */
+  before?: IsoDate
+  framework?: Framework
+}
+
 export interface Dashboard {
-  analyses: { count: number; entitiesDetected: number }
+  analyses: {
+    count: number
+    entitiesDetected: number
+    entitiesProcessed: number
+    /** processed / detected; null without detected entities. */
+    anonymizationRate: number | null
+  }
   datasets: { count: number; recordsGenerated: number; active: number }
+  /** One point per day of the period, empty days included. */
+  activity: { date: string; documents: number; entities: number }[]
+  frameworks: { framework: Framework; count: number }[]
+  /** Every entity type, largest first; unknown detector types by their own name. */
+  entityTypes: { type: EntityType | string; count: number }[]
+  /** Detected entities per method, every method listed. */
+  methods: { method: EntityMethod; count: number }[]
+  /** Latest 5, filtered by framework but not by period. */
+  recentAnalyses: AnalysisSummary[]
   recentActivity: ActivityEvent[]
 }

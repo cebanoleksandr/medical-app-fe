@@ -2,8 +2,10 @@ import { api, fileForm } from '../api/client'
 import type {
   Analysis,
   AnalysisOptions,
+  AnalysisSummary,
   CreateAnalysisRequest,
   ExtractTextResponse,
+  ListAnalysesParams,
   RenderAnalysisRequest,
 } from '../api/types'
 
@@ -16,6 +18,11 @@ export const analysesService = {
   /** .pdf, .docx or .txt up to 5 MB. */
   extractText(file: File) {
     return api.post<ExtractTextResponse>('/analyses/extract-text', fileForm(file))
+  },
+
+  /** Newest first, metadata only. Page with the last item's `createdAt`. */
+  list(params: ListAnalysesParams = {}) {
+    return api.get<AnalysisSummary[]>('/analyses', { params })
   },
 
   create(request: CreateAnalysisRequest) {

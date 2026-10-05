@@ -1,5 +1,10 @@
 import { api } from '../api/client'
-import type { ActivityEvent, Dashboard, ListActivityParams } from '../api/types'
+import type {
+  ActivityEvent,
+  Dashboard,
+  DashboardParams,
+  ListActivityParams,
+} from '../api/types'
 
 export const activityService = {
   /** Newest first. For the next page pass the last event's `createdAt` as `before`. */
@@ -7,7 +12,7 @@ export const activityService = {
     return api.get<ActivityEvent[]>('/activity', { params })
   },
 
-  getDashboard() {
-    return api.get<Dashboard>('/dashboard')
+  getDashboard(params: DashboardParams = {}) {
+    return api.get<Dashboard>('/dashboard', { params })
   },
 }
