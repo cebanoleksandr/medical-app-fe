@@ -1,13 +1,16 @@
-import { api, fileForm } from '../api/client'
+import { api, fileForm, http } from '../api/client'
+import { toApiError } from '../api/errors'
 import type {
   Analysis,
   AnalysisOptions,
-  AnalysisSummary,
+  AnalysesFilter,
+  AnalysesPage,
   CreateAnalysisRequest,
   ExtractTextResponse,
   ListAnalysesParams,
   RenderAnalysisRequest,
 } from '../api/types'
+import type { DownloadedFile } from './synthetic.service'
 
 export const analysesService = {
   /** Frameworks, methods, output modes: everything the wizard needs. */
@@ -20,9 +23,22 @@ export const analysesService = {
     return api.post<ExtractTextResponse>('/analyses/extract-text', fileForm(file))
   },
 
-  /** Newest first, metadata only. Page with the last item's `createdAt`. */
+  /** One page, newest first, metadata only (the server keeps no text). */
   list(params: ListAnalysesParams = {}) {
-    return api.get<AnalysisSummary[]>('/analyses', { params })
+    return api.get<AnalysesPage>('/analyses', { params })
+  },
+
+  /** The filtered list as CSV. Use saveFile() to hand it to the user. */
+  async exportCsv(filter: AnalysesFilter = {}): Promise<DownloadedFile> {
+    try {
+      const res = await http.get<Blob>('/analyses/export', {
+        params: filter,
+        responseType: 'blob',
+      })
+      return { blob: res.data, filename: 'analyses.csv' }
+    } catch (err) {
+      throw await toApiError(err)
+    }
   },
 
   create(request: CreateAnalysisRequest) {

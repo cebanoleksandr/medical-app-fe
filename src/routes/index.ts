@@ -9,6 +9,7 @@ import LandingLayout from '../components/layouts/LandingLayout'
 import { sessionQuery } from '../hooks'
 import ComplianceStepPage from '../pages/ComplianceStepPage'
 import ConfigurationStepPage from '../pages/ConfigurationStepPage'
+import AnalysesPage from '../pages/AnalysesPage'
 import DashboardPage from '../pages/DashboardPage'
 import DataInputStepPage from '../pages/DataInputStepPage'
 import GeneratedDataPage from '../pages/GeneratedDataPage'
@@ -64,6 +65,14 @@ export const routes: RouteObject[] = [
             handle: {
               title: 'Dashboard',
               subtitle: 'Monitor anonymization activity and compliance performance',
+            } satisfies RouteHandle,
+          },
+          {
+            path: 'analyses',
+            Component: AnalysesPage,
+            handle: {
+              title: 'All Analyses',
+              subtitle: 'Complete history of de-identification jobs',
             } satisfies RouteHandle,
           },
           {

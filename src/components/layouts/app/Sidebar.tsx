@@ -3,10 +3,11 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlotOutlined'
 import SettingsIcon from '@mui/icons-material/SettingsOutlined'
 import { styled } from '@mui/material/styles'
-import { NavLink, useMatch } from 'react-router-dom'
+import { NavLink, matchPath, useLocation } from 'react-router-dom'
 import dashboardIcon from '../../../assets/icons/dashboard.svg'
 import databaseIcon from '../../../assets/icons/database.svg'
 import deIdentifyIcon from '../../../assets/icons/de-identify.svg'
+import listIcon from '../../../assets/icons/list.svg'
 import logo from '../../../assets/logo.svg'
 import { colors, radius, typography } from '../../../theme'
 import { LogoutPopup } from '../../popups/LogoutPopup'
@@ -18,11 +19,19 @@ interface NavItem {
   to: string
   label: string
   icon: ReactNode
+  /** Paths (exact) that open this section; defaults to everything under `to`. */
+  section?: string[]
   children?: NavItem[]
 }
 
 const nav: NavItem[] = [
-  { to: '/app', label: 'Dashboard', icon: <MaskIcon src={dashboardIcon} /> },
+  {
+    to: '/app',
+    label: 'Dashboard',
+    icon: <MaskIcon src={dashboardIcon} />,
+    section: ['/app', '/app/analyses'],
+    children: [{ to: '/app/analyses', label: 'All Analyses', icon: <MaskIcon src={listIcon} /> }],
+  },
   { to: '/app/de-identify', label: 'De-Identify', icon: <MaskIcon src={deIdentifyIcon} /> },
   {
     to: '/app/synthetic',
@@ -110,11 +119,22 @@ const Link = styled(NavLink, {
 }))
 
 function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
-  // Sub-items show only while their section is open.
-  const inSection = useMatch({ path: item.to, end: false })
+  const { pathname } = useLocation()
+  // Sub-items show only while their section is open; the section's own item
+  // stays highlighted on its sub-pages.
+  const inSection = item.section
+    ? item.section.some((path) => matchPath(path, pathname))
+    : !!matchPath({ path: item.to, end: false }, pathname)
   return (
     <>
-      <Link to={item.to} end={item.to === '/app'} nested={nested}>
+      <Link
+        to={item.to}
+        end
+        nested={nested}
+        // A plain string: styled() would stringify a className function.
+        // NavLink still adds "active" itself on its own path.
+        className={!nested && inSection ? 'active' : undefined}
+      >
         <span className="Sidebar-icon" aria-hidden>
           {item.icon}
         </span>

@@ -27,7 +27,6 @@ export const queryKeys = {
     list: (limit: number) => ['activity', 'list', limit] as const,
     // Under `activity` so creating or reviewing an analysis refreshes them.
     dashboard: (params: DashboardParams = {}) => ['activity', 'dashboard', params] as const,
-    analyses: (params: Omit<ListAnalysesParams, 'before'>) =>
-      ['activity', 'analyses', params] as const,
+    analyses: (params: ListAnalysesParams) => ['activity', 'analyses', params] as const,
   },
 }

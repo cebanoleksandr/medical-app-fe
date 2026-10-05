@@ -8,6 +8,9 @@ import { colors, shadows, typography } from '../../theme'
 import { EmptyEntitiesPicture, LayeredPicture } from '../review/EmptyEntitiesPicture'
 
 const Root = styled('section')({
+  // Contains the visually hidden data tables (position: absolute); without
+  // it they hang off the document and make the page scroll besides <main>.
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   gap: 12,

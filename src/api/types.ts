@@ -514,12 +514,26 @@ export interface AnalysisSummary {
   processed: number
 }
 
-export interface ListAnalysesParams {
-  /** 1–100, default 20. */
-  limit?: number
-  /** Cursor: `createdAt` of the last analysis from the previous page. */
-  before?: IsoDate
+/** Filters shared by the list and its CSV export. */
+export interface AnalysesFilter {
   framework?: Framework
+  /** Created at or after. */
+  from?: IsoDate
+  /** Created at or before. */
+  to?: IsoDate
+}
+
+export interface ListAnalysesParams extends AnalysesFilter {
+  /** 1–100, default 10. */
+  limit?: number
+  offset?: number
+}
+
+export interface AnalysesPage {
+  total: number
+  offset: number
+  limit: number
+  items: AnalysisSummary[]
 }
 
 export interface Dashboard {

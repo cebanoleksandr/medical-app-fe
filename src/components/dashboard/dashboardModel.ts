@@ -1,6 +1,8 @@
 import type { DashboardParams, EntityMethod, EntityType, Framework } from '../../api/types'
 import { colors } from '../../theme'
 
+export const ALL_ANALYSES_URL = '/app/analyses'
+
 export type PeriodDays = '7' | '30' | '90'
 
 export const PERIOD_OPTIONS: { value: PeriodDays; label: string }[] = [

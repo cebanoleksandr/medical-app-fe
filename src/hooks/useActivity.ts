@@ -1,7 +1,12 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query'
 import { queryKeys } from '../api/queryKeys'
-import type { DashboardParams, Framework, IsoDate } from '../api/types'
-import { activityService, analysesService } from '../services'
+import type {
+  AnalysesFilter,
+  DashboardParams,
+  IsoDate,
+  ListAnalysesParams,
+} from '../api/types'
+import { activityService, analysesService, saveFile } from '../services'
 
 /** Keeps the previous numbers on screen while a new period loads. */
 export function useDashboard(params: DashboardParams = {}) {
@@ -12,20 +17,20 @@ export function useDashboard(params: DashboardParams = {}) {
   })
 }
 
-/** Past analyses, newest first; `fetchNextPage()` loads older ones. */
-export function useAnalysesList({
-  limit = 20,
-  framework,
-  enabled = true,
-}: { limit?: number; framework?: Framework; enabled?: boolean } = {}) {
-  return useInfiniteQuery({
-    queryKey: queryKeys.activity.analyses({ limit, framework }),
-    queryFn: ({ pageParam }) =>
-      analysesService.list({ limit, framework, before: pageParam }),
-    initialPageParam: undefined as IsoDate | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.length < limit ? undefined : lastPage.at(-1)?.createdAt,
-    enabled,
+/** One page of past analyses; the previous page stays on screen while the next loads. */
+export function useAnalysesPage(params: ListAnalysesParams) {
+  return useQuery({
+    queryKey: queryKeys.activity.analyses(params),
+    queryFn: () => analysesService.list(params),
+    placeholderData: keepPreviousData,
+  })
+}
+
+/** Downloads the filtered analyses as CSV. */
+export function useExportAnalyses() {
+  return useMutation({
+    mutationFn: (filter: AnalysesFilter) => analysesService.exportCsv(filter),
+    onSuccess: saveFile,
   })
 }
 
