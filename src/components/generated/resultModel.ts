@@ -6,6 +6,8 @@ import type {
   Level3,
   ValidationReport,
 } from '../../api/types'
+import i18n from '../../i18n'
+import { formatDate } from '../../i18n/format'
 import { formatRecords } from '../synthetic/generationSettings'
 
 /** Overall verdict: the banner, card accents and which actions are allowed. */
@@ -42,44 +44,28 @@ export function resultStatus(report: ValidationReport): ResultStatus {
   return 'passed'
 }
 
-export const FRAMEWORK_NAMES: Record<Framework, { short: string; long: string }> = {
-  HIPAA: { short: 'HIPAA SH', long: 'HIPAA Safe Harbor' },
-  EU_GDPR: { short: 'EU GDPR', long: 'EU GDPR' },
-  UK_GDPR: { short: 'UK GDPR', long: 'UK GDPR' },
-  SWISS_FADP: { short: 'Swiss FADP', long: 'Swiss FADP' },
-}
+// Labels are in `synthetic:result`; these read them in the current language.
 
-export const LEVEL_LABELS: Record<Level3, string> = {
-  HIGH: 'High',
-  MEDIUM: 'Medium',
-  LOW: 'Low',
-}
+export const frameworkName = (framework: Framework, form: 'short' | 'long') =>
+  i18n.t(`synthetic:result.frameworks.${framework}.${form}`)
+
+export const levelLabel = (level: Level3) => i18n.t(`synthetic:result.levels.${level}`)
 
 export type QualityLevel = ValidationReport['quality']['quality']
 
-export const QUALITY: Record<QualityLevel, { label: string; tone: Tone }> = {
-  GOOD: { label: 'Good', tone: 'success' },
-  FAIR: { label: 'Fair', tone: 'warning' },
-  POOR: { label: 'Poor', tone: 'error' },
+export const QUALITY: Record<QualityLevel, { tone: Tone }> = {
+  GOOD: { tone: 'success' },
+  FAIR: { tone: 'warning' },
+  POOR: { tone: 'error' },
 }
 
-/** Presidio entity types the validation scan reports. */
-const ENTITY_LABELS: Record<string, string> = {
-  PERSON: 'Names',
-  EMAIL_ADDRESS: 'Email addresses',
-  PHONE_NUMBER: 'Phone numbers',
-  US_SSN: 'Social security numbers',
-  UA_RNOKPP: 'Tax numbers (RNOKPP)',
-  UA_PASSPORT: 'Passport numbers',
-  US_PASSPORT: 'Passport numbers',
-  CH_AHV: 'AHV numbers',
-  US_DRIVER_LICENSE: 'Driver license numbers',
-  IBAN_CODE: 'Bank accounts',
-  CREDIT_CARD: 'Credit card numbers',
-  IP_ADDRESS: 'IP addresses',
-}
+export const qualityLabel = (quality: QualityLevel) => i18n.t(`synthetic:result.quality.${quality}`)
 
-export const entityLabel = (type: string) => ENTITY_LABELS[type] ?? type
+/** Presidio entity types the validation scan reports; unknown ones keep their name. */
+export const entityLabel = (type: string) =>
+  i18n.t(`synthetic:result.findings.${type}` as 'synthetic:result.findings.PERSON', {
+    defaultValue: type,
+  })
 
 /** Findings grouped by entity type, most frequent first. */
 export function findingGroups(report: ValidationReport) {
@@ -113,7 +99,7 @@ export function columnOptions(dataset: Dataset) {
   return {
     defaults: [
       ...dataset.columns.filter((c) => preview.has(c.key)).map(toOption),
-      { key: QUALITY_COLUMN, label: 'Quality', locked: false },
+      { key: QUALITY_COLUMN, label: i18n.t('synthetic:result.quality.column'), locked: false },
     ],
     additional: dataset.columns.filter((c) => !preview.has(c.key)).map(toOption),
   }
@@ -121,19 +107,13 @@ export function columnOptions(dataset: Dataset) {
 
 export const defaultColumns = (dataset: Dataset) => [...dataset.previewColumns, QUALITY_COLUMN]
 
-const dateFormat = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-})
-
 export function formatCell(value: CellValue, type: ColumnDefinition['type'] = 'string'): string {
   if (value === null || value === '') return '—'
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (typeof value === 'boolean') return i18n.t(value ? 'synthetic:result.yes' : 'synthetic:result.no')
   if (typeof value === 'number') return formatRecords(value)
   if (type === 'date') {
     const time = Date.parse(value)
-    if (!Number.isNaN(time)) return dateFormat.format(time)
+    if (!Number.isNaN(time)) return formatDate(time, { month: 'short', day: 'numeric', year: 'numeric' })
   }
   return value
 }

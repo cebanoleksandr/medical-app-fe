@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { SectionHeader } from '../../components/landing/SectionHeader'
 import { ContactInfo } from '../../components/landing/contact/ContactInfo'
 import { ContactPanel } from '../../components/landing/contact/ContactPanel'
@@ -24,12 +25,13 @@ const Body = styled('div')({
 })
 
 const ContactUsPage = () => {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Inner>
         <SectionHeader
-          title="Contact Us"
-          description="Have questions about data anonymization or compliance? We're here to help."
+          title={t('contact.title')}
+          description={t('contact.description')}
         />
         <Body>
           <ContactInfo />

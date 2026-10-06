@@ -1,16 +1,18 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Container, NARROW, TABLET, sectionPadding } from '../layouts/landing/styles'
 import { colors, radius, typography } from '../../theme'
 import { fadeUp, reveal, stagger } from './motion'
 import { SectionHeader } from './SectionHeader'
 
+// Keys under `frameworks` in the `landing` namespace.
 const frameworks = [
-  { badge: 'EU GDPR', name: 'General Data Protection Regulation', entities: 11 },
-  { badge: 'HIPAA', name: 'Health Insurance Portability and Accountability Act', entities: 17 },
-  { badge: 'UK DPI', name: 'UK Data Protection and Investigatory Powers', entities: 9 },
-  { badge: 'Swiss FADP', name: 'Swiss Federal Act on Data Protection', entities: 8 },
-]
+  { id: 'gdpr', entities: 11 },
+  { id: 'hipaa', entities: 17 },
+  { id: 'uk', entities: 9 },
+  { id: 'fadp', entities: 8 },
+] as const
 
 const Root = styled('section')({
   ...sectionPadding,
@@ -80,19 +82,20 @@ const Card = styled(motion.li)({
 })
 
 export function Frameworks() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Inner>
         <SectionHeader
-          title="Built for Compliance"
-          description="Choose from industry-standard regulatory frameworks or create your own custom compliance profile"
+          title={t('frameworks.title')}
+          description={t('frameworks.description')}
         />
         <Cards {...reveal} variants={stagger(0.1)}>
           {frameworks.map((framework) => (
-            <Card key={framework.badge} variants={fadeUp} whileHover={{ y: -4 }}>
-              <span className="Framework-badge">{framework.badge}</span>
-              <h3>{framework.name}</h3>
-              <p>{framework.entities} entity types</p>
+            <Card key={framework.id} variants={fadeUp} whileHover={{ y: -4 }}>
+              <span className="Framework-badge">{t(`frameworks.${framework.id}.badge`)}</span>
+              <h3>{t(`frameworks.${framework.id}.name`)}</h3>
+              <p>{t('frameworks.entityTypes', { count: framework.entities })}</p>
             </Card>
           ))}
         </Cards>

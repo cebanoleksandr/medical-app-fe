@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
 import Collapse from '@mui/material/Collapse'
 import { styled } from '@mui/material/styles'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import type { EntityMethod, EntityMethods, EntityType } from '../../api/types'
 import autorenewIcon from '../../assets/configuration/autorenew.svg'
 import unfoldIcon from '../../assets/configuration/unfold-less.svg'
@@ -14,6 +16,7 @@ import {
   METHOD_ORDER,
   type EntityInfo,
   type LawInfo,
+  useLawText,
 } from './entityConfig'
 
 export interface EntityConfigTableProps {
@@ -107,13 +110,13 @@ const SensitiveBadge = styled('span')({
   color: colors.warning,
 })
 
-function methodOptions(entity: EntityInfo): DropdownOption<EntityMethod>[] {
+function methodOptions(entity: EntityInfo, t: TFunction<'deIdentify'>): DropdownOption<EntityMethod>[] {
   return METHOD_ORDER.map((method) => ({
     value: method,
-    label: METHODS[method].label,
-    description: METHODS[method].description,
+    label: t(`methods.${method}.label`),
+    description: t(`methods.${method}.description`),
     icon: <MaskIcon src={METHODS[method].icon} />,
-    group: METHODS[method].group,
+    group: t(`methodGroups.${METHODS[method].group}`),
     // Special category data may only be removed.
     disabled: entity.special && method !== 'REDACT',
   }))
@@ -121,6 +124,8 @@ function methodOptions(entity: EntityInfo): DropdownOption<EntityMethod>[] {
 
 /** "Entity configuration": the method applied to each entity type. */
 export function EntityConfigTable({ law, value, customized, onChange, onReset }: EntityConfigTableProps) {
+  const { t } = useTranslation('deIdentify')
+  const lawText = useLawText(law)
   const panelId = useId()
   const [open, setOpen] = useState(false)
 
@@ -128,9 +133,12 @@ export function EntityConfigTable({ law, value, customized, onChange, onReset }:
     <Root>
       <Header>
         <div>
-          <strong>Entity configuration</strong>
+          <strong>{t('entityTable.title')}</strong>
           <span className="EntityConfig-summary">
-            {ENTITIES.length} types · {customized ? 'Customized' : 'Auto-configured'}
+            {t('entityTable.summary', {
+              count: ENTITIES.length,
+              state: customized ? t('entityTable.customized') : t('entityTable.auto'),
+            })}
           </span>
         </div>
         <Actions>
@@ -141,7 +149,7 @@ export function EntityConfigTable({ law, value, customized, onChange, onReset }:
               startIcon={<MaskIcon src={autorenewIcon} />}
               onClick={onReset}
             >
-              Reset to default
+              {t('entityTable.reset')}
             </Button>
           )}
           <Button
@@ -152,32 +160,36 @@ export function EntityConfigTable({ law, value, customized, onChange, onReset }:
             aria-controls={panelId}
             onClick={() => setOpen((current) => !current)}
           >
-            Customize
+            {t('entityTable.customize')}
           </Button>
         </Actions>
       </Header>
 
       <Collapse in={open} timeout={250}>
-        <div id={panelId} role="group" aria-label="Methods per entity type">
+        <div id={panelId} role="group" aria-label={t('entityTable.groupLabel')}>
           {ENTITY_GROUPS.map((group) => (
-            <div key={group.title}>
+            <div key={group.id}>
               <GroupTitle data-special={group.special || undefined}>
-                {group.special ? `Special category — ${law.specialArticle}` : group.title}
+                {group.special
+                  ? t('entityGroups.specialArticle', { article: lawText.specialArticle })
+                  : t(`entityGroups.${group.id}`)}
               </GroupTitle>
               {group.entities.map((entity) => (
                 <Row key={entity.type}>
                   <Entity id={`entity-${entity.type}`}>
                     <MaskIcon src={entity.icon} aria-hidden />
-                    {entity.label}
-                    {entity.special && <SensitiveBadge>Sensitive</SensitiveBadge>}
+                    {t(`entities.${entity.type}`)}
+                    {entity.special && <SensitiveBadge>{t('entityTable.sensitive')}</SensitiveBadge>}
                   </Entity>
                   <Dropdown
                     className="EntityConfig-method"
-                    options={methodOptions(entity)}
+                    options={methodOptions(entity, t)}
                     value={value[entity.type]}
                     onChange={(method) => onChange(entity.type, method)}
                     triggerDescription={
-                      entity.special ? `${law.specialArticle} — Special category` : undefined
+                      entity.special
+                        ? t('entityTable.specialTrigger', { article: lawText.specialArticle })
+                        : undefined
                     }
                     aria-labelledby={`entity-${entity.type}`}
                   />

@@ -3,7 +3,9 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { styled } from '@mui/material/styles'
 import { AnimatePresence } from 'framer-motion'
+import type { TFunction } from 'i18next'
 import { useForm, useWatch } from 'react-hook-form'
+import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import type { ApiError } from '../../api/errors'
 import mailIcon from '../../assets/auth/mail.svg'
@@ -39,15 +41,16 @@ const Resend = styled('p')({
   '& .Login-resendError': { display: 'block', marginTop: 8, color: colors.error },
 })
 
-function describeError(error: ApiError) {
-  if (error.isRateLimited) return 'Too many attempts. Please try again in a few minutes.'
-  if (error.isNetworkError) return "Couldn't reach the server. Check your connection and try again."
-  if (error.status >= 500) return 'Something went wrong on our side. Please try again.'
+function describeError(error: ApiError, t: TFunction<['auth', 'common']>) {
+  if (error.isRateLimited) return t('common:errors.rateLimited')
+  if (error.isNetworkError) return t('common:errors.unreachable')
+  if (error.status >= 500) return t('common:errors.server')
   return error.message
 }
 
 /** Magic-link sign-in: enter an email, then "check your inbox". */
 const LoginPage = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const navigate = useNavigate()
   const request = useRequestMagicLink()
   // Wakes the Render instance while the user types.
@@ -84,7 +87,7 @@ const LoginPage = () => {
           setCooldown(RESEND_COOLDOWN_S)
         },
         onError: (error) => {
-          if (!sentTo) setError('email', { type: 'server', message: describeError(error) })
+          if (!sentTo) setError('email', { type: 'server', message: describeError(error, t) })
         },
       },
     )
@@ -101,23 +104,23 @@ const LoginPage = () => {
         <Status key="sent" {...swapProps}>
           <img className="Auth-icon" src={mailIcon} alt="" />
           <Headline>
-            <h1>Check your inbox</h1>
+            <h1>{t('sent.title')}</h1>
             <p>
-              We sent a sign-in link to <strong>{sentTo}</strong>
+              <Trans t={t} i18nKey="sent.description" values={{ email: sentTo }} />
             </p>
           </Headline>
           <Divider />
           <Resend role="status">
-            Didn&apos;t receive it? Check spam or{' '}
+            {t('sent.notReceived')}{' '}
             <button
               type="button"
               disabled={cooldown > 0 || request.isPending}
               onClick={() => send({ email: sentTo })}
             >
-              {cooldown > 0 ? `Resend link in ${cooldown}s` : 'Resend link'}
+              {cooldown > 0 ? t('sent.resendIn', { seconds: cooldown }) : t('sent.resend')}
             </button>
             {request.isError && (
-              <span className="Login-resendError">{describeError(request.error)}</span>
+              <span className="Login-resendError">{describeError(request.error, t)}</span>
             )}
           </Resend>
           <Button
@@ -127,20 +130,20 @@ const LoginPage = () => {
             onClick={backToForm}
             sx={backSx}
           >
-            Back to Sign In
+            {t('sent.backToSignIn')}
           </Button>
         </Status>
       ) : (
         <View key="form" {...swapProps}>
           <Headline>
-            <h1>Sign in to De-ID Studio</h1>
-            <p>Enter your email to receive a sign-in link</p>
+            <h1>{t('login.title')}</h1>
+            <p>{t('login.subtitle')}</p>
           </Headline>
           <Form noValidate onSubmit={handleSubmit(send)}>
             <TextField
-              label="Email"
+              label={t('login.email')}
               type="email"
-              placeholder="Enter your email"
+              placeholder={t('login.emailPlaceholder')}
               autoComplete="email"
               autoFocus
               required
@@ -154,7 +157,7 @@ const LoginPage = () => {
               disabled={!email.trim() || request.isPending}
               sx={ctaSx}
             >
-              {request.isPending ? 'Sending…' : 'Send Magic Link'}
+              {request.isPending ? t('login.sending') : t('login.send')}
             </Button>
           </Form>
           <Button
@@ -164,7 +167,7 @@ const LoginPage = () => {
             onClick={() => navigate('/')}
             sx={backSx}
           >
-            Back
+            {t('common:actions.back')}
           </Button>
         </View>
       )}

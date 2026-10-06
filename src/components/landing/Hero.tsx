@@ -1,13 +1,12 @@
 import { Fragment } from 'react'
 import { keyframes, styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { Trans, useTranslation } from 'react-i18next'
 import heroImage from '../../assets/landing/hero.png'
 import { GetStartedButton } from '../layouts/landing/GetStartedButton'
 import { Container, NARROW, TABLET } from '../layouts/landing/styles'
 import { colors, typography } from '../../theme'
 import { fadeUp, stagger } from './motion'
-
-const trust = ['HIPAA Compliant', 'GDPR Certified', '99.9% Accuracy']
 
 // Slow drift of the background waves.
 const drift = keyframes({
@@ -86,23 +85,20 @@ const Trust = styled(motion.ul)({
 })
 
 export function Hero() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       {/* Plays on load rather than on scroll: the hero is always in view. */}
       <Inner initial="hidden" animate="visible" variants={stagger(0.12, 0.15)}>
-        <motion.h1 variants={fadeUp}>
-          Clinical Data De-Identification &amp; Synthesis Studio
-        </motion.h1>
+        <motion.h1 variants={fadeUp}>{t('hero.title')}</motion.h1>
         <motion.p className="Hero-lead" variants={fadeUp}>
-          Enterprise-grade PII detection and anonymization{' '}
-          <br />
-          for healthcare organizations
+          <Trans t={t} i18nKey="hero.lead" />
         </motion.p>
         <Cta variants={fadeUp}>
           <GetStartedButton />
         </Cta>
         <Trust variants={fadeUp}>
-          {trust.map((item, index) => (
+          {t('hero.trust', { returnObjects: true }).map((item, index) => (
             <Fragment key={item}>
               {index > 0 && <li className="Hero-dot" aria-hidden />}
               <li>{item}</li>

@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { Dataset, ValidationReport } from '../../api/types'
 import checkCircleIcon from '../../assets/generated/check-circle-small.svg'
 import downloadIcon from '../../assets/review/report.svg'
@@ -9,7 +10,7 @@ import { Button, Checkbox, MaskIcon } from '../ui'
 import { formatRecords } from '../synthetic/generationSettings'
 import { DialogHeader, Glyph, Notice } from './parts'
 import { CheckboxOption, Divider, MetaList, MetaRow } from './styles'
-import { FRAMEWORK_NAMES, type ResultStatus } from './resultModel'
+import { frameworkName, type ResultStatus } from './resultModel'
 
 // Figma: 544px card, 32px padding, 16px corners.
 const panelStyle = {
@@ -44,11 +45,7 @@ const Footer = styled('div')({
   gap: 16,
 })
 
-const VALIDATION_TEXT: Record<ResultStatus, string> = {
-  passed: 'Passed',
-  warning: 'Passed with warnings',
-  failed: 'Failed',
-}
+// Validation texts are `synthetic:result.download.<status>`.
 
 export interface DownloadOptions {
   validationReport: boolean
@@ -77,6 +74,7 @@ export function DownloadPopup({
   pending = false,
   error,
 }: DownloadPopupProps) {
+  const { t } = useTranslation(['synthetic', 'common'])
   const titleId = useId()
   const [options, setOptions] = useState<DownloadOptions>({
     validationReport: true,
@@ -88,35 +86,35 @@ export function DownloadPopup({
   return (
     <BasePopup isVisible={isVisible} onClose={onClose} labelledBy={titleId} style={panelStyle}>
       <Content>
-        <Header titleId={titleId} title="Download synthetic dataset" onClose={onClose} />
+        <Header titleId={titleId} title={t('result.download.title')} onClose={onClose} />
         <Meta>
           <MetaRow>
-            <dt>Format</dt>
+            <dt>{t('result.download.format')}</dt>
             <dd>{dataset.format}</dd>
           </MetaRow>
           <MetaRow>
-            <dt>Records</dt>
+            <dt>{t('result.download.records')}</dt>
             <dd>{formatRecords(dataset.records)}</dd>
           </MetaRow>
           <MetaRow>
-            <dt>Fields</dt>
+            <dt>{t('result.download.fields')}</dt>
             <dd>{formatRecords(dataset.fields)}</dd>
           </MetaRow>
           <MetaRow>
-            <dt>Framework</dt>
-            <dd>{FRAMEWORK_NAMES[dataset.framework].long}</dd>
+            <dt>{t('result.download.framework')}</dt>
+            <dd>{frameworkName(dataset.framework, 'long')}</dd>
           </MetaRow>
           <MetaRow>
-            <dt>Validation</dt>
+            <dt>{t('result.download.validation')}</dt>
             <dd>
               {status === 'passed' && (
                 <Glyph src={checkCircleIcon} size={14} color={colors.success} />
               )}
-              {status ? VALIDATION_TEXT[status] : 'In progress…'}
+              {status ? t(`result.download.${status}`) : t('result.download.inProgress')}
             </dd>
           </MetaRow>
         </Meta>
-        <Notice tone="info">Generated data will not be stored after this session.</Notice>
+        <Notice tone="info">{t('result.download.notice')}</Notice>
         <Options>
           <CheckboxOption>
             <Checkbox
@@ -124,18 +122,18 @@ export function DownloadPopup({
               disabled={!report}
               onChange={() => toggle('validationReport')}
             />
-            Include validation report
+            {t('result.download.report')}
           </CheckboxOption>
           <CheckboxOption>
             <Checkbox checked={options.schemaSummary} onChange={() => toggle('schemaSummary')} />
-            Include schema summary
+            {t('result.download.schema')}
           </CheckboxOption>
         </Options>
         {error && <Notice tone="error">{error}</Notice>}
         <Divider />
         <Footer>
           <Button variant="ghostSecondary" size="medium" onClick={onClose}>
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <Button
             variant="secondary"
@@ -144,7 +142,7 @@ export function DownloadPopup({
             disabled={pending || status === 'failed'}
             onClick={() => onDownload({ ...options, validationReport: options.validationReport && !!report })}
           >
-            {pending ? 'Downloading…' : 'Download'}
+            {pending ? t('common:actions.downloading') : t('common:actions.download')}
           </Button>
         </Footer>
       </Content>

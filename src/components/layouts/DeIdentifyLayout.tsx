@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { colors } from '../../theme'
 import { Stepper } from '../ui'
@@ -47,6 +48,7 @@ const Footer = styled('div')({
 })
 
 const DeIdentifyLayout = () => {
+  const { t } = useTranslation('app')
   const { pathname } = useLocation()
   const [footerSlot, setFooterSlot] = useState<HTMLElement | null>(null)
   const { draft, updateDraft, resetDraft } = useDraftStore()
@@ -60,7 +62,10 @@ const DeIdentifyLayout = () => {
   return (
     <Root>
       <StepperBar>
-        <Stepper steps={steps} activeStep={stepIndex} />
+        <Stepper
+          steps={steps.map((step) => ({ ...step, label: t(step.label) }))}
+          activeStep={stepIndex}
+        />
       </StepperBar>
       <Body>
         <Outlet

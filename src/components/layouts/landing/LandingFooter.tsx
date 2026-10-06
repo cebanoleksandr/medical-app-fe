@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { fadeUp, reveal } from '../../landing/motion'
 import { colors, typography } from '../../../theme'
 import { Logo } from './Logo'
@@ -33,18 +34,16 @@ const Copyright = styled(motion.p)({
 })
 
 export function LandingFooter() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Container>
         <Brand {...reveal} variants={fadeUp}>
           <Logo />
-          <p>
-            Enterprise-grade clinical data de-identification and synthetic data
-            generation platform
-          </p>
+          <p>{t('footer.about')}</p>
         </Brand>
         <Copyright {...reveal} variants={fadeUp}>
-          © {new Date().getFullYear()} Clinical Data Studio. All rights reserved.
+          {t('footer.copyright', { year: new Date().getFullYear() })}
         </Copyright>
       </Container>
     </Root>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import frameworksPicture from '../../assets/dashboard/empty/frameworks.svg'
 import gearSmall from '../../assets/dashboard/empty/gear-small.svg'
 import gear from '../../assets/dashboard/empty/gear.svg'
@@ -93,7 +94,8 @@ const ENTITY_TYPES_LAYERS = [
 export type EmptyPicture = 'methods' | 'frameworks' | 'entityTypes'
 
 /** Illustration and "No analyses found" in place of a chart. */
-export function EmptyChart({ picture, text = 'No analyses found' }: { picture: EmptyPicture; text?: string }) {
+export function EmptyChart({ picture, text }: { picture: EmptyPicture; text?: string }) {
+  const { t } = useTranslation('dashboard')
   return (
     <EmptyRoot>
       {picture === 'methods' && <EmptyEntitiesPicture size={100} />}
@@ -101,7 +103,7 @@ export function EmptyChart({ picture, text = 'No analyses found' }: { picture: E
         <img className="ChartCard-picture" src={frameworksPicture} alt="" />
       )}
       {picture === 'entityTypes' && <LayeredPicture layers={ENTITY_TYPES_LAYERS} size={100} />}
-      <p>{text}</p>
+      <p>{text ?? t('empty.none')}</p>
     </EmptyRoot>
   )
 }

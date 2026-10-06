@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { styled } from '@mui/material/styles'
 import { Navigate, useNavigate } from 'react-router-dom'
 import type { DetectedEntity, RenderAnalysisRequest } from '../api/types'
@@ -23,6 +24,7 @@ import {
 import { StatsBar } from '../components/review/StatsBar'
 import { Button, MaskIcon } from '../components/ui'
 import { useCreateSourceFromAnalysis, useRenderAnalysis } from '../hooks'
+import { formatNumber } from '../i18n/format'
 import { colors, typography } from '../theme'
 
 const Root = styled('div')({
@@ -69,6 +71,7 @@ function download(content: string, filename: string) {
 }
 
 const ReviewStepPage = () => {
+  const { t } = useTranslation(['deIdentify', 'common'])
   const { draft, updateDraft, resetDraft } = useDeIdentify()
   const navigate = useNavigate()
   const render = useRenderAnalysis()
@@ -93,7 +96,8 @@ const ReviewStepPage = () => {
 
   const entities = pending ?? analysis.entities
   const included = entities.filter((entity) => entity.included)
-  const source = draft.inputMode === 'file' && draft.upload ? draft.upload.name : 'Pasted text'
+  const source =
+    draft.inputMode === 'file' && draft.upload ? draft.upload.name : t('review.pastedText')
   const output = pending ? deidentifiedText(text, entities) : analysis.deidentifiedText
 
   const sendRender = (next: DetectedEntity[]) => {
@@ -135,14 +139,11 @@ const ReviewStepPage = () => {
   }
 
   let warning: string | undefined
-  if (entities.length === 0) warning = 'No identifiers highlighted — document appears clean'
-  else if (included.length === 0)
-    warning =
-      'All entities are excluded — the de-identified version will be identical to the original document.'
+  if (entities.length === 0) warning = t('review.warnings.clean')
+  else if (included.length === 0) warning = t('review.warnings.allExcluded')
   else {
     const toReview = included.filter((entity) => entity.lowConfidence).length
-    if (toReview > 0)
-      warning = `${toReview} ${toReview === 1 ? 'field requires' : 'fields require'} review before export`
+    if (toReview > 0) warning = t('review.warnings.toReview', { count: toReview })
   }
 
   const renderFailed = render.isError
@@ -153,10 +154,8 @@ const ReviewStepPage = () => {
     <Root>
       <Header>
         <div>
-          <h2>Review results</h2>
-          <p>
-            {source} · Analyzed {formatDate(analysis.createdAt)}
-          </p>
+          <h2>{t('review.title')}</h2>
+          <p>{t('review.meta', { source, date: formatDate(analysis.createdAt) })}</p>
         </div>
         <Button
           variant="secondary"
@@ -164,16 +163,16 @@ const ReviewStepPage = () => {
           startIcon={<MaskIcon src={settingsIcon} />}
           onClick={() => navigate(stepUrl(2))}
         >
-          Adjust Settings
+          {t('review.adjust')}
         </Button>
       </Header>
 
       <StatsBar
         items={[
-          { value: String(entities.length), label: 'Detected entities' },
-          { value: String(included.length), label: 'Processed entities' },
-          { value: formatPercent(analysis.stats.avgConfidence), label: 'Avg. confidence' },
-          { value: formatSeconds(analysis.stats.processingMs), label: 'Processing time' },
+          { value: formatNumber(entities.length), label: t('review.stats.detected') },
+          { value: formatNumber(included.length), label: t('review.stats.processed') },
+          { value: formatPercent(analysis.stats.avgConfidence), label: t('review.stats.confidence') },
+          { value: formatSeconds(analysis.stats.processingMs), label: t('review.stats.time') },
         ]}
       />
 
@@ -195,7 +194,7 @@ const ReviewStepPage = () => {
         <Banner role="alert" data-tone="error">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Couldn&apos;t prepare synthetic data</strong>
+            <strong>{t('review.sourceFailed')}</strong>
             <p>{createSource.error.message}</p>
           </div>
         </Banner>
@@ -208,7 +207,7 @@ const ReviewStepPage = () => {
             startIcon={<MaskIcon src={addIcon} />}
             onClick={() => setConfirmNew(true)}
           >
-            New analysis
+            {t('common:actions.newAnalysis')}
           </Button>
         }
         end={
@@ -219,7 +218,7 @@ const ReviewStepPage = () => {
             disabled={!canGenerate}
             onClick={generateSynthetic}
           >
-            {createSource.isPending ? 'Preparing…' : 'Generate Synthetic Data'}
+            {createSource.isPending ? t('review.preparing') : t('review.generate')}
           </Button>
         }
       />
@@ -228,9 +227,9 @@ const ReviewStepPage = () => {
         isVisible={confirmNew}
         onClose={() => setConfirmNew(false)}
         onConfirm={startNew}
-        title="Start a new analysis?"
-        description="The current results will be cleared. Copy or download anything you need first."
-        confirmLabel="Start new"
+        title={t('review.newTitle')}
+        description={t('review.newText')}
+        confirmLabel={t('review.newConfirm')}
       />
     </Root>
   )

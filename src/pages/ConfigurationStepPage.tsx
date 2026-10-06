@@ -1,6 +1,9 @@
 import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
 import { Navigate, useNavigate } from 'react-router-dom'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
+import { useCatalog } from '../i18n/useCatalog'
 import type { ApiError } from '../api/errors'
 import analyzeIcon from '../assets/configuration/analyze.svg'
 import warningIcon from '../assets/configuration/warning.svg'
@@ -34,17 +37,18 @@ const Header = styled('div')({
   '& p': { ...typography.bodyM, margin: 0, color: colors.neutral[500] },
 })
 
-function describeAnalyzeError(error: ApiError) {
-  if (error.isRateLimited) return 'Too many analyses in a short time. Please wait a minute and try again.'
-  if (error.isNetworkError) return "Couldn't reach the server. Check your connection and try again."
+function describeAnalyzeError(error: ApiError, t: TFunction<['deIdentify', 'common']>) {
+  if (error.isRateLimited) return t('configuration.errors.rateLimited')
+  if (error.isNetworkError) return t('common:errors.unreachable')
   // The detection service sleeps when idle and takes up to a minute to start.
-  if (error.status === 503)
-    return 'The detection service is starting up. Please try again in a minute.'
-  if (error.status >= 500) return 'Something went wrong on our side. Please try again.'
+  if (error.status === 503) return t('configuration.errors.starting')
+  if (error.status >= 500) return t('common:errors.server')
   return error.message
 }
 
 const ConfigurationStepPage = () => {
+  const { t } = useTranslation(['deIdentify', 'common'])
+  const catalog = useCatalog()
   const { draft, updateDraft } = useDeIdentify()
   const navigate = useNavigate()
   const options = useAnalysisOptions()
@@ -79,11 +83,13 @@ const ConfigurationStepPage = () => {
   return (
     <Root data-compact={law ? '' : undefined}>
       <Header>
-        <h2>Configure De-Identification</h2>
+        <h2>{t('configuration.title')}</h2>
         <p>
           {law
-            ? 'Select a privacy risk level or customize how each entity type is handled'
-            : `Choose how patient data will be anonymized under ${framework?.name ?? '…'}`}
+            ? t('configuration.subtitleRisk')
+            : t('configuration.subtitleMethod', {
+                framework: framework ? catalog.framework(framework).name : '…',
+              })}
         </p>
       </Header>
 
@@ -92,14 +98,14 @@ const ConfigurationStepPage = () => {
         <Banner role="alert" data-tone="error">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Couldn&apos;t load the settings</strong>
+            <strong>{t('configuration.loadFailed')}</strong>
             <Button
               variant="ghostSecondary"
               size="medium"
               sx={{ marginTop: '8px' }}
               onClick={() => options.refetch()}
             >
-              Try again
+              {t('common:actions.tryAgain')}
             </Button>
           </div>
         </Banner>
@@ -130,8 +136,8 @@ const ConfigurationStepPage = () => {
             <Banner role="alert" data-tone="error">
               <MaskIcon src={warningIcon} aria-hidden />
               <div>
-                <strong>Analysis failed</strong>
-                <p>{describeAnalyzeError(analyze.error)}</p>
+                <strong>{t('configuration.analysisFailed')}</strong>
+                <p>{describeAnalyzeError(analyze.error, t)}</p>
               </div>
             </Banner>
           )}
@@ -139,7 +145,7 @@ const ConfigurationStepPage = () => {
       )}
 
       <StepFooter
-        continueLabel={analyze.isPending ? 'Analyzing…' : 'Analyze'}
+        continueLabel={analyze.isPending ? t('configuration.analyzing') : t('configuration.analyze')}
         continueIcon={<MaskIcon src={analyzeIcon} />}
         continueDisabled={!settings || analyze.isPending}
         onContinue={run}

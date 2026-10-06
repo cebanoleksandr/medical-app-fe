@@ -1,12 +1,13 @@
 import type { Ref } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import type { DetectedEntity } from '../../api/types'
 import warningIcon from '../../assets/configuration/warning.svg'
 import arrowIcon from '../../assets/review/arrow-small.svg'
 import { colors, shadows, typography } from '../../theme'
 import { EntityTypeLabel, MaskIcon, StatusButton } from '../ui'
-import { categoryOf } from './reviewModel'
+import { categoryOf, categoryText } from './reviewModel'
 
 export interface EntityRowProps {
   entity: DetectedEntity
@@ -88,6 +89,7 @@ const Score = styled('span')({
 
 /** One detected entity: type, value, what it becomes, and the include toggle. */
 export function EntityRow({ entity, onToggle, flash = false, ref }: EntityRowProps) {
+  const { t } = useTranslation(['deIdentify', 'common'])
   const category = categoryOf(entity)
   const review = entity.included && entity.lowConfidence
 
@@ -106,7 +108,7 @@ export function EntityRow({ entity, onToggle, flash = false, ref }: EntityRowPro
       data-excluded={!entity.included || undefined}
       data-flash={flash || undefined}
     >
-      <EntityTypeLabel type={category.icon} label={category.label} />
+      <EntityTypeLabel type={category.icon} label={categoryText(category.label)} />
       <Content>
         <span className="EntityRow-value" title={entity.text}>
           {entity.text}
@@ -114,7 +116,7 @@ export function EntityRow({ entity, onToggle, flash = false, ref }: EntityRowPro
         <Result data-unchanged={!entity.included || undefined}>
           <MaskIcon src={arrowIcon} aria-hidden />
           <span>
-            {entity.included ? (entity.replacement ?? '…') : 'unchanged'}
+            {entity.included ? (entity.replacement ?? '…') : t('review.entities.unchanged')}
           </span>
         </Result>
       </Content>
@@ -122,12 +124,16 @@ export function EntityRow({ entity, onToggle, flash = false, ref }: EntityRowPro
         <StatusButton
           included={entity.included}
           onClick={onToggle}
-          aria-label={`${entity.included ? 'Exclude' : 'Include'} ${category.label} ${entity.text}`}
+          aria-label={t('review.entities.toggle', {
+            action: entity.included ? t('common:status.exclude') : t('common:status.include'),
+            category: categoryText(category.label),
+            text: entity.text,
+          })}
         />
         <Score>
           {entity.score.toFixed(2)}
           {entity.lowConfidence && (
-            <MaskIcon src={warningIcon} role="img" aria-label="Low confidence" />
+            <MaskIcon src={warningIcon} role="img" aria-label={t('review.entities.lowConfidence')} />
           )}
         </Score>
       </Actions>

@@ -1,5 +1,6 @@
 import * as yup from 'yup'
 import { MAX_PASTED_TEXT_LENGTH, MAX_UPLOAD_BYTES, MIN_TEXT_LENGTH } from '../../api/types'
+import i18n from '../../i18n'
 
 /** "5000" → "5 000", as the design writes counts. */
 export function formatCount(value: number) {
@@ -25,12 +26,12 @@ export const pastedTextSchema = yup.object({
     .default('')
     .test(
       'min',
-      `Please enter at least ${MIN_TEXT_LENGTH} characters to continue`,
+      () => i18n.t('deIdentify:input.text.tooShort', { min: MIN_TEXT_LENGTH }),
       (value = '') => value.trim().length >= MIN_TEXT_LENGTH,
     )
     .max(
       MAX_PASTED_TEXT_LENGTH,
-      `Text is too long: the limit is ${formatCount(MAX_PASTED_TEXT_LENGTH)} characters`,
+      () => i18n.t('deIdentify:input.text.tooLong', { max: formatCount(MAX_PASTED_TEXT_LENGTH) }),
     ),
 })
 
@@ -61,16 +62,18 @@ export function checkFile(file: File): UploadProblem | null {
   const name = file.name.toLowerCase()
   if (!UPLOAD_EXTENSIONS.some((extension) => name.endsWith(extension))) {
     return {
-      title: 'Unsupported file format',
-      message: 'Please upload .txt, .pdf or .docx',
-      note: 'File format not supported',
+      title: i18n.t('deIdentify:input.problems.unsupported.title'),
+      message: i18n.t('deIdentify:input.problems.unsupported.message'),
+      note: i18n.t('deIdentify:input.problems.unsupported.note'),
     }
   }
   if (file.size > MAX_UPLOAD_BYTES) {
     return {
-      title: 'File is too large',
-      message: `Please upload a file up to ${formatFileSize(MAX_UPLOAD_BYTES)}`,
-      note: `This file is ${formatFileSize(file.size)}`,
+      title: i18n.t('deIdentify:input.problems.tooLarge.title'),
+      message: i18n.t('deIdentify:input.problems.tooLarge.message', {
+        max: formatFileSize(MAX_UPLOAD_BYTES),
+      }),
+      note: i18n.t('deIdentify:input.problems.tooLarge.note', { size: formatFileSize(file.size) }),
     }
   }
   return null

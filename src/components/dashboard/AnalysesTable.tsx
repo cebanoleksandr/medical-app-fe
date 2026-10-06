@@ -1,10 +1,11 @@
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { AnalysisSummary } from '../../api/types'
 import descriptionIcon from '../../assets/generated/description.svg'
 import { colors, typography } from '../../theme'
 import { Glyph } from '../generated/parts'
 import { Dot } from '../generated/styles'
-import { FRAMEWORK_LABELS, formatDate, formatNumber } from './dashboardModel'
+import { formatDateTime, formatNumber } from './dashboardModel'
 
 const Scroller = styled('div')({ overflowX: 'auto' })
 
@@ -60,35 +61,36 @@ export function AnalysesTable({
   rows,
   error,
   layout = 'compact',
-  emptyText = 'No analyses yet',
+  emptyText,
 }: AnalysesTableProps) {
+  const { t } = useTranslation(['analyses', 'common'])
   const end = layout === 'full' ? 'AnalysesTable-end' : undefined
   return (
     <Scroller>
       <Table data-layout={layout}>
         <thead>
           <tr>
-            <th scope="col">Document</th>
-            <th scope="col">Status</th>
-            <th scope="col" className={end}>Framework</th>
-            <th scope="col" className={end}>Entities</th>
-            <th scope="col" className={end}>Date</th>
+            <th scope="col">{t('table.document')}</th>
+            <th scope="col">{t('table.status')}</th>
+            <th scope="col" className={end}>{t('table.framework')}</th>
+            <th scope="col" className={end}>{t('table.entities')}</th>
+            <th scope="col" className={end}>{t('table.date')}</th>
           </tr>
         </thead>
         <tbody>
           {error && !rows ? (
             <tr>
               <Message colSpan={5} role="alert">
-                Couldn&apos;t load analyses: {error.message}
+                {t('table.loadFailed', { message: error.message })}
               </Message>
             </tr>
           ) : !rows ? (
             <tr>
-              <Message colSpan={5}>Loading…</Message>
+              <Message colSpan={5}>{t('common:actions.loading')}</Message>
             </tr>
           ) : rows.length === 0 ? (
             <tr>
-              <Message colSpan={5}>{emptyText}</Message>
+              <Message colSpan={5}>{emptyText ?? t('table.empty')}</Message>
             </tr>
           ) : (
             rows.map((analysis) => (
@@ -97,16 +99,19 @@ export function AnalysesTable({
                   {/* The server keeps no file names or text, only the length. */}
                   <Document>
                     <Glyph src={descriptionIcon} size={16} />
-                    {formatNumber(analysis.characters)} characters · {analysis.language.toUpperCase()}
+                    {t('common:analysis.document', {
+                      characters: formatNumber(analysis.characters),
+                      language: analysis.language.toUpperCase(),
+                    })}
                   </Document>
                 </td>
                 <td>
                   {/* Only finished analyses are stored. */}
-                  <Status>Completed</Status>
+                  <Status>{t('common:status.completed')}</Status>
                 </td>
-                <td className={end}>{FRAMEWORK_LABELS[analysis.framework]}</td>
+                <td className={end}>{t(`common:frameworks.${analysis.framework}`)}</td>
                 <td className={end}>{formatNumber(analysis.detected)}</td>
-                <td className={end}>{formatDate(analysis.createdAt)}</td>
+                <td className={end}>{formatDateTime(analysis.createdAt)}</td>
               </tr>
             ))
           )}

@@ -1,0 +1,59 @@
+{
+  "periods": {
+    "label": "Period",
+    "7": "Last 7 days",
+    "30": "Last 30 days",
+    "90": "Last 90 days"
+  },
+  "welcome": {
+    "title": "Welcome to De-ID Studio",
+    "text": "Run your first analysis to see activity and statistics here."
+  },
+  "loadFailed": "Couldn't load the dashboard",
+  "stats": {
+    "documents": "Total Documents",
+    "entities": "Entities Detected",
+    "rate": "Anonymization Rate",
+    "records": "Synthetic Records"
+  },
+  "activity": {
+    "title": "Processing Activity",
+    "subtitle": "Based on selected date range",
+    "switch": "Chart data",
+    "documents": "Documents",
+    "entities": "Entities",
+    "plotLabel": "{{series}} per day. Use the arrow keys to read each day.",
+    "tableCaption": "Processing activity per day",
+    "day": "Day"
+  },
+  "methods": {
+    "title": "De-Identification Method Usage",
+    "subtitle": "Popular methods applied to detected entities",
+    "subtitleEmpty": "Methods will appear after your first analysis",
+    "chartLabel": "Detected entities per method"
+  },
+  "frameworks": {
+    "title": "Compliance Framework Usage",
+    "subtitle": "Distribution of frameworks applied across analyses",
+    "subtitleEmpty": "Framework distribution will appear after your first analysis",
+    "chartLabel": "Analyses per framework",
+    "slice": "{{framework}}: {{count}} ({{share}})"
+  },
+  "entityTypes": {
+    "title": "Entity Types Detected",
+    "subtitle": "Distribution of PII entities found in documents",
+    "subtitleEmpty": "Entity breakdown will appear after your first analysis",
+    "chartLabel": "Detected entities per entity type",
+    "showAll": "Show all {{count}} entity types"
+  },
+  "bar": "{{label}}: {{value}}",
+  "empty": {
+    "none": "No analyses found",
+    "period": "No analyses in this period"
+  },
+  "recent": {
+    "title": "Recent Activity",
+    "subtitleAll": "Last 5 analyses across all compliance frameworks",
+    "subtitleOne": "Last 5 analyses across {{framework}}"
+  }
+}

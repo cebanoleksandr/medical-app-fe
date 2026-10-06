@@ -6,7 +6,9 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import ButtonBase from '@mui/material/ButtonBase'
 import Popover from '@mui/material/Popover'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import eventIcon from '../../assets/dashboard/event.svg'
+import { formatDate } from '../../i18n/format'
 import { colors, radius, shadows, typography } from '../../theme'
 import { Button } from './Button'
 import { MaskIcon } from './MaskIcon'
@@ -36,10 +38,13 @@ function parseInput(text: string): Date | null {
   return date.getMonth() === month - 1 && date.getDate() === day ? date : null
 }
 
-const triggerFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
-const monthFormat = new Intl.DateTimeFormat('en-US', { month: 'long' })
-const longFormat = new Intl.DateTimeFormat('en-US', { dateStyle: 'full' })
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+// In the UI language: "Apr 21", "April", "Tuesday, April 21, 2026", "S M T…".
+const triggerDay = (d: Date) => formatDate(d, { month: 'short', day: 'numeric' })
+const monthName = (d: Date) => formatDate(d, { month: 'long' })
+const fullDay = (d: Date) => formatDate(d, { dateStyle: 'full' })
+/** Sunday-first narrow weekday names (Jan 4, 1970 was a Sunday). */
+const weekdays = () =>
+  Array.from({ length: 7 }, (_, i) => formatDate(new Date(1970, 0, 4 + i), { weekday: 'narrow' }))
 
 /** Six weeks starting on the Sunday on or before the 1st. */
 function monthGrid(month: Date) {
@@ -224,6 +229,7 @@ interface MonthViewProps {
 }
 
 function MonthView({ month, onMonth, draft, onPick, max }: MonthViewProps) {
+  const { t } = useTranslation()
   const today = startOfDay(new Date())
   const { from, to } = draft
   const nextMonth = addMonths(month, 1)
@@ -231,12 +237,12 @@ function MonthView({ month, onMonth, draft, onPick, max }: MonthViewProps) {
     <Calendar>
       <Nav>
         <div>
-          <ButtonBase aria-label="Previous month" onClick={() => onMonth(addMonths(month, -1))}>
+          <ButtonBase aria-label={t('datePicker.previousMonth')} onClick={() => onMonth(addMonths(month, -1))}>
             <ChevronLeftIcon />
           </ButtonBase>
-          <span aria-live="polite">{monthFormat.format(month)}</span>
+          <span aria-live="polite">{monthName(month)}</span>
           <ButtonBase
-            aria-label="Next month"
+            aria-label={t('datePicker.nextMonth')}
             disabled={nextMonth > max}
             onClick={() => onMonth(nextMonth)}
           >
@@ -244,12 +250,12 @@ function MonthView({ month, onMonth, draft, onPick, max }: MonthViewProps) {
           </ButtonBase>
         </div>
         <div>
-          <ButtonBase aria-label="Previous year" onClick={() => onMonth(addMonths(month, -12))}>
+          <ButtonBase aria-label={t('datePicker.previousYear')} onClick={() => onMonth(addMonths(month, -12))}>
             <ChevronLeftIcon />
           </ButtonBase>
           <span>{month.getFullYear()}</span>
           <ButtonBase
-            aria-label="Next year"
+            aria-label={t('datePicker.nextYear')}
             disabled={addMonths(month, 12) > max}
             onClick={() => onMonth(addMonths(month, 12))}
           >
@@ -257,8 +263,8 @@ function MonthView({ month, onMonth, draft, onPick, max }: MonthViewProps) {
           </ButtonBase>
         </div>
       </Nav>
-      <Grid role="grid" aria-label={`${monthFormat.format(month)} ${month.getFullYear()}`}>
-        {WEEKDAYS.map((day, i) => (
+      <Grid role="grid" aria-label={`${monthName(month)} ${month.getFullYear()}`}>
+        {weekdays().map((day, i) => (
           <abbr key={i} aria-hidden>
             {day}
           </abbr>
@@ -273,7 +279,7 @@ function MonthView({ month, onMonth, draft, onPick, max }: MonthViewProps) {
               key={day.getTime()}
               disableRipple
               role="gridcell"
-              aria-label={longFormat.format(day)}
+              aria-label={fullDay(day)}
               aria-selected={start || end || inRange}
               data-outside={outside || undefined}
               data-today={sameDay(day, today) || undefined}
@@ -302,6 +308,7 @@ interface DateFieldProps {
 
 /** dd/mm/yyyy text input; applied on blur or Enter. */
 function DateField({ label, value, onCommit }: DateFieldProps) {
+  const { t } = useTranslation()
   const [text, setText] = useState(formatInput(value))
   const [invalid, setInvalid] = useState(false)
   // Calendar clicks replace what was typed.
@@ -322,7 +329,7 @@ function DateField({ label, value, onCommit }: DateFieldProps) {
       <span>{label}</span>
       <input
         value={text}
-        placeholder="dd/mm/yyyy"
+        placeholder={t('datePicker.format')}
         inputMode="numeric"
         aria-invalid={invalid}
         onChange={(event) => setText(event.target.value)}
@@ -346,10 +353,11 @@ export interface DateRangePickerProps {
 export function DateRangePicker({
   value,
   onChange,
-  placeholder = 'Date',
+  placeholder,
   className,
   'aria-label': ariaLabel,
 }: DateRangePickerProps) {
+  const { t } = useTranslation()
   const titleId = useId()
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null)
   const [open, setOpen] = useState(false)
@@ -394,8 +402,8 @@ export function DateRangePicker({
   const label =
     value.from && value.to
       ? sameDay(value.from, value.to)
-        ? triggerFormat.format(value.from)
-        : `${triggerFormat.format(value.from)} – ${triggerFormat.format(value.to)}`
+        ? triggerDay(value.from)
+        : `${triggerDay(value.from)} – ${triggerDay(value.to)}`
       : null
 
   return (
@@ -404,12 +412,12 @@ export function DateRangePicker({
         ref={setAnchor}
         className={className}
         data-placeholder={!label || undefined}
-        aria-label={ariaLabel ? `${ariaLabel}: ${label ?? 'any'}` : undefined}
+        aria-label={ariaLabel ? `${ariaLabel}: ${label ?? t('datePicker.any')}` : undefined}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={openPicker}
       >
-        {label ?? placeholder}
+        {label ?? placeholder ?? t('datePicker.placeholder')}
         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
       </Trigger>
       <Popover
@@ -432,10 +440,10 @@ export function DateRangePicker({
         }}
       >
         <Panel>
-          <h2 id={titleId}>Select date range</h2>
+          <h2 id={titleId}>{t('datePicker.title')}</h2>
           <Pair>
-            <DateField label="Start date" value={draft.from} onCommit={setStart} />
-            <DateField label="End date" value={draft.to} onCommit={setEnd} />
+            <DateField label={t('datePicker.start')} value={draft.from} onCommit={setStart} />
+            <DateField label={t('datePicker.end')} value={draft.to} onCommit={setEnd} />
           </Pair>
           <Pair>
             <MonthView month={left} onMonth={setLeft} draft={draft} onPick={pick} max={today} />
@@ -451,7 +459,7 @@ export function DateRangePicker({
                 setOpen(false)
               }}
             >
-              Clear
+              {t('actions.clear')}
             </Button>
             <Button
               className="DateRangePicker-cancel"
@@ -459,10 +467,10 @@ export function DateRangePicker({
               size="medium"
               onClick={() => setOpen(false)}
             >
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button variant="ghost" size="medium" disabled={!draft.from} onClick={apply}>
-              Apply
+              {t('actions.apply')}
             </Button>
           </Actions>
         </Panel>

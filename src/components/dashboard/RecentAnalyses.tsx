@@ -1,10 +1,11 @@
 import { styled } from '@mui/material/styles'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { AnalysisSummary, Framework } from '../../api/types'
 import { colors, shadows, typography } from '../../theme'
 import { Button } from '../ui'
 import { AnalysesTable } from './AnalysesTable'
-import { ALL_ANALYSES_URL, FRAMEWORK_LABELS } from './dashboardModel'
+import { ALL_ANALYSES_URL } from './dashboardModel'
 
 const Root = styled('section')({
   minWidth: 0,
@@ -34,15 +35,19 @@ interface RecentAnalysesProps {
 
 /** The latest five analyses; "View all" opens the full, filterable list. */
 export function RecentAnalyses({ recent, framework }: RecentAnalysesProps) {
+  const { t } = useTranslation(['dashboard', 'common'])
   const navigate = useNavigate()
-  const scope = framework ? FRAMEWORK_LABELS[framework] : 'all compliance frameworks'
 
   return (
     <Root aria-labelledby="recent-activity-heading">
       <Header>
         <div>
-          <h2 id="recent-activity-heading">Recent Activity</h2>
-          <p>Last 5 analyses across {scope}</p>
+          <h2 id="recent-activity-heading">{t('recent.title')}</h2>
+          <p>
+            {framework
+              ? t('recent.subtitleOne', { framework: t(`common:frameworks.${framework}`) })
+              : t('recent.subtitleAll')}
+          </p>
         </div>
         {!!recent?.length && (
           <Button
@@ -52,7 +57,7 @@ export function RecentAnalyses({ recent, framework }: RecentAnalysesProps) {
               navigate(framework ? `${ALL_ANALYSES_URL}?framework=${framework}` : ALL_ANALYSES_URL)
             }
           >
-            View all
+            {t('common:actions.viewAll')}
           </Button>
         )}
       </Header>

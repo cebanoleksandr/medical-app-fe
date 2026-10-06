@@ -3,8 +3,10 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Collapse from '@mui/material/Collapse'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { IdentifierKey, MethodOption } from '../../api/types'
 import peopleIcon from '../../assets/configuration/people.svg'
+import { useCatalog } from '../../i18n/useCatalog'
 import { colors, shadows, typography } from '../../theme'
 import { Checkbox } from '../ui'
 import { groupIdentifiers } from './identifierGroups'
@@ -113,6 +115,8 @@ const Item = styled('label')({
  * identifiers by category. Read-only for methods that remove all of them.
  */
 export function IdentifierPicker({ method, value, onChange }: IdentifierPickerProps) {
+  const { t } = useTranslation('deIdentify')
+  const catalog = useCatalog()
   const panelId = useId()
   const readOnly = !method.customizable
   // Customizable methods open straight away: picking is the next step.
@@ -130,13 +134,13 @@ export function IdentifierPicker({ method, value, onChange }: IdentifierPickerPr
 
   const count = checked.size
   const summary = readOnly
-    ? `${count} identifiers included`
+    ? t('identifierPicker.included', { count })
     : count === 0
-      ? 'No identifiers selected'
-      : `${count} of ${method.identifiers.length} identifiers selected`
+      ? t('identifierPicker.none')
+      : t('identifierPicker.selected', { count, total: method.identifiers.length })
   const hint = readOnly
-    ? `${method.name} removes all of them automatically`
-    : 'Select identifiers to customize de-identification'
+    ? t('identifierPicker.allRemoved', { method: catalog.method(method).name })
+    : t('identifierPicker.selectHint')
 
   return (
     <Root data-readonly={readOnly || undefined}>
@@ -154,10 +158,10 @@ export function IdentifierPicker({ method, value, onChange }: IdentifierPickerPr
         {open ? <KeyboardArrowDownIcon /> : <ChevronRightIcon />}
       </Trigger>
       <Collapse in={open} timeout={200}>
-        <Panel id={panelId} role="group" aria-label="Identifiers">
+        <Panel id={panelId} role="group" aria-label={t('identifierPicker.label')}>
           {groups.map((group) => (
-            <div key={group.title}>
-              <GroupTitle>{group.title}</GroupTitle>
+            <div key={group.id}>
+              <GroupTitle>{t(`identifierPicker.groups.${group.id}`)}</GroupTitle>
               <Items>
                 {group.items.map((item) => {
                   const isChecked = checked.has(item.key)
@@ -172,7 +176,9 @@ export function IdentifierPicker({ method, value, onChange }: IdentifierPickerPr
                         disabled={readOnly}
                         onChange={() => toggle(item.key)}
                       />
-                      {item.label}
+                      {t(`identifierPicker.short.${item.key}`, {
+                        defaultValue: catalog.identifier(item),
+                      })}
                     </Item>
                   )
                 })}

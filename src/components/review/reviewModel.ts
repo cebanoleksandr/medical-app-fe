@@ -1,4 +1,6 @@
 import type { Analysis, DetectedEntity, IdentifierKey } from '../../api/types'
+import i18n from '../../i18n'
+import { formatDate as formatLocalDate, formatNumber } from '../../i18n/format'
 
 // ---------- Categories ----------
 
@@ -71,11 +73,8 @@ export function categoryOf(entity: DetectedEntity): EntityCategory {
 
 export type SortOrder = 'document' | 'confidence' | 'type'
 
-export const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
-  { value: 'document', label: 'Order in document' },
-  { value: 'confidence', label: 'Confidence' },
-  { value: 'type', label: 'Type' },
-]
+/** Labels are `deIdentify:review.sort.<order>`. */
+export const SORT_ORDERS: SortOrder[] = ['document', 'confidence', 'type']
 
 export function sortEntities(entities: DetectedEntity[], order: SortOrder) {
   const sorted = [...entities]
@@ -121,12 +120,21 @@ export function deidentifiedText(text: string, entities: DetectedEntity[]) {
 // ---------- Formatting ----------
 
 export const formatPercent = (value: number | null) =>
-  value === null ? '-' : `${Math.round(value * 100)}%`
+  value === null ? '-' : formatNumber(value, { style: 'percent', maximumFractionDigits: 0 })
 
-export const formatSeconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`
+export const formatSeconds = (ms: number) =>
+  i18n.t('deIdentify:review.seconds', {
+    value: formatNumber(ms / 1000, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+  })
 
 export const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  formatLocalDate(iso, { month: 'short', day: 'numeric', year: 'numeric' })
+
+/** A category code (PERSON, FREE TEXT) in the UI language. */
+export const categoryText = (label: string) =>
+  i18n.t(`deIdentify:review.categories.${label}` as 'deIdentify:review.categories.PERSON', {
+    defaultValue: label,
+  })
 
 // ---------- Report ----------
 
@@ -141,36 +149,39 @@ export function buildReport(
   source: string,
   deidentified: string,
 ) {
+  const t = i18n.getFixedT(null, 'deIdentify', 'review.report')
   const included = entities.filter((e) => e.included)
   const settings = analysis.riskLevel
-    ? `Risk level: ${analysis.riskLevel}`
-    : `Method: ${analysis.method} · Output: ${analysis.outputMode} · Sensitivity: ${analysis.sensitivity}`
+    ? t('risk', { value: analysis.riskLevel })
+    : t('settings', {
+        method: analysis.method,
+        output: analysis.outputMode,
+        sensitivity: analysis.sensitivity,
+      })
   const rows = entities.map((entity, index) => {
-    const status = entity.included ? `→ ${entity.replacement ?? ''}` : 'unchanged (excluded)'
-    const flag = entity.lowConfidence ? '  ⚠ low confidence' : ''
-    return `${String(index + 1).padStart(3)}. ${categoryOf(entity).label.padEnd(22)} ${entity.score.toFixed(2)}  ${status}${flag}`
+    const status = entity.included ? `→ ${entity.replacement ?? ''}` : t('excluded')
+    const flag = entity.lowConfidence ? `  ${t('lowConfidence')}` : ''
+    return `${String(index + 1).padStart(3)}. ${categoryText(categoryOf(entity).label).padEnd(22)} ${entity.score.toFixed(2)}  ${status}${flag}`
   })
+  const heading = (text: string, rule: string) => [text, rule.repeat(text.length)]
 
   return [
-    'De-identification report',
-    '========================',
+    ...heading(t('title'), '='),
     '',
-    `Source: ${source}`,
-    `Analyzed: ${formatDate(analysis.createdAt)}`,
-    `Framework: ${analysis.framework} · Language: ${analysis.language}`,
+    t('source', { value: source }),
+    t('analyzed', { value: formatDate(analysis.createdAt) }),
+    t('framework', { framework: analysis.framework, language: analysis.language }),
     settings,
     '',
-    `Detected entities: ${entities.length}`,
-    `Processed entities: ${included.length}`,
-    `Avg. confidence: ${formatPercent(analysis.stats.avgConfidence)}`,
-    `Processing time: ${formatSeconds(analysis.stats.processingMs)}`,
+    t('detected', { value: entities.length }),
+    t('processed', { value: included.length }),
+    t('confidence', { value: formatPercent(analysis.stats.avgConfidence) }),
+    t('time', { value: formatSeconds(analysis.stats.processingMs) }),
     '',
-    'Entities (original values omitted)',
-    '----------------------------------',
-    ...(rows.length ? rows : ['None detected']),
+    ...heading(t('entities'), '-'),
+    ...(rows.length ? rows : [t('none')]),
     '',
-    'De-identified text',
-    '------------------',
+    ...heading(t('text'), '-'),
     deidentified,
   ].join('\n')
 }

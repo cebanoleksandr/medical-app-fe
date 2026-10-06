@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import closeIcon from '../../assets/data-input/close.svg'
 import errorIcon from '../../assets/synthetic/error.svg'
 import uploadIcon from '../../assets/synthetic/upload.svg'
@@ -158,6 +159,7 @@ const Problem = styled('div')({
 
 /** "Upload your file": a compact drop zone for .xlsx, .csv and .json sources. */
 export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps) {
+  const { t } = useTranslation('synthetic')
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const busy = state.status === 'uploading'
@@ -185,7 +187,7 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
 
   const replaceButton = (
     <ZoneButton variant="ghostSecondary" size="medium" onClick={browse}>
-      Replace file
+      {t('dropZone.replace')}
     </ZoneButton>
   )
 
@@ -194,7 +196,7 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
     content = (
       <Row sx={{ color: colors.accent[500] }}>
         <MaskIcon src={uploadIcon} aria-hidden />
-        Drag &amp; drop
+        {t('dropZone.dragDrop')}
       </Row>
     )
   } else if (state.status === 'uploading') {
@@ -203,7 +205,7 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
         <CircularProgress size={24} thickness={4} sx={{ color: colors.accent[400] }} />
         <FileInfo>
           <strong title={state.name}>{state.name}</strong>
-          Reading columns…
+          {t('dropZone.reading')}
         </FileInfo>
       </Content>
     )
@@ -215,7 +217,7 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
             <strong title={state.name}>{state.name}</strong>
             {formatFileSize(state.size)} · {fileKind(state.name)}
           </FileInfo>
-          <RemoveButton type="button" aria-label={`Remove ${state.name}`} onClick={onRemove}>
+          <RemoveButton type="button" aria-label={t('dropZone.remove', { name: state.name })} onClick={onRemove}>
             <MaskIcon src={closeIcon} />
           </RemoveButton>
         </FileRow>
@@ -239,14 +241,14 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
       <Content>
         <Row>
           <MaskIcon src={uploadIcon} aria-hidden />
-          Drag &amp; drop
+          {t('dropZone.dragDrop')}
         </Row>
-        <Divider>or</Divider>
+        <Divider>{t('dropZone.or')}</Divider>
         <Content sx={{ gap: 0 }}>
           <ZoneButton variant="ghostSecondary" size="medium" onClick={browse}>
-            Browse file
+            {t('dropZone.browse')}
           </ZoneButton>
-          <Helper>Supported formats: .xlsx, .csv, .json — max 5 MB</Helper>
+          <Helper>{t('dropZone.formats')}</Helper>
         </Content>
       </Content>
     )
@@ -268,7 +270,7 @@ export function SourceDropZone({ state, onFile, onRemove }: SourceDropZoneProps)
         type="file"
         accept={SOURCE_ACCEPT}
         hidden
-        aria-label="Upload your file"
+        aria-label={t('dropZone.input')}
         onChange={(event) => {
           const file = event.target.files?.[0]
           // Cleared so picking the same file again still fires onChange.

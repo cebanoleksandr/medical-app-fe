@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import { styled } from '@mui/material/styles'
+import { Trans, useTranslation } from 'react-i18next'
 import autorenewIcon from '../../assets/configuration/autorenew.svg'
 import warningIcon from '../../assets/popups/warning.svg'
 import downloadIcon from '../../assets/review/report.svg'
@@ -58,6 +59,7 @@ export function RegeneratePopup({
   onDownload,
   pending = false,
 }: RegeneratePopupProps) {
+  const { t } = useTranslation(['synthetic', 'common'])
   const titleId = useId()
   const descriptionId = useId()
 
@@ -71,16 +73,14 @@ export function RegeneratePopup({
     >
       <Content>
         <Header>
-          <IconButton variant="ghost" aria-label="Close" onClick={onClose}>
+          <IconButton variant="ghost" aria-label={t('common:actions.close')} onClick={onClose}>
             <CloseIcon />
           </IconButton>
           <img src={warningIcon} alt="" width={48} height={48} />
-          <h2 id={titleId}>Regenerate dataset?</h2>
+          <h2 id={titleId}>{t('result.regenerate.title')}</h2>
         </Header>
         <p id={descriptionId}>
-          Current data exists only in this session.
-          <br />
-          Download before regenerating to avoid data loss.
+          <Trans t={t} i18nKey="result.regenerate.text" />
         </p>
         <Divider />
         <Actions>
@@ -91,7 +91,7 @@ export function RegeneratePopup({
             disabled={pending}
             onClick={onRegenerate}
           >
-            {pending ? 'Regenerating…' : 'Regenerate'}
+            {pending ? t('common:actions.regenerating') : t('common:actions.regenerate')}
           </Button>
           <Button
             variant="secondary"
@@ -99,7 +99,7 @@ export function RegeneratePopup({
             startIcon={<MaskIcon src={downloadIcon} />}
             onClick={onDownload}
           >
-            Download
+            {t('common:actions.download')}
           </Button>
         </Actions>
       </Content>

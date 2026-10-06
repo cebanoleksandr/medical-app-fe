@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import closeIcon from '../../assets/data-input/close.svg'
 import errorIcon from '../../assets/data-input/error.svg'
 import successIcon from '../../assets/data-input/success.svg'
@@ -181,6 +182,7 @@ const ButtonIcon = styled(MaskIcon)({ fontSize: 24 })
  * file and passes the outcome back in `state`.
  */
 export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
+  const { t } = useTranslation('deIdentify')
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const reading = state.status === 'reading'
@@ -213,7 +215,7 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
       startIcon={<ButtonIcon src={uploadIcon} />}
       onClick={browse}
     >
-      Replace file
+      {t('input.file.replace')}
     </Button>
   )
 
@@ -223,8 +225,8 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
       <Content>
         <BigIcon src={uploadIcon} sx={{ color: colors.accent[500] }} />
         <Heading sx={{ color: colors.accent[500] }}>
-          <h3>Upload your file</h3>
-          <p>Drag &amp; drop</p>
+          <h3>{t('input.file.upload')}</h3>
+          <p>{t('input.file.dragDrop')}</p>
         </Heading>
       </Content>
     )
@@ -233,7 +235,7 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
       <Content>
         <CircularProgress size={48} thickness={3} sx={{ color: colors.accent[400] }} />
         <Heading sx={{ color: colors.neutral[700] }}>
-          <h3>Reading your file…</h3>
+          <h3>{t('input.file.reading')}</h3>
           <p>{state.name}</p>
         </Heading>
       </Content>
@@ -251,7 +253,7 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
                 {formatFileSize(file.size)} · {fileKind(file.name)}
               </span>
             </FileInfo>
-            <RemoveButton type="button" aria-label={`Remove ${file.name}`} onClick={onRemove}>
+            <RemoveButton type="button" aria-label={t('input.file.remove', { name: file.name })} onClick={onRemove}>
               <MaskIcon src={closeIcon} />
             </RemoveButton>
           </FileRow>
@@ -277,15 +279,15 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
       <Content>
         <BigIcon src={uploadIcon} sx={{ color: colors.neutral[900] }} />
         <Heading>
-          <h3 style={{ color: colors.neutral[700] }}>Upload your file</h3>
-          <p style={{ color: colors.neutral[500] }}>Drag &amp; drop</p>
+          <h3 style={{ color: colors.neutral[700] }}>{t('input.file.upload')}</h3>
+          <p style={{ color: colors.neutral[500] }}>{t('input.file.dragDrop')}</p>
         </Heading>
-        <Divider>or</Divider>
+        <Divider>{t('input.file.or')}</Divider>
         <Group sx={{ gap: '12px' }}>
           <Button variant="primary" size="medium" onClick={browse}>
-            Browse file
+            {t('input.file.browse')}
           </Button>
-          <Helper>Supported formats: .txt, .pdf, .docx — max 5 MB</Helper>
+          <Helper>{t('input.file.formats')}</Helper>
         </Group>
       </Content>
     )
@@ -295,9 +297,9 @@ export function FileDropZone({ state, onFile, onRemove }: FileDropZoneProps) {
     state.status === 'error'
       ? state.problem.note
       : state.status === 'ready'
-        ? `${formatCount(state.file.text.length)} characters extracted`
+        ? t('input.file.extracted', { characters: formatCount(state.file.text.length) })
         : state.status === 'idle'
-          ? 'Upload a file to continue'
+          ? t('input.file.continueHint')
           : ''
 
   return (

@@ -1,0 +1,14 @@
+{
+  "table": {
+    "label": "All analyses",
+    "document": "Document",
+    "status": "Status",
+    "framework": "Framework",
+    "entities": "Entities",
+    "date": "Date",
+    "loadFailed": "Couldn't load analyses: {{message}}",
+    "empty": "No analyses yet",
+    "noMatch": "No analyses match these filters"
+  },
+  "exportFailed": "Couldn't export the analyses"
+}

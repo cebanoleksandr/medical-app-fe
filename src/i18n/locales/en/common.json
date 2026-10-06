@@ -1,0 +1,204 @@
+{
+  "brand": {
+    "name": "De-ID Studio",
+    "tagline": "De-ID & Synthesis",
+    "home": "De-ID Studio home"
+  },
+  "actions": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "clear": "Clear",
+    "close": "Close",
+    "continue": "Continue",
+    "download": "Download",
+    "downloading": "Downloading…",
+    "regenerate": "Regenerate",
+    "regenerating": "Regenerating…",
+    "newAnalysis": "New analysis",
+    "tryAgain": "Try again",
+    "viewAll": "View all",
+    "showLess": "Show less",
+    "exportCsv": "Export CSV",
+    "exporting": "Exporting…",
+    "loading": "Loading…"
+  },
+  "status": {
+    "completed": "Completed",
+    "processing": "Processing",
+    "failed": "Failed",
+    "included": "Included",
+    "excluded": "Excluded",
+    "exclude": "Exclude",
+    "include": "Include"
+  },
+  "select": {
+    "placeholder": "Select…"
+  },
+  "frameworks": {
+    "HIPAA": "HIPAA",
+    "EU_GDPR": "EU GDPR",
+    "UK_GDPR": "UK GDPR",
+    "SWISS_FADP": "Swiss FADP"
+  },
+  "errors": {
+    "requestFailed": "Request failed",
+    "network": "Network error",
+    "timeout": "The server took too long to respond",
+    "unreachable": "Couldn't reach the server. Check your connection and try again.",
+    "server": "Something went wrong on our side. Please try again.",
+    "rateLimited": "Too many attempts. Please try again in a few minutes."
+  },
+  "pagination": {
+    "label": "Pages",
+    "first": "Go to first page",
+    "last": "Go to last page",
+    "next": "Go to next page",
+    "previous": "Go to previous page",
+    "page": "Go to page {{page}}",
+    "current": "Page {{page}}",
+    "ellipsis": "More pages"
+  },
+  "datePicker": {
+    "placeholder": "Date",
+    "title": "Select date range",
+    "start": "Start date",
+    "end": "End date",
+    "format": "dd/mm/yyyy",
+    "any": "any",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "previousYear": "Previous year",
+    "nextYear": "Next year"
+  },
+  "frameworkFilter": {
+    "label": "Framework",
+    "all": "All frameworks"
+  },
+  "methods": {
+    "REDACT": "Redact",
+    "PLACEHOLDER": "Replace",
+    "TOKEN": "Token",
+    "MASK": "Mask",
+    "HASH": "Hash",
+    "GENERALISE": "Generalise",
+    "PSEUDONYMISE": "Pseudonymise",
+    "SYNTHETIC": "Synthetic",
+    "NLP_REDACTION": "NLP redaction"
+  },
+  "entityTypes": {
+    "PERSON": "Person",
+    "ORGANIZATION": "Organisation",
+    "LOCATION": "Location",
+    "DATE_TIME": "Date / Time",
+    "IP": "IP Address",
+    "GEOPOINT": "Geopoint",
+    "NATIONAL_ID": "National ID",
+    "ID_NUMBER": "ID Number",
+    "PASSPORT": "Passport",
+    "CREDIT_CARD": "Credit Card",
+    "BANK_ACCOUNT": "Bank Account",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "MEDICAL_RECORD_NUMBER": "MRN",
+    "DEVICE_ID": "Device ID",
+    "FREE_TEXT": "Free Text PHI",
+    "BIOLOGICAL_DATA": "Bio. Data",
+    "PHOTO": "Photo / Image"
+  },
+  "analysis": {
+    "document": "{{characters}} characters · {{language}}"
+  },
+  "languages": {
+    "en": "English",
+    "uk": "Ukrainian"
+  },
+  "recommended": "Recommended",
+  "catalog": {
+    "frameworks": {
+      "HIPAA": {
+        "name": "HIPAA",
+        "description": "Safe Harbor / Expert Determination",
+        "region": "US Healthcare"
+      },
+      "EU_GDPR": {
+        "name": "EU GDPR",
+        "description": "General Data Protection Regulation",
+        "region": "European Union"
+      },
+      "UK_GDPR": {
+        "name": "UK GDPR",
+        "description": "UK General Data Protection Regulation",
+        "region": "United Kingdom"
+      },
+      "SWISS_FADP": {
+        "name": "Swiss FADP",
+        "description": "Federal Act on Data Protection",
+        "region": "Switzerland"
+      }
+    },
+    "laws": {
+      "EU_GDPR": "GDPR",
+      "UK_GDPR": "UK GDPR",
+      "SWISS_FADP": "the revised FADP (nDSG)"
+    },
+    "methods": {
+      "SAFE_HARBOR": {
+        "name": "Safe Harbor",
+        "description": "Automatically removes all 18 HIPAA identifiers"
+      },
+      "EXPERT_DETERMINATION": {
+        "name": "Expert Determination",
+        "description": "Customize which identifiers to remove"
+      },
+      "ANONYMISATION": {
+        "name": "Full anonymisation",
+        "description": "Removes all direct and common indirect identifiers under {{law}}"
+      },
+      "CUSTOM": {
+        "name": "Custom selection",
+        "description": "Choose which identifiers to remove; the result may still be personal data"
+      }
+    },
+    "outputModes": {
+      "REDACT": {
+        "name": "Redact — Remove entirely",
+        "description": "Replaces detected data with [REDACTED]"
+      },
+      "MASK": {
+        "name": "Mask — Hide characters",
+        "description": "Keeps the format, replaces characters with *"
+      },
+      "PLACEHOLDER": {
+        "name": "Placeholder — Entity label",
+        "description": "Replaces data with numbered labels such as [PATIENT_1]"
+      },
+      "PSEUDONYMIZE": {
+        "name": "Pseudonymize — Realistic fake data",
+        "description": "Replaces data with consistent, realistic fake values"
+      }
+    },
+    "identifiers": {
+      "names": "Names",
+      "geographic": "Addresses and geographic locations",
+      "dates": "Dates related to an individual",
+      "phone": "Telephone numbers",
+      "fax": "Fax numbers",
+      "email": "Email addresses",
+      "ssn": "Social security and national ID numbers",
+      "mrn": "Medical record numbers",
+      "health_plan": "Health plan and insurance numbers",
+      "account": "Account numbers",
+      "license": "Certificate, license and ID document numbers",
+      "vehicle": "Vehicle identifiers and serial numbers",
+      "device": "Device identifiers and serial numbers",
+      "url": "Web URLs",
+      "ip": "IP addresses",
+      "biometric": "Biometric identifiers",
+      "photo": "Full-face photographs",
+      "other": "Any other unique identifying number or code",
+      "organization": "Organizations (employers, facilities)",
+      "special_category": "Nationality, religious or political affiliation"
+    }
+  }
+}

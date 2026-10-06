@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import checkIcon from '../../assets/generated/check.svg'
 import errorIcon from '../../assets/generated/error.svg'
 import warningIcon from '../../assets/generated/warning.svg'
@@ -170,13 +171,14 @@ interface DialogHeaderProps {
 
 /** Title, grey subtitle and a close button: shared by drawers and modals. */
 export function DialogHeader({ titleId, title, subtitle, onClose, className }: DialogHeaderProps) {
+  const { t } = useTranslation()
   return (
     <HeaderRoot className={className}>
       <div>
         <h2 id={titleId}>{title}</h2>
         {subtitle && <p>{subtitle}</p>}
       </div>
-      <IconButton variant="ghost" aria-label="Close" onClick={onClose}>
+      <IconButton variant="ghost" aria-label={t('actions.close')} onClick={onClose}>
         <CloseIcon />
       </IconButton>
     </HeaderRoot>

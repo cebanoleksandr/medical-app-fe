@@ -1,5 +1,6 @@
 import { useRef, type KeyboardEvent } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import editIcon from '../../assets/data-input/edit.svg'
 import uploadIcon from '../../assets/data-input/upload.svg'
 import { colors, radius, typography } from '../../theme'
@@ -13,9 +14,10 @@ export interface InputModeTabsProps {
   idPrefix: string
 }
 
-const TABS: { mode: InputMode; label: string; icon: string }[] = [
-  { mode: 'text', label: 'Enter Text', icon: editIcon },
-  { mode: 'file', label: 'Upload File', icon: uploadIcon },
+// Labels are `deIdentify:input.tabs.<mode>`.
+const TABS: { mode: InputMode; icon: string }[] = [
+  { mode: 'text', icon: editIcon },
+  { mode: 'file', icon: uploadIcon },
 ]
 
 const List = styled('div')({
@@ -59,6 +61,7 @@ const Tab = styled('button')({
 
 /** "Enter Text / Upload File" switch of the Data Input step. */
 export function InputModeTabs({ value, onChange, idPrefix }: InputModeTabsProps) {
+  const { t } = useTranslation('deIdentify')
   const refs = useRef<Partial<Record<InputMode, HTMLButtonElement | null>>>({})
 
   // Arrow keys move between tabs and select them, as in a WAI-ARIA tablist.
@@ -71,8 +74,8 @@ export function InputModeTabs({ value, onChange, idPrefix }: InputModeTabsProps)
   }
 
   return (
-    <List role="tablist" aria-label="Input type" onKeyDown={onKeyDown}>
-      {TABS.map(({ mode, label, icon }) => {
+    <List role="tablist" aria-label={t('input.tabs.label')} onKeyDown={onKeyDown}>
+      {TABS.map(({ mode, icon }) => {
         const selected = mode === value
         return (
           <Tab
@@ -89,7 +92,7 @@ export function InputModeTabs({ value, onChange, idPrefix }: InputModeTabsProps)
             onClick={() => onChange(mode)}
           >
             <MaskIcon src={icon} aria-hidden />
-            {label}
+            {t(`input.tabs.${mode}`)}
           </Tab>
         )
       })}

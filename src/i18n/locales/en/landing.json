@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "label": "Main",
+    "solutions": "Solutions",
+    "contact": "Contact Us"
+  },
+  "getStarted": "Get started",
+  "footer": {
+    "about": "Enterprise-grade clinical data de-identification and synthetic data generation platform",
+    "copyright": "© {{year}} Clinical Data Studio. All rights reserved."
+  },
+  "hero": {
+    "title": "Clinical Data De-Identification & Synthesis Studio",
+    "lead": "Enterprise-grade PII detection and anonymization <br/>for healthcare organizations",
+    "trust": [
+      "HIPAA Compliant",
+      "GDPR Certified",
+      "99.9% Accuracy"
+    ]
+  },
+  "stats": [
+    {
+      "value": "99.9%",
+      "label": "Detection Accuracy"
+    },
+    {
+      "value": "18",
+      "label": "HIPAA Identifiers Covered"
+    },
+    {
+      "value": "< 1 min",
+      "label": "Average Processing Time"
+    },
+    {
+      "value": "100%",
+      "label": "Compliance Coverage"
+    }
+  ],
+  "features": {
+    "title": "Protect Patient Privacy Without Compromising Data Value",
+    "description": "Comprehensive tools for healthcare organizations to securely manage clinical data",
+    "signal": {
+      "title": "Deep Signal Detection",
+      "description": "Align with global regulations through a single adaptive compliance layer."
+    },
+    "synthetic": {
+      "title": "Synthetic Intelligence Layer",
+      "description": "Generate high-fidelity synthetic datasets that preserve patterns — without exposing real identities."
+    },
+    "compliance": {
+      "title": "Unified Compliance Engine",
+      "description": "Align with global regulations through a single adaptive compliance layer."
+    },
+    "privacy": {
+      "title": "Adaptive Privacy Shield",
+      "description": "Continuously anonymize and protect data while maintaining analytical value."
+    },
+    "outroTitle": "From Data Intelligence to Compliance",
+    "outro": "Seamlessly transition from data intelligence to regulatory compliance with built-in frameworks tailored to your industry."
+  },
+  "frameworks": {
+    "title": "Built for Compliance",
+    "description": "Choose from industry-standard regulatory frameworks or create your own custom compliance profile",
+    "entityTypes_one": "{{count}} entity type",
+    "entityTypes_other": "{{count}} entity types",
+    "gdpr": {
+      "badge": "EU GDPR",
+      "name": "General Data Protection Regulation"
+    },
+    "hipaa": {
+      "badge": "HIPAA",
+      "name": "Health Insurance Portability and Accountability Act"
+    },
+    "uk": {
+      "badge": "UK DPI",
+      "name": "UK Data Protection and Investigatory Powers"
+    },
+    "fadp": {
+      "badge": "Swiss FADP",
+      "name": "Swiss Federal Act on Data Protection"
+    }
+  },
+  "cta": {
+    "title": "Ready to Protect Your Clinical Data?",
+    "description": "Start de-identifying and synthesizing healthcare data in minutes with our enterprise-grade platform"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "Got questions? We've got answers. Find everything you need to know about using our platform, plans, and features.",
+    "items": [
+      {
+        "question": "Do you have GDPR compliance?",
+        "answer": "Yes. Clinical Data Studio fully supports GDPR requirements for personal data protection. Our platform automatically detects and anonymizes PII according to GDPR standards, ensuring your organization meets EU data protection obligations while maintaining full data utility for analysis and research."
+      },
+      {
+        "question": "Do you have HIPAA compliance?",
+        "answer": "Yes. We provide full HIPAA compliance support with two de-identification methods: Safe Harbor (removing all 18 PHI identifiers) and Expert Determination (statistical risk-based approach with justification). Both methods produce audit-ready compliance reports accepted by healthcare regulatory bodies."
+      },
+      {
+        "question": "Can I export the anonymized or synthetic data after processing?",
+        "answer": "Yes. After processing, you can download your anonymized or synthetic data in PDF format. A compliance report with full audit trail is also available for download directly from the results screen."
+      },
+      {
+        "question": "What are the pricing plans?",
+        "answer": "We offer a free trial so you can explore the platform before purchasing. For enterprise pricing and volume-based plans, reach out to our team and we'll find the best option for your organization."
+      }
+    ]
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Have questions about data anonymization or compliance? We're here to help.",
+    "info": {
+      "heading": "Have questions about data anonymization or compliance?",
+      "text": "Our team of experts is ready to help you navigate HIPAA, GDPR, and other privacy regulations.",
+      "response": "We respond within 24 hours"
+    },
+    "form": {
+      "title": "Send us a message",
+      "subtitle": "We'll get back to you within 24 hours",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter your last name",
+      "company": "Company",
+      "companyPlaceholder": "Your organization",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you",
+      "send": "Send message",
+      "sending": "Sending…"
+    },
+    "success": {
+      "title": "Message sent!",
+      "thanks": "Thank you for reaching out",
+      "reply": "We'll get back to you within 24 hours.",
+      "home": "Back Home"
+    },
+    "failure": {
+      "title": "Message not sent",
+      "description": "Something went wrong"
+    },
+    "validation": {
+      "firstName": "Enter your first name",
+      "lastName": "Enter your last name",
+      "email": "Enter your email",
+      "emailInvalid": "Invalid email format",
+      "tooLong": "Must be at most {{max}} characters",
+      "messageMin": "Message must be at least {{min}} characters"
+    }
+  }
+}

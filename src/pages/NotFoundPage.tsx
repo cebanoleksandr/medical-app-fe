@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/logo-landing.svg'
 import fourLeft from '../assets/not-found/four-left.svg'
@@ -68,14 +69,15 @@ const Text = styled('div')({
 
 /** Any unknown URL: a big 404, a short note and a way back home. */
 const NotFoundPage = () => {
+  const { t } = useTranslation(['app', 'common'])
   const navigate = useNavigate()
   return (
     <Root>
-      <Brand to="/" aria-label="De-ID Studio home">
+      <Brand to="/" aria-label={t('common:brand.home')}>
         <img src={logo} alt="" />
         <div>
-          <strong>De-ID Studio</strong>
-          <span>De-ID &amp; Synthesis</span>
+          <strong>{t('common:brand.name')}</strong>
+          <span>{t('common:brand.tagline')}</span>
         </div>
       </Brand>
       <Content>
@@ -89,14 +91,12 @@ const NotFoundPage = () => {
           ))}
         </Picture>
         <Text>
-          <h1>Page not found</h1>
+          <h1>{t('notFound.title')}</h1>
           <p>
-            The page you&apos;re looking for doesn&apos;t exist
-            <br />
-            or may have been moved.
+            <Trans t={t} i18nKey="notFound.description" />
           </p>
           <Button variant="primary" size="medium" onClick={() => navigate('/')}>
-            Go to home
+            {t('notFound.home')}
           </Button>
         </Text>
       </Content>

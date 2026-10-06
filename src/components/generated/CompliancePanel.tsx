@@ -1,12 +1,14 @@
 import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import type { Framework, ValidationReport } from '../../api/types'
 import arrowIcon from '../../assets/configuration/arrow-right.svg'
 import { colors, shadows, typography } from '../../theme'
 import { Button, MaskIcon } from '../ui'
 import { CheckItem, SoftNotice } from './parts'
 import { Checklist, Divider } from './styles'
-import { FRAMEWORK_NAMES, LEVEL_LABELS, type ResultStatus } from './resultModel'
+import { frameworkName, levelLabel, type ResultStatus } from './resultModel'
 
 const Root = styled('section')({
   display: 'flex',
@@ -34,15 +36,14 @@ const Facts = styled('dl')({
   '& dd': { margin: 0, color: colors.neutral[500] },
 })
 
-function notice(report: ValidationReport, status: ResultStatus) {
+function notice(report: ValidationReport, status: ResultStatus, t: TFunction<'synthetic'>) {
   const fields = report.lowConfidenceFields.length
-  const plural = fields === 1 ? 'field' : 'fields'
   if (status === 'failed') {
     return (
       <SoftNotice tone="error">
         {report.compliance.directIdentifiers === 'DETECTED'
-          ? 'Direct identifiers found — do not download'
-          : 'Validation failed — do not download'}
+          ? t('result.panel.identifiersFound')
+          : t('result.panel.failed')}
       </SoftNotice>
     )
   }
@@ -50,13 +51,13 @@ function notice(report: ValidationReport, status: ResultStatus) {
     return (
       <SoftNotice tone="warning">
         {fields
-          ? `${fields} ${plural} require review before export`
-          : 'Data quality needs review before export'}
+          ? t('result.panel.fieldsToReview', { count: fields })
+          : t('result.panel.qualityReview')}
       </SoftNotice>
     )
   }
   if (fields) {
-    return <SoftNotice tone="warning">{`${fields} low-confidence ${plural} may require review`}</SoftNotice>
+    return <SoftNotice tone="warning">{t('result.panel.lowConfidence', { count: fields })}</SoftNotice>
   }
   return null
 }
@@ -71,45 +72,58 @@ interface CompliancePanelProps {
 
 /** The validation checklist next to the records table. */
 export function CompliancePanel({ framework, report, status, error, onDetails }: CompliancePanelProps) {
+  const { t } = useTranslation('synthetic')
   return (
     <Root aria-labelledby="compliance-validation-heading">
-      <h2 id="compliance-validation-heading">Compliance Validation</h2>
+      <h2 id="compliance-validation-heading">{t('result.panel.title')}</h2>
       <Facts>
-        <dt>Framework:</dt>
-        <dd>{FRAMEWORK_NAMES[framework].long}</dd>
-        <dt>Risk level:</dt>
-        <dd>{report ? LEVEL_LABELS[report.compliance.riskLevel] : '…'}</dd>
-        <dt>Export status:</dt>
-        <dd>{!status ? '…' : status === 'failed' ? 'Do not download' : 'Safe to download'}</dd>
+        <dt>{t('result.panel.framework')}</dt>
+        <dd>{frameworkName(framework, 'long')}</dd>
+        <dt>{t('result.panel.risk')}</dt>
+        <dd>{report ? levelLabel(report.compliance.riskLevel) : '…'}</dd>
+        <dt>{t('result.panel.exportStatus')}</dt>
+        <dd>
+          {!status
+            ? '…'
+            : status === 'failed'
+              ? t('result.panel.doNotDownload')
+              : t('result.panel.safe')}
+        </dd>
       </Facts>
       <Divider />
       {report && status ? (
         <>
-          <Checklist aria-label="Validation checks">
+          <Checklist aria-label={t('result.panel.checks')}>
             {report.checks.map((check) => (
               <CheckItem
                 key={check.id}
                 tone={check.passed ? 'success' : 'error'}
                 emphasis={!check.passed}
-                label={<span title={check.detail}>{check.label}</span>}
+                label={
+                  <span title={check.detail}>
+                    {t(`result.checks.${check.id}`, { defaultValue: check.label })}
+                  </span>
+                }
               />
             ))}
           </Checklist>
           <Divider />
-          {notice(report, status)}
+          {notice(report, status, t)}
           <Button
             variant="ghostSecondary"
             size="medium"
             endIcon={<MaskIcon src={arrowIcon} />}
             onClick={onDetails}
           >
-            {status === 'passed' ? 'View validation details' : 'View issues'}
+            {status === 'passed' ? t('result.panel.details') : t('result.panel.issues')}
           </Button>
         </>
       ) : error ? (
-        <SoftNotice tone="error">Couldn&apos;t validate the dataset: {error.message}</SoftNotice>
+        <SoftNotice tone="error">
+          {t('result.panel.validateFailed', { message: error.message })}
+        </SoftNotice>
       ) : (
-        <div aria-busy="true" aria-label="Validating">
+        <div aria-busy="true" aria-label={t('result.panel.validating')}>
           {Array.from({ length: 5 }, (_, index) => (
             <Skeleton key={index} variant="text" width={`${60 + ((index * 13) % 30)}%`} />
           ))}

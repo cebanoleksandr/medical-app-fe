@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { useForm, useWatch } from 'react-hook-form'
 import { MAX_PASTED_TEXT_LENGTH, MIN_TEXT_LENGTH } from '../../api/types'
 import errorIcon from '../../assets/data-input/error.svg'
@@ -71,6 +72,7 @@ const Count = styled('span')({ marginLeft: 'auto', whiteSpace: 'nowrap' })
 
 /** "Enter Text" panel: the text to anonymize, 50 to 5 000 characters. */
 export function PastedTextInput({ defaultValue, onChange }: PastedTextInputProps) {
+  const { t } = useTranslation('deIdentify')
   const id = useId()
   const supportingId = `${id}-supporting`
   const { control, register, formState } = useForm<PastedTextValues>({
@@ -86,10 +88,10 @@ export function PastedTextInput({ defaultValue, onChange }: PastedTextInputProps
     <Root>
       <Area
         id={id}
-        aria-label="Text to anonymize"
+        aria-label={t('input.text.label')}
         aria-invalid={Boolean(error)}
         aria-describedby={supportingId}
-        placeholder={`Paste your text here — minimum ${MIN_TEXT_LENGTH} characters required`}
+        placeholder={t('input.text.placeholder', { min: MIN_TEXT_LENGTH })}
         spellCheck={false}
         {...register('text', { onChange: (event) => onChange(event.target.value) })}
       />
@@ -101,7 +103,10 @@ export function PastedTextInput({ defaultValue, onChange }: PastedTextInputProps
           </Message>
         )}
         <Count>
-          {formatCount(text.length)} / {formatCount(MAX_PASTED_TEXT_LENGTH)} characters
+          {t('input.text.count', {
+            current: formatCount(text.length),
+            max: formatCount(MAX_PASTED_TEXT_LENGTH),
+          })}
         </Count>
       </Supporting>
     </Root>

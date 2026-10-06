@@ -2,6 +2,7 @@ import { type CSSProperties, useState } from 'react'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { colors, typography } from '../../theme'
 import { Button, Tooltip } from '../ui'
 import { formatNumber, niceScale } from './dashboardModel'
@@ -93,12 +94,15 @@ interface BarChartProps {
   color: string
   /** Shows this many rows and a "Show all" toggle for the rest. */
   collapsedRows?: number
-  /** "entity types" in "Show all 18 entity types". */
-  noun: string
+  /** Accessible name of the chart. */
+  label: string
+  /** Text of the "Show all" toggle. */
+  showAllLabel?: string
 }
 
 /** Horizontal bars with the scale on top, as in the Figma charts. */
-export function BarChart({ rows, color, collapsedRows, noun }: BarChartProps) {
+export function BarChart({ rows, color, collapsedRows, label, showAllLabel }: BarChartProps) {
+  const { t } = useTranslation(['dashboard', 'common'])
   const [expanded, setExpanded] = useState(false)
   const scale = niceScale(Math.max(0, ...rows.map((r) => r.value)))
   const collapsible = !!collapsedRows && rows.length > collapsedRows
@@ -107,7 +111,7 @@ export function BarChart({ rows, color, collapsedRows, noun }: BarChartProps) {
 
   return (
     <Root>
-      <Chart role="list" aria-label={`Detected entities per ${noun.replace(/s$/, '')}`}>
+      <Chart role="list" aria-label={label}>
         <Axis aria-hidden>
           {scale.ticks.map((tick, i) => (
             <span
@@ -129,8 +133,8 @@ export function BarChart({ rows, color, collapsedRows, noun }: BarChartProps) {
         {shown.map((row) => (
           <Row key={row.key} role="listitem">
             <span title={row.label}>{row.label}</span>
-            <Tooltip title={`${row.label}: ${formatNumber(row.value)}`} followCursor placement="top">
-              <Track tabIndex={0} aria-label={`${row.label}: ${formatNumber(row.value)}`}>
+            <Tooltip title={t('bar', { label: row.label, value: formatNumber(row.value) })} followCursor placement="top">
+              <Track tabIndex={0} aria-label={t('bar', { label: row.label, value: formatNumber(row.value) })}>
                 <span style={{ width: `${pct(row.value)}%`, '--bar': color } as CSSProperties} />
               </Track>
             </Tooltip>
@@ -145,7 +149,7 @@ export function BarChart({ rows, color, collapsedRows, noun }: BarChartProps) {
           aria-expanded={expanded}
           onClick={() => setExpanded((value) => !value)}
         >
-          {expanded ? 'Show less' : `Show all ${rows.length} ${noun}`}
+          {expanded ? t('common:actions.showLess') : showAllLabel}
         </Toggle>
       )}
     </Root>

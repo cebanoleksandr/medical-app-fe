@@ -1,9 +1,11 @@
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button, type ButtonSize } from '../../ui'
 
 /** Landing CTA; signed-in users get sent on to /app by the auth loader. */
 export function GetStartedButton({ size = 'large' }: { size?: ButtonSize }) {
+  const { t } = useTranslation('landing')
   const navigate = useNavigate()
   return (
     <Button
@@ -16,7 +18,7 @@ export function GetStartedButton({ size = 'large' }: { size?: ButtonSize }) {
         '@media (prefers-reduced-motion: reduce)': { '& svg': { transition: 'none' } },
       }}
     >
-      Get started
+      {t('getStarted')}
     </Button>
   )
 }

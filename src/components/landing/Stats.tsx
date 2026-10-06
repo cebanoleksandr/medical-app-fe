@@ -1,16 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { styled } from '@mui/material/styles'
 import { animate, motion, useInView, useReducedMotion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Container, NARROW, TABLET } from '../layouts/landing/styles'
 import { colors, typography } from '../../theme'
 import { EASE_OUT, fadeUp, reveal, stagger, viewport } from './motion'
-
-const stats = [
-  { value: '99.9%', label: 'Detection Accuracy' },
-  { value: '18', label: 'HIPAA Identifiers Covered' },
-  { value: '< 1 min', label: 'Average Processing Time' },
-  { value: '100%', label: 'Compliance Coverage' },
-]
 
 const Root = styled('section')({
   padding: '64px 0',
@@ -96,11 +90,12 @@ function CountUp({ value }: { value: string }) {
 }
 
 export function Stats() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Container>
         <List {...reveal} variants={stagger(0.1)}>
-          {stats.flatMap((stat, index) => [
+          {t('stats', { returnObjects: true }).flatMap((stat, index) => [
             index > 0 && <Divider key={`divider-${index}`} aria-hidden variants={growDown} />,
             // The label comes first in the markup (dt before dd) but shows below.
             <Item key={stat.label} variants={fadeUp}>

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../ui'
 import { useDeIdentify } from './context'
@@ -27,11 +28,12 @@ export interface StepFooterProps {
 export function StepFooter({
   onContinue,
   continueDisabled = false,
-  continueLabel = 'Continue',
+  continueLabel,
   continueIcon = <ArrowForwardIcon />,
   start,
   end,
 }: StepFooterProps) {
+  const { t } = useTranslation()
   const { footerSlot, stepIndex } = useDeIdentify()
   const navigate = useNavigate()
   if (!footerSlot) return null
@@ -48,7 +50,7 @@ export function StepFooter({
           disabled={isFirst}
           onClick={() => navigate(stepUrl(stepIndex - 1))}
         >
-          Back
+          {t('actions.back')}
         </Button>
       )}
       {end ?? (
@@ -58,7 +60,7 @@ export function StepFooter({
           disabled={continueDisabled || (isLast && !onContinue)}
           onClick={onContinue ?? (() => navigate(stepUrl(stepIndex + 1)))}
         >
-          {continueLabel}
+          {continueLabel ?? t('actions.continue')}
         </Button>
       )}
     </>,

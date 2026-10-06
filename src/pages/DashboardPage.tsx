@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import warningIcon from '../assets/configuration/warning.svg'
 import addIcon from '../assets/review/add.svg'
@@ -7,12 +8,10 @@ import { ActivityChart } from '../components/dashboard/ActivityChart'
 import { BarChart } from '../components/dashboard/BarChart'
 import { ChartCard, EmptyChart } from '../components/dashboard/ChartCard'
 import {
-  FRAMEWORK_LABELS,
   FRAMEWORK_ORDER,
-  METHOD_LABELS,
   METHOD_ORDER,
-  PERIOD_OPTIONS,
-  entityLabel,
+  PERIODS,
+  isEntityType,
   periodParams,
   type FrameworkFilter,
   type PeriodDays,
@@ -73,12 +72,9 @@ const ChartsRow = styled('div')({
   '@media (max-width: 1100px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
 })
 
-const frameworkOptions = [
-  { value: 'ALL' as const, label: 'All frameworks' },
-  ...FRAMEWORK_ORDER.map((f) => ({ value: f, label: FRAMEWORK_LABELS[f] })),
-]
 
 const DashboardPage = () => {
+  const { t } = useTranslation(['dashboard', 'common'])
   const navigate = useNavigate()
   const [days, setDays] = useState<PeriodDays>('7')
   const [framework, setFramework] = useState<FrameworkFilter>('ALL')
@@ -100,19 +96,25 @@ const DashboardPage = () => {
   const firstVisit = !!data && framework === 'ALL' && data.recentAnalyses.length === 0
   const periodEmpty = !!data && data.analyses.count === 0
   const busy = dashboard.isPlaceholderData
-  const emptyText = firstVisit ? 'No analyses found' : 'No analyses in this period'
+  const emptyText = firstVisit ? t('empty.none') : t('empty.period')
+  const periodOptions = PERIODS.map((value) => ({ value, label: t(`periods.${value}`) }))
+  const frameworkOptions = [
+    { value: 'ALL' as const, label: t('common:frameworkFilter.all') },
+    ...FRAMEWORK_ORDER.map((f) => ({ value: f, label: t(`common:frameworks.${f}`) })),
+  ]
 
   const methods = data
     ? METHOD_ORDER.map((method) => ({
         key: method,
-        label: METHOD_LABELS[method],
+        label: t(`common:methods.${method}`),
         value: data.methods.find((m) => m.method === method)?.count ?? 0,
       }))
     : []
-  const entityTypes = (data?.entityTypes ?? []).map((t) => ({
-    key: t.type,
-    label: entityLabel(t.type),
-    value: t.count,
+  const entityTypes = (data?.entityTypes ?? []).map((entry) => ({
+    key: entry.type,
+    // Detector types outside the catalogue keep their raw name.
+    label: isEntityType(entry.type) ? t(`common:entityTypes.${entry.type}`) : entry.type.replace(/_/g, ' '),
+    value: entry.count,
   }))
 
   const newAnalysis = (
@@ -122,7 +124,7 @@ const DashboardPage = () => {
       startIcon={<MaskIcon src={addIcon} />}
       onClick={() => navigate(NEW_ANALYSIS_URL)}
     >
-      New analysis
+      {t('common:actions.newAnalysis')}
     </Button>
   )
 
@@ -135,8 +137,8 @@ const DashboardPage = () => {
               i
             </span>
             <div>
-              <strong>Welcome to De-ID Studio</strong>
-              <p>Run your first analysis to see activity and statistics here.</p>
+              <strong>{t('welcome.title')}</strong>
+              <p>{t('welcome.text')}</p>
             </div>
           </div>
           {newAnalysis}
@@ -146,10 +148,10 @@ const DashboardPage = () => {
           <Dropdown<PeriodDays>
             className="Dashboard-filter"
             size="compact"
-            options={PERIOD_OPTIONS}
+            options={periodOptions}
             value={days}
             onChange={changeDays}
-            aria-label="Period"
+            aria-label={t('periods.label')}
           />
           <Dropdown<FrameworkFilter>
             className="Dashboard-filter"
@@ -157,7 +159,7 @@ const DashboardPage = () => {
             options={frameworkOptions}
             value={framework}
             onChange={changeFramework}
-            aria-label="Framework"
+            aria-label={t('common:frameworkFilter.label')}
           />
           {newAnalysis}
         </Toolbar>
@@ -167,7 +169,7 @@ const DashboardPage = () => {
         <Banner role="alert" data-tone="error">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Couldn&apos;t load the dashboard</strong>
+            <strong>{t('loadFailed')}</strong>
             <p>{dashboard.error.message}</p>
           </div>
         </Banner>
@@ -180,16 +182,12 @@ const DashboardPage = () => {
       <ChartsRow>
         <ChartCard
           id="method-usage-heading"
-          title="De-Identification Method Usage"
-          subtitle={
-            firstVisit
-              ? 'Methods will appear after your first analysis'
-              : 'Popular methods applied to detected entities'
-          }
+          title={t('methods.title')}
+          subtitle={firstVisit ? t('methods.subtitleEmpty') : t('methods.subtitle')}
           busy={busy}
         >
           {methods.some((m) => m.value > 0) ? (
-            <BarChart rows={methods} color={colors.accent[400]} noun="methods" />
+            <BarChart rows={methods} color={colors.accent[400]} label={t('methods.chartLabel')} />
           ) : (
             <EmptyChart picture="methods" text={emptyText} />
           )}
@@ -197,12 +195,8 @@ const DashboardPage = () => {
 
         <ChartCard
           id="framework-usage-heading"
-          title="Compliance Framework Usage"
-          subtitle={
-            firstVisit
-              ? 'Framework distribution will appear after your first analysis'
-              : 'Distribution of frameworks applied across analyses'
-          }
+          title={t('frameworks.title')}
+          subtitle={firstVisit ? t('frameworks.subtitleEmpty') : t('frameworks.subtitle')}
           busy={busy}
         >
           {data && data.frameworks.length > 0 ? (
@@ -214,12 +208,8 @@ const DashboardPage = () => {
 
         <ChartCard
           id="entity-types-heading"
-          title="Entity Types Detected"
-          subtitle={
-            firstVisit
-              ? 'Entity breakdown will appear after your first analysis'
-              : 'Distribution of PII entities found in documents'
-          }
+          title={t('entityTypes.title')}
+          subtitle={firstVisit ? t('entityTypes.subtitleEmpty') : t('entityTypes.subtitle')}
           busy={busy}
         >
           {entityTypes.some((t) => t.value > 0) ? (
@@ -227,7 +217,8 @@ const DashboardPage = () => {
               rows={entityTypes}
               color={colors.primary[500]}
               collapsedRows={6}
-              noun="entity types"
+              label={t('entityTypes.chartLabel')}
+              showAllLabel={t('entityTypes.showAll', { count: entityTypes.length })}
             />
           ) : (
             <EmptyChart picture="entityTypes" text={emptyText} />

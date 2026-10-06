@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { visuallyHidden } from '@mui/utils'
 import type { Dashboard, Framework } from '../../api/types'
 import { colors, typography } from '../../theme'
 import { Tooltip } from '../ui'
-import { FRAMEWORK_COLORS, FRAMEWORK_LABELS, FRAMEWORK_ORDER, formatNumber } from './dashboardModel'
+import { FRAMEWORK_COLORS, FRAMEWORK_ORDER, formatNumber } from './dashboardModel'
 
 const WIDTH = 326
 const HEIGHT = 190
@@ -104,20 +105,26 @@ function toSlices(frameworks: Dashboard['frameworks']): Slice[] {
   })
 }
 
-const percent = (share: number) => `${Math.round(share * 100)}%`
+const percent = (share: number) => formatNumber(share, { style: 'percent', maximumFractionDigits: 0 })
 
 /** Share of analyses per framework: a ring with labelled leader lines. */
 export function FrameworkDonut({ frameworks }: { frameworks: Dashboard['frameworks'] }) {
+  const { t } = useTranslation(['dashboard', 'common'])
+  const name = (framework: Framework) => t(`common:frameworks.${framework}`)
   const slices = toSlices(frameworks)
   const single = slices.length === 1
 
   return (
     <Root>
-      <svg width={WIDTH} height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Analyses per framework">
+      <svg width={WIDTH} height={HEIGHT} viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={t('frameworks.chartLabel')}>
         {slices.map((slice) => (
           <Tooltip
             key={slice.framework}
-            title={`${FRAMEWORK_LABELS[slice.framework]}: ${formatNumber(slice.count)} (${percent(slice.share)})`}
+            title={t('frameworks.slice', {
+              framework: name(slice.framework),
+              count: formatNumber(slice.count),
+              share: percent(slice.share),
+            })}
             followCursor
           >
             <path
@@ -127,7 +134,7 @@ export function FrameworkDonut({ frameworks }: { frameworks: Dashboard['framewor
               stroke={single ? 'none' : colors.white}
               strokeWidth={2}
               tabIndex={0}
-              aria-label={`${FRAMEWORK_LABELS[slice.framework]}: ${percent(slice.share)}`}
+              aria-label={`${name(slice.framework)}: ${percent(slice.share)}`}
             />
           </Tooltip>
         ))}
@@ -144,7 +151,7 @@ export function FrameworkDonut({ frameworks }: { frameworks: Dashboard['framewor
                 strokeWidth={1}
               />
               <text x={end} y={y - 18} textAnchor={anchor}>
-                {FRAMEWORK_LABELS[slice.framework]}
+                {name(slice.framework)}
               </text>
               <text className="FrameworkDonut-value" x={end} y={y - 4} textAnchor={anchor}>
                 {percent(slice.share)}
@@ -156,16 +163,16 @@ export function FrameworkDonut({ frameworks }: { frameworks: Dashboard['framewor
       <Legend aria-hidden>
         {slices.map((slice) => (
           <li key={slice.framework} style={{ '--slice': FRAMEWORK_COLORS[slice.framework] } as CSSProperties}>
-            {FRAMEWORK_LABELS[slice.framework]}
+            {name(slice.framework)}
           </li>
         ))}
       </Legend>
       <table style={visuallyHidden}>
-        <caption>Analyses per framework</caption>
+        <caption>{t('frameworks.chartLabel')}</caption>
         <tbody>
           {slices.map((slice) => (
             <tr key={slice.framework}>
-              <th scope="row">{FRAMEWORK_LABELS[slice.framework]}</th>
+              <th scope="row">{name(slice.framework)}</th>
               <td>{slice.count}</td>
               <td>{percent(slice.share)}</td>
             </tr>

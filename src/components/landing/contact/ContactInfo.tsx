@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import mailIcon from '../../../assets/landing/mail.svg'
 import shieldIcon from '../../../assets/landing/shield.svg'
 import { Logo } from '../../layouts/landing/Logo'
@@ -53,17 +54,15 @@ const Row = styled(motion.div)({
 })
 
 export function ContactInfo() {
+  const { t } = useTranslation('landing')
   return (
     <Root {...reveal} variants={stagger(0.1)}>
       <motion.div className="ContactInfo-logo" variants={fadeUp}>
         <Logo />
       </motion.div>
       <Heading variants={fadeUp}>
-        <h3>Have questions about data anonymization or compliance?</h3>
-        <p>
-          Our team of experts is ready to help you navigate HIPAA, GDPR, and other
-          privacy regulations.
-        </p>
+        <h3>{t('contact.info.heading')}</h3>
+        <p>{t('contact.info.text')}</p>
       </Heading>
       <Divider variants={drawLine} />
       <Row variants={fadeUp}>
@@ -73,7 +72,7 @@ export function ContactInfo() {
       {/* Pinned to the bottom of the panel. */}
       <Row variants={fadeUp} style={{ marginTop: 'auto', color: 'rgba(255, 255, 255, 0.7)' }}>
         <img src={shieldIcon} alt="" />
-        We respond within 24 hours
+        {t('contact.info.response')}
       </Row>
     </Root>
   )

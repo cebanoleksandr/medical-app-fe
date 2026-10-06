@@ -1,4 +1,5 @@
 import axios from 'axios'
+import i18n from '../i18n'
 
 /** NestJS error body: `message` is an array for validation errors. */
 interface NestErrorBody {
@@ -14,7 +15,7 @@ export class ApiError extends Error {
   readonly messages: string[]
 
   constructor(status: number, messages: string[]) {
-    super(messages[0] ?? 'Request failed')
+    super(messages[0] ?? i18n.t('errors.requestFailed'))
     this.name = 'ApiError'
     this.status = status
     this.messages = messages
@@ -46,7 +47,7 @@ export async function toApiError(err: unknown): Promise<ApiError> {
   if (!err.response) {
     const timedOut = err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT'
     return new ApiError(0, [
-      timedOut ? 'The server took too long to respond' : 'Network error',
+      timedOut ? i18n.t('errors.timeout') : i18n.t('errors.network'),
     ])
   }
 

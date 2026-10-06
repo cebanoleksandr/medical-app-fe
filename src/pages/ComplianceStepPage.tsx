@@ -6,6 +6,8 @@ import { StepFooter } from '../components/layouts/de-identify/StepFooter'
 import { useDeIdentify } from '../components/layouts/de-identify/context'
 import { Button } from '../components/ui'
 import { useAnalysisOptions } from '../hooks'
+import { useTranslation } from 'react-i18next'
+import { useCatalog } from '../i18n/useCatalog'
 import { colors, typography } from '../theme'
 
 const Root = styled('div')({
@@ -41,6 +43,8 @@ const LoadError = styled('div')({
 })
 
 const ComplianceStepPage = () => {
+  const { t } = useTranslation(['deIdentify', 'common'])
+  const catalog = useCatalog()
   const { draft, updateDraft } = useDeIdentify()
   const options = useAnalysisOptions()
 
@@ -59,16 +63,16 @@ const ComplianceStepPage = () => {
   return (
     <Root>
       <Header>
-        <h2 id="framework-heading">Select Compliance Framework</h2>
-        <p>Choose the regulation that applies to your data</p>
+        <h2 id="framework-heading">{t('compliance.title')}</h2>
+        <p>{t('compliance.subtitle')}</p>
       </Header>
 
       {/* A failed background refetch keeps the cached frameworks. */}
       {options.isError && !options.data ? (
         <LoadError role="alert">
-          Couldn&apos;t load the compliance frameworks.
+          {t('compliance.loadFailed')}
           <Button variant="ghostSecondary" size="medium" onClick={() => options.refetch()}>
-            Try again
+            {t('common:actions.tryAgain')}
           </Button>
         </LoadError>
       ) : (
@@ -77,18 +81,21 @@ const ComplianceStepPage = () => {
             ? Array.from({ length: 4 }, (_, index) => (
                 <Skeleton key={index} variant="rounded" height={156} sx={{ borderRadius: '12px' }} />
               ))
-            : options.data.frameworks.map((framework) => (
+            : options.data.frameworks.map((framework) => {
+                const text = catalog.framework(framework)
+                return (
                 <ComplianceCard
                   key={framework.id}
                   name="framework"
                   value={framework.id}
-                  title={framework.name}
-                  description={framework.description}
-                  badge={framework.region}
+                  title={text.name}
+                  description={text.description}
+                  badge={text.region}
                   checked={draft.framework === framework.id}
                   onChange={() => select(framework.id)}
                 />
-              ))}
+                )
+              })}
         </Cards>
       )}
 

@@ -3,6 +3,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlotOutlined'
 import SettingsIcon from '@mui/icons-material/SettingsOutlined'
 import { styled } from '@mui/material/styles'
+import type { ParseKeys } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { NavLink, matchPath, useLocation } from 'react-router-dom'
 import dashboardIcon from '../../../assets/icons/dashboard.svg'
 import databaseIcon from '../../../assets/icons/database.svg'
@@ -17,7 +19,8 @@ export const SIDEBAR_WIDTH = 260
 
 interface NavItem {
   to: string
-  label: string
+  /** Key in the `app` namespace. */
+  label: ParseKeys<'app'>
   icon: ReactNode
   /** Paths (exact) that open this section; defaults to everything under `to`. */
   section?: string[]
@@ -27,19 +30,19 @@ interface NavItem {
 const nav: NavItem[] = [
   {
     to: '/app',
-    label: 'Dashboard',
+    label: 'nav.dashboard',
     icon: <MaskIcon src={dashboardIcon} />,
     section: ['/app', '/app/analyses'],
-    children: [{ to: '/app/analyses', label: 'All Analyses', icon: <MaskIcon src={listIcon} /> }],
+    children: [{ to: '/app/analyses', label: 'nav.allAnalyses', icon: <MaskIcon src={listIcon} /> }],
   },
-  { to: '/app/de-identify', label: 'De-Identify', icon: <MaskIcon src={deIdentifyIcon} /> },
+  { to: '/app/de-identify', label: 'nav.deIdentify', icon: <MaskIcon src={deIdentifyIcon} /> },
   {
     to: '/app/synthetic',
-    label: 'Synthetic Data',
+    label: 'nav.synthetic',
     icon: <MaskIcon src={databaseIcon} />,
     children: [
-      { to: '/app/synthetic/settings', label: 'Generation Settings', icon: <SettingsIcon /> },
-      { to: '/app/synthetic/result', label: 'Generated Data', icon: <ScatterPlotIcon /> },
+      { to: '/app/synthetic/settings', label: 'nav.generationSettings', icon: <SettingsIcon /> },
+      { to: '/app/synthetic/result', label: 'nav.generatedData', icon: <ScatterPlotIcon /> },
     ],
   },
 ]
@@ -119,6 +122,7 @@ const Link = styled(NavLink, {
 }))
 
 function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
+  const { t } = useTranslation('app')
   const { pathname } = useLocation()
   // Sub-items show only while their section is open; the section's own item
   // stays highlighted on its sub-pages.
@@ -138,7 +142,7 @@ function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
         <span className="Sidebar-icon" aria-hidden>
           {item.icon}
         </span>
-        {item.label}
+        {t(item.label)}
       </Link>
       {inSection && item.children?.map((child) => (
         <NavEntry key={child.to} item={child} nested />
@@ -148,6 +152,7 @@ function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
 }
 
 export function Sidebar() {
+  const { t } = useTranslation(['app', 'common'])
   const [confirmingLogout, setConfirmingLogout] = useState(false)
 
   return (
@@ -155,12 +160,12 @@ export function Sidebar() {
       <Brand>
         <img src={logo} alt="" />
         <div>
-          <div style={{ color: colors.white }}>De-ID Studio</div>
-          <div style={{ color: colors.neutral[400] }}>De-ID &amp; Synthesis</div>
+          <div style={{ color: colors.white }}>{t('common:brand.name')}</div>
+          <div style={{ color: colors.neutral[400] }}>{t('common:brand.tagline')}</div>
         </div>
       </Brand>
 
-      <Items aria-label="Main">
+      <Items aria-label={t('nav.label')}>
         {nav.map((item) => (
           <NavEntry key={item.to} item={item} />
         ))}
@@ -172,7 +177,7 @@ export function Sidebar() {
         onClick={() => setConfirmingLogout(true)}
         sx={signOutSx}
       >
-        Sign out
+        {t('nav.signOut')}
       </Button>
       <LogoutPopup
         isVisible={confirmingLogout}

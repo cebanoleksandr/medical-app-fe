@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { styled } from '@mui/material/styles'
+import { Trans, useTranslation } from 'react-i18next'
 import type { DetectedEntity } from '../../api/types'
 import retryIcon from '../../assets/configuration/autorenew.svg'
 import warningIcon from '../../assets/configuration/warning.svg'
@@ -26,10 +27,8 @@ export interface DocumentViewerProps {
   warning?: string
 }
 
-const TABS: { value: DocumentTab; label: string }[] = [
-  { value: 'original', label: 'Original' },
-  { value: 'deidentified', label: 'De-identified' },
-]
+// Labels are `deIdentify:review.document.<tab>`.
+const TABS: DocumentTab[] = ['original', 'deidentified']
 
 const Root = styled('section')({
   display: 'flex',
@@ -154,6 +153,7 @@ export function DocumentViewer({
   onReport,
   warning,
 }: DocumentViewerProps) {
+  const { t } = useTranslation(['deIdentify', 'common'])
   const [tab, setTab] = useState<DocumentTab>('original')
   const [copied, setCopied] = useState(false)
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({})
@@ -187,16 +187,14 @@ export function DocumentViewer({
       <Failure role="alert">
         <div>
           <FailureIcon src={errorIcon} aria-hidden />
-          <h3>Failed to generate de-identified version</h3>
+          <h3>{t('review.document.failedTitle')}</h3>
         </div>
         <p>
-          Something went wrong while processing the document.
-          <br />
-          Please try again.
+          <Trans t={t} i18nKey="review.document.failedText" />
         </p>
         <hr />
         <Button variant="secondary" size="medium" startIcon={<MaskIcon src={retryIcon} />} onClick={onRetry}>
-          Try again
+          {t('common:actions.tryAgain')}
         </Button>
       </Failure>
     )
@@ -233,10 +231,10 @@ export function DocumentViewer({
   }
 
   return (
-    <Root aria-label="Document">
+    <Root aria-label={t('review.document.label')}>
       <Toolbar>
-        <TabList role="tablist" aria-label="Document version" onKeyDown={onTabKeyDown}>
-          {TABS.map(({ value, label }) => (
+        <TabList role="tablist" aria-label={t('review.document.tabs')} onKeyDown={onTabKeyDown}>
+          {TABS.map((value) => (
             <Tab
               key={value}
               ref={(node) => {
@@ -249,7 +247,7 @@ export function DocumentViewer({
               tabIndex={tab === value ? 0 : -1}
               onClick={() => setTab(value)}
             >
-              {label}
+              {t(`review.document.${value}`)}
             </Tab>
           ))}
         </TabList>
@@ -261,7 +259,7 @@ export function DocumentViewer({
             disabled={failed}
             onClick={copy}
           >
-            {copied ? 'Copied' : 'Copy'}
+            {copied ? t('review.document.copied') : t('review.document.copy')}
           </Button>
           <Button
             variant="ghostSecondary"
@@ -270,7 +268,7 @@ export function DocumentViewer({
             disabled={failed}
             onClick={onReport}
           >
-            Report
+            {t('review.document.report')}
           </Button>
         </Actions>
       </Toolbar>

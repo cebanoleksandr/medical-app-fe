@@ -1,21 +1,24 @@
 import { useId, type ReactNode } from 'react'
 import { styled } from '@mui/material/styles'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import type { ValidationCheck, ValidationReport } from '../../api/types'
 import autorenewIcon from '../../assets/configuration/autorenew.svg'
 import cancelIcon from '../../assets/generated/cancel-large.svg'
 import checkCircleIcon from '../../assets/generated/check-circle-large.svg'
 import downloadIcon from '../../assets/review/report.svg'
 import settingsIcon from '../../assets/review/settings.svg'
+import { formatNumber } from '../../i18n/format'
 import { colors, radius, shadows, typography } from '../../theme'
 import BasePopup from '../popups/BasePopup'
 import { Button, MaskIcon } from '../ui'
 import { CheckItem, DialogHeader, Glyph, Notice } from './parts'
 import { Checklist, Divider, SectionLabel } from './styles'
 import {
-  FRAMEWORK_NAMES,
-  LEVEL_LABELS,
-  QUALITY,
   findingGroups,
+  frameworkName,
+  levelLabel,
+  qualityLabel,
   type ResultStatus,
 } from './resultModel'
 
@@ -59,51 +62,47 @@ const Footer = styled('div')({
   gap: 16,
 })
 
-/** Short names and results in the spirit of "Names — Removed". */
-const CHECK_TEXT: Record<ValidationCheck['id'], { label: string; passed: string; failed: string }> = {
-  dates_transformed: { label: 'Dates', passed: 'Transformed', failed: 'Out of range' },
-  free_text_checked: { label: 'Free-text fields', passed: 'Checked', failed: 'Identifiers found' },
-  export_format_validated: { label: 'Export format', passed: 'Valid', failed: 'Invalid' },
-  synthetic_identifiers_generated: {
-    label: 'Synthetic identifiers',
-    passed: 'Generated',
-    failed: 'Not unique',
-  },
-  direct_identifiers_removed: { label: 'Direct identifiers', passed: 'Removed', failed: 'Detected' },
-}
+// Short names and results ("Names — Removed") are `synthetic:result.validation.checksText`.
 
-function checkItem(check: ValidationCheck) {
-  const text = CHECK_TEXT[check.id]
+function checkItem(check: ValidationCheck, t: TFunction<'synthetic'>) {
+  const key = `result.validation.checksText.${check.id}` as const
   return (
     <CheckItem
       key={check.id}
       tone={check.passed ? 'success' : 'error'}
       emphasis={!check.passed}
-      label={<span title={check.detail}>{text?.label ?? check.label}</span>}
-      state={check.passed ? text?.passed : text?.failed}
+      label={<span title={check.detail}>{t(`${key}.label`, { defaultValue: check.label })}</span>}
+      state={check.passed ? t(`${key}.passed`) : t(`${key}.failed`)}
     />
   )
 }
 
 /** Review notes: weak source fields plus whatever made the verdict a warning. */
-function warningItems(report: ValidationReport) {
+function warningItems(report: ValidationReport, t: TFunction<'synthetic'>) {
   const items: { key: string; label: ReactNode; state: ReactNode }[] = []
   const { compliance, quality } = report
   if (compliance.riskLevel !== 'LOW') {
     items.push({
       key: 'risk',
-      label: <span title={compliance.riskFactors.join('\n')}>Risk level</span>,
-      state: LEVEL_LABELS[compliance.riskLevel],
+      label: <span title={compliance.riskFactors.join('\n')}>{t('result.validation.riskLevel')}</span>,
+      state: levelLabel(compliance.riskLevel),
     })
   }
   if (quality.quality !== 'GOOD') {
-    items.push({ key: 'quality', label: 'Data quality', state: QUALITY[quality.quality].label })
+    items.push({
+      key: 'quality',
+      label: t('result.validation.dataQuality'),
+      state: qualityLabel(quality.quality),
+    })
   }
   if (quality.consistency !== 'HIGH') {
     items.push({
       key: 'consistency',
-      label: 'Consistency',
-      state: `${LEVEL_LABELS[quality.consistency]} (${Math.round(quality.consistencyRate * 100)}%)`,
+      label: t('result.validation.consistency'),
+      state: t('result.validation.consistencyState', {
+        level: levelLabel(quality.consistency),
+        rate: formatNumber(quality.consistencyRate, { style: 'percent', maximumFractionDigits: 0 }),
+      }),
     })
   }
   report.lowConfidenceFields.forEach((field, index) =>
@@ -134,16 +133,17 @@ export function ValidationPopup({
   onAdjustSettings,
   regenerating = false,
 }: ValidationPopupProps) {
+  const { t } = useTranslation(['synthetic', 'common'])
   const titleId = useId()
   const failed = status === 'failed'
-  const framework = FRAMEWORK_NAMES[report.compliance.framework].long
+  const framework = frameworkName(report.compliance.framework, 'long')
 
   return (
     <BasePopup isVisible={isVisible} onClose={onClose} labelledBy={titleId} style={panelStyle}>
       <Content>
         <DialogHeader
           titleId={titleId}
-          title={failed ? 'Validation Issues' : 'Validation Details'}
+          title={failed ? t('result.validation.issuesTitle') : t('result.validation.detailsTitle')}
           subtitle={framework}
           onClose={onClose}
         />
@@ -158,7 +158,7 @@ export function ValidationPopup({
                 startIcon={<MaskIcon src={settingsIcon} />}
                 onClick={onAdjustSettings}
               >
-                Adjust settings
+                {t('result.validation.adjust')}
               </Button>
               <Button
                 variant="secondary"
@@ -167,13 +167,13 @@ export function ValidationPopup({
                 disabled={regenerating}
                 onClick={onRegenerate}
               >
-                {regenerating ? 'Regenerating…' : 'Regenerate'}
+                {regenerating ? t('common:actions.regenerating') : t('common:actions.regenerate')}
               </Button>
             </>
           ) : (
             <>
               <Button variant="ghostSecondary" size="medium" onClick={onClose}>
-                Cancel
+                {t('common:actions.cancel')}
               </Button>
               <Button
                 variant="secondary"
@@ -181,7 +181,7 @@ export function ValidationPopup({
                 startIcon={<MaskIcon src={downloadIcon} />}
                 onClick={onDownload}
               >
-                Download
+                {t('common:actions.download')}
               </Button>
             </>
           )}
@@ -192,29 +192,30 @@ export function ValidationPopup({
 }
 
 function PassedBody({ report }: { report: ValidationReport }) {
-  const warnings = warningItems(report)
+  const { t } = useTranslation('synthetic')
+  const warnings = warningItems(report, t)
   return (
     <>
       <StatusRow>
         <Glyph src={checkCircleIcon} size={20} color={colors.success} />
-        {warnings.length ? 'Passed with review notes' : 'Passed'}
+        {warnings.length ? t('result.validation.passedNotes') : t('result.validation.passed')}
       </StatusRow>
       <Section aria-labelledby="validation-checks">
-        <SectionLabel id="validation-checks">Checks</SectionLabel>
-        <Checklist>{report.checks.map(checkItem)}</Checklist>
+        <SectionLabel id="validation-checks">{t('result.validation.checks')}</SectionLabel>
+        <Checklist>{report.checks.map((check) => checkItem(check, t))}</Checklist>
       </Section>
       {warnings.length > 0 && (
         <>
           <Divider />
           <Section aria-labelledby="validation-warnings">
-            <SectionLabel id="validation-warnings">Warnings</SectionLabel>
+            <SectionLabel id="validation-warnings">{t('result.validation.warnings')}</SectionLabel>
             <Checklist>
               {warnings.map((item) => (
                 <CheckItem key={item.key} tone="warning" label={item.label} state={item.state} />
               ))}
             </Checklist>
           </Section>
-          <Notice tone="info">Review warnings before using this dataset in regulated workflows</Notice>
+          <Notice tone="info">{t('result.validation.warningsNote')}</Notice>
         </>
       )}
       <Divider />
@@ -223,6 +224,7 @@ function PassedBody({ report }: { report: ValidationReport }) {
 }
 
 function FailedBody({ report }: { report: ValidationReport }) {
+  const { t } = useTranslation('synthetic')
   const detected = report.compliance.directIdentifiers === 'DETECTED'
   const failedChecks = report.checks.filter((check) => !check.passed)
   const passedChecks = report.checks.filter((check) => check.passed)
@@ -230,15 +232,15 @@ function FailedBody({ report }: { report: ValidationReport }) {
     <>
       <StatusRow>
         <Glyph src={cancelIcon} size={24} slot={20} color={colors.error} />
-        Validation failed
+        {t('result.validation.failedTitle')}
       </StatusRow>
       <Notice tone="error">
         {detected
-          ? 'Direct identifiers detected. Do not download this dataset.'
-          : 'Some checks failed. Do not download this dataset.'}
+          ? t('result.validation.identifiersDetected')
+          : t('result.validation.checksFailed')}
       </Notice>
       <Section aria-labelledby="validation-issues">
-        <SectionLabel id="validation-issues">Issues</SectionLabel>
+        <SectionLabel id="validation-issues">{t('result.validation.issues')}</SectionLabel>
         <Checklist>
           {findingGroups(report).map((group) => (
             <CheckItem
@@ -246,10 +248,10 @@ function FailedBody({ report }: { report: ValidationReport }) {
               tone="error"
               emphasis
               label={group.label}
-              state={`Detected (${group.count})`}
+              state={t('result.validation.detectedCount', { count: group.count })}
             />
           ))}
-          {failedChecks.map(checkItem)}
+          {failedChecks.map((check) => checkItem(check, t))}
           {!detected &&
             report.compliance.riskLevel === 'HIGH' &&
             report.compliance.riskFactors.map((factor) => (
@@ -261,14 +263,14 @@ function FailedBody({ report }: { report: ValidationReport }) {
         <>
           <Divider />
           <Section aria-labelledby="validation-passed">
-            <SectionLabel id="validation-passed">Passed</SectionLabel>
-            <Checklist>{passedChecks.map(checkItem)}</Checklist>
+            <SectionLabel id="validation-passed">{t('result.validation.passedSection')}</SectionLabel>
+            <Checklist>{passedChecks.map((check) => checkItem(check, t))}</Checklist>
           </Section>
         </>
       )}
       <Divider />
       <Notice tone="neutral">
-        Recommended: Regenerate the dataset or adjust configuration settings.
+        {t('result.validation.recommended')}
       </Notice>
     </>
   )

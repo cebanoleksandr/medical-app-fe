@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import bannerImage from '../../assets/landing/cta-banner.png'
 import { GetStartedButton } from '../layouts/landing/GetStartedButton'
 import { Container, NARROW, sectionPadding, sectionTitle } from '../layouts/landing/styles'
@@ -36,6 +37,7 @@ const Card = styled(motion.div)({
 })
 
 export function CtaBanner() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Container>
@@ -44,11 +46,8 @@ export function CtaBanner() {
             variants={stagger(0.12, 0.2)}
             style={{ display: 'contents' }}
           >
-            <motion.h2 variants={fadeUp}>Ready to Protect Your Clinical Data?</motion.h2>
-            <motion.p variants={fadeUp}>
-            Start de-identifying and synthesizing healthcare data in minutes with our
-            enterprise-grade platform
-            </motion.p>
+            <motion.h2 variants={fadeUp}>{t('cta.title')}</motion.h2>
+            <motion.p variants={fadeUp}>{t('cta.description')}</motion.p>
             <motion.div variants={fadeUp}>
               <GetStartedButton />
             </motion.div>

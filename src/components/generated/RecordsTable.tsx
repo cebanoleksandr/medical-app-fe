@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { ColumnDefinition, Dataset, DatasetRecord, RecordsPage } from '../../api/types'
 import descriptionIcon from '../../assets/generated/description.svg'
 import settingsIcon from '../../assets/review/settings.svg'
@@ -9,7 +10,7 @@ import { Button, MaskIcon } from '../ui'
 import { formatRecords } from '../synthetic/generationSettings'
 import { Glyph } from './parts'
 import { Dot, TONE_COLOR } from './styles'
-import { QUALITY, QUALITY_COLUMN, formatCell } from './resultModel'
+import { formatCell, QUALITY, QUALITY_COLUMN, qualityLabel } from './resultModel'
 
 const Root = styled('section')({
   display: 'flex',
@@ -88,12 +89,13 @@ interface RecordsTableProps {
 
 /** The first records of the dataset with the chosen columns. */
 export function RecordsTable({ dataset, columns, page, error, onCustomize, onView }: RecordsTableProps) {
+  const { t } = useTranslation('synthetic')
   const definitions = new Map(dataset.columns.map((c) => [c.key, c]))
   const idKey = dataset.columns.find((c) => c.role === 'id')?.key
   const shown = columns
     .map((key) =>
       key === QUALITY_COLUMN
-        ? ({ key, label: 'Quality', type: 'string' } satisfies ColumnDefinition)
+        ? ({ key, label: t('result.quality.column'), type: 'string' } satisfies ColumnDefinition)
         : definitions.get(key),
     )
     .filter((c): c is ColumnDefinition => !!c)
@@ -104,7 +106,7 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
       const quality = QUALITY[row.quality]
       return (
         <QualityCell style={{ '--dot': TONE_COLOR[quality.tone] } as CSSProperties}>
-          {quality.label}
+          {qualityLabel(row.quality)}
         </QualityCell>
       )
     }
@@ -124,11 +126,14 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
     <Root aria-labelledby="preview-records-heading">
       <Header>
         <div>
-          <h2 id="preview-records-heading">Preview Records</h2>
+          <h2 id="preview-records-heading">{t('result.table.title')}</h2>
           <p>
             {page
-              ? `Showing ${page.rows.length} of ${formatRecords(page.total)} records`
-              : `${formatRecords(dataset.records)} records`}
+              ? t('result.table.showing', {
+                  shown: formatRecords(page.rows.length),
+                  total: formatRecords(page.total),
+                })
+              : t('result.table.total', { total: formatRecords(dataset.records) })}
           </p>
         </div>
         <Button
@@ -137,7 +142,7 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
           startIcon={<MaskIcon src={settingsIcon} />}
           onClick={onCustomize}
         >
-          Columns
+          {t('result.table.columns')}
         </Button>
       </Header>
       <Scroller>
@@ -150,7 +155,7 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
                 </th>
               ))}
               <th className="RecordsTable-action" scope="col">
-                Action
+                {t('result.table.action')}
               </th>
             </tr>
           </thead>
@@ -158,7 +163,7 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
             {error && !page ? (
               <tr>
                 <Message colSpan={span} role="alert">
-                  Couldn&apos;t load records: {error.message}
+                  {t('result.table.loadFailed', { message: error.message })}
                 </Message>
               </tr>
             ) : !page ? (
@@ -181,10 +186,10 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
                     <Button
                       variant="ghostSecondary"
                       size="medium"
-                      aria-label={`View ${row.recordId}`}
+                      aria-label={t('result.table.viewRecord', { id: row.recordId })}
                       onClick={() => onView(row)}
                     >
-                      View
+                      {t('result.table.view')}
                     </Button>
                   </td>
                 </tr>

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { AnalysisOptions, EntityMethod, EntityType, Language, RiskLevel } from '../../api/types'
 import infoIcon from '../../assets/configuration/info.svg'
 import languageIcon from '../../assets/configuration/language.svg'
 import warningIcon from '../../assets/configuration/warning.svg'
+import { useCatalog } from '../../i18n/useCatalog'
 import { colors, typography } from '../../theme'
 import type { DeIdentifyDraft, DraftPatch } from '../layouts/de-identify/context'
 import { ConfirmPopup } from '../popups/ConfirmPopup'
@@ -12,9 +14,8 @@ import { Button, Dropdown, MaskIcon, type DropdownOption } from '../ui'
 import { Banner, Cards, Description, NARROW, Rail, Section, Stack } from './configStyles'
 import { entityMethodsOf, isCustomized } from './configRequest'
 import { EntityConfigTable } from './EntityConfigTable'
-import { RISK_LEVELS, type LawInfo } from './entityConfig'
+import { useLawText, type LawInfo } from './entityConfig'
 import { LogicDrawer } from './LogicDrawer'
-import { LANGUAGE_NAMES } from './languages'
 import { OptionCard } from './OptionCard'
 
 export interface DataProtectionSettingsProps {
@@ -39,6 +40,9 @@ const Controls = styled('div')({
 
 /** GDPR, UK GDPR, FADP: privacy risk level and a method per entity type. */
 export function DataProtectionSettings({ law, options, draft, updateDraft }: DataProtectionSettingsProps) {
+  const { t } = useTranslation(['deIdentify', 'common'])
+  const catalog = useCatalog()
+  const lawText = useLawText(law)
   const [logicOpen, setLogicOpen] = useState(false)
   // Level whose defaults the user is asked to confirm; replaces their changes.
   const [confirmLevel, setConfirmLevel] = useState<RiskLevel | null>(null)
@@ -62,26 +66,27 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
 
   const languageOptions: DropdownOption<Language>[] = options.languages.map((code) => ({
     value: code,
-    label: LANGUAGE_NAMES[code] ?? code,
+    label: catalog.language(code),
     icon: <MaskIcon src={languageIcon} />,
   }))
 
   return (
     <>
       <Section aria-labelledby="risk-heading">
-        <h3 id="risk-heading">1. Choose privacy risk level</h3>
+        <h3 id="risk-heading">{t('dataProtection.risk')}</h3>
         <Rail>
           <Cards role="radiogroup" aria-labelledby="risk-heading" data-size="small">
             {LEVELS.map((item) => {
-              const [first, second] = RISK_LEVELS[item].lines(law)
+              const first = t(`risk.${item}.line1`)
+              const second = t(`risk.${item}.line2`, { note: lawText.mediumNote })
               return (
                 <OptionCard
                   key={item}
                   compact
                   name="risk-level"
                   value={item}
-                  title={RISK_LEVELS[item].title}
-                  badge={item === 'MEDIUM' ? 'Recommended' : undefined}
+                  title={t(`risk.${item}.title`)}
+                  badge={item === 'MEDIUM' ? t('common:recommended') : undefined}
                   checked={item === level}
                   onChange={() => selectLevel(item)}
                 >
@@ -101,8 +106,8 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
         <Banner role="note">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Low risk may not fully protect sensitive health data.</strong>
-            <p>Biological data and photos will still be removed ({law.articleShort}).</p>
+            <strong>{t('dataProtection.lowTitle')}</strong>
+            <p>{t('dataProtection.lowText', { article: lawText.articleShort })}</p>
           </div>
         </Banner>
       )}
@@ -110,11 +115,8 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
       <Banner data-tone="info">
         <MaskIcon src={infoIcon} aria-hidden />
         <div>
-          <strong>How this configuration works</strong>
-          <p>
-            Methods are automatically selected based on {law.name} risk guidelines and entity
-            sensitivity levels. You can review or override any setting below.
-          </p>
+          <strong>{t('dataProtection.howTitle')}</strong>
+          <p>{t('dataProtection.howText', { law: lawText.name })}</p>
         </div>
         <Button
           variant="ghost"
@@ -122,18 +124,18 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
           endIcon={<ArrowForwardIcon />}
           onClick={() => setLogicOpen(true)}
         >
-          View logic
+          {t('dataProtection.viewLogic')}
         </Button>
       </Banner>
 
       <Section aria-labelledby="entities-heading" data-locked={!level || undefined}>
-        <h3 id="entities-heading">2. Entity Configuration</h3>
+        <h3 id="entities-heading">{t('dataProtection.entities')}</h3>
         {level && methods && (
           <Rail>
             <Stack>
               <Description>
-                <strong>Choose which identifiers to remove from your document.</strong>
-                <span>Methods follow the risk level. Customize any entity type below.</span>
+                <strong>{t('dataProtection.entitiesTitle')}</strong>
+                <span>{t('dataProtection.entitiesText')}</span>
               </Description>
               <Controls>
                 <EntityConfigTable
@@ -147,7 +149,7 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
                   options={languageOptions}
                   value={draft.language ?? 'en'}
                   onChange={(next) => updateDraft({ language: next })}
-                  aria-label="Document language"
+                  aria-label={t('configuration.documentLanguage')}
                 />
               </Controls>
             </Stack>
@@ -170,9 +172,11 @@ export function DataProtectionSettings({ law, options, draft, updateDraft }: Dat
           if (confirmLevel) applyLevel(confirmLevel)
           setConfirmLevel(null)
         }}
-        title={`Reset to ${RISK_LEVELS[confirmLevel ?? level ?? 'MEDIUM'].title} defaults?`}
-        description="Your custom settings will be lost."
-        confirmLabel="Reset"
+        title={t('dataProtection.resetTitle', {
+          level: t(`risk.${confirmLevel ?? level ?? 'MEDIUM'}.title`),
+        })}
+        description={t('dataProtection.resetText')}
+        confirmLabel={t('dataProtection.reset')}
       />
     </>
   )

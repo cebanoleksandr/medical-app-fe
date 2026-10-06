@@ -1,6 +1,7 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { EASE_OUT } from '../../landing/motion'
 import { colors, typography } from '../../../theme'
 import { GetStartedButton } from './GetStartedButton'
@@ -68,6 +69,7 @@ const Link = styled(NavLink)({
 })
 
 export function LandingHeader() {
+  const { t } = useTranslation('landing')
   return (
     <Root
       initial={{ y: -24, opacity: 0 }}
@@ -76,11 +78,11 @@ export function LandingHeader() {
     >
       <Inner>
         <Logo />
-        <Nav aria-label="Main">
+        <Nav aria-label={t('nav.label')}>
           <Link to="/" end>
-            Solutions
+            {t('nav.solutions')}
           </Link>
-          <Link to="/contact-us">Contact Us</Link>
+          <Link to="/contact-us">{t('nav.contact')}</Link>
         </Nav>
         <GetStartedButton size="medium" />
       </Inner>

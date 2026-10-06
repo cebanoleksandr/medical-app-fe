@@ -1,0 +1,272 @@
+{
+  "settings": {
+    "title": "Generation Settings",
+    "subtitle": "Configure the synthetic data parameters",
+    "sourceGone": "The de-identified source is no longer available",
+    "sourceGoneText": "{{message}}. Choose a data source below.",
+    "optionsFailed": "Couldn't load generation options",
+    "dataSource": "Data source",
+    "datasetType": "Dataset type",
+    "uploadFile": "Upload your file",
+    "or": "or",
+    "configuration": "Configuration",
+    "records": "Number of Records",
+    "recordsMax": "Max {{max}} records",
+    "framework": "Choose Framework",
+    "frameworkPlaceholder": "Compliance Framework",
+    "format": "Choose Format",
+    "formatPlaceholder": "Output Format",
+    "documentSource": "De-identified document · {{count}} identifiers replaced",
+    "fileSource": "Uploaded file · {{count}} rows",
+    "estimate": "Estimated output:",
+    "incomplete": "Complete required fields to generate dataset",
+    "generateFailed": "Couldn't generate the dataset",
+    "sourceExpired": "The data source has expired. Choose the source again.",
+    "generate": "Generate Synthetic Data",
+    "generating": "Generating…",
+    "recordsMin": "Enter at least 1 record",
+    "fileUnreadable": "Couldn't read this file",
+    "fileTryAnother": "Please try another file",
+    "fileUnsupported": "File format not supported",
+    "fileUnsupportedText": "Please upload .xlsx, .csv or .json",
+    "fileTooLarge": "File is too large",
+    "fileTooLargeText": "Please upload a file up to {{max}}"
+  },
+  "datasetTypes": {
+    "PATIENT_RECORDS": "Patient Records",
+    "CLINICAL_NOTES": "Clinical Notes",
+    "LAB_RESULTS": "Lab Results",
+    "PRESCRIPTIONS": "Prescriptions"
+  },
+  "dropZone": {
+    "dragDrop": "Drag & drop",
+    "or": "or",
+    "browse": "Browse file",
+    "replace": "Replace file",
+    "reading": "Reading columns…",
+    "remove": "Remove {{name}}",
+    "formats": "Supported formats: .xlsx, .csv, .json — max 5 MB",
+    "input": "Upload your file"
+  },
+  "deidentifiedSource": {
+    "title": "Use de-identified data as source",
+    "available": "Use previously de-identified data",
+    "unavailable": "De-identify a document first to use it here",
+    "note": "Passed from current session",
+    "label": "Data source"
+  },
+  "result": {
+    "frameworks": {
+      "HIPAA": {
+        "short": "HIPAA SH",
+        "long": "HIPAA Safe Harbor"
+      },
+      "EU_GDPR": {
+        "short": "EU GDPR",
+        "long": "EU GDPR"
+      },
+      "UK_GDPR": {
+        "short": "UK GDPR",
+        "long": "UK GDPR"
+      },
+      "SWISS_FADP": {
+        "short": "Swiss FADP",
+        "long": "Swiss FADP"
+      }
+    },
+    "levels": {
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "quality": {
+      "GOOD": "Good",
+      "FAIR": "Fair",
+      "POOR": "Poor",
+      "column": "Quality"
+    },
+    "findings": {
+      "PERSON": "Names",
+      "EMAIL_ADDRESS": "Email addresses",
+      "PHONE_NUMBER": "Phone numbers",
+      "US_SSN": "Social security numbers",
+      "UA_RNOKPP": "Tax numbers (RNOKPP)",
+      "UA_PASSPORT": "Passport numbers",
+      "US_PASSPORT": "Passport numbers",
+      "CH_AHV": "AHV numbers",
+      "US_DRIVER_LICENSE": "Driver license numbers",
+      "IBAN_CODE": "Bank accounts",
+      "CREDIT_CARD": "Credit card numbers",
+      "IP_ADDRESS": "IP addresses"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "banner": {
+      "passed": "Generation completed",
+      "warning": "Passed with warnings",
+      "failed": "Failed",
+      "pending": "Validating dataset…"
+    },
+    "cards": {
+      "compliance": "Compliance",
+      "framework": "Framework:",
+      "risk": "Risk level:",
+      "identifiers": "Direct identifiers:",
+      "detected": "Detected",
+      "notDetected": "Not detected",
+      "quality": "Data Quality",
+      "qualityRow": "Quality:",
+      "consistency": "Consistency:",
+      "warnings": "Warnings:",
+      "directIdentifiers": "Direct identifiers",
+      "lowConfidence": "{{count}} low-confidence",
+      "none": "None",
+      "export": "Export",
+      "checking": "Checking…",
+      "doNotDownload": "Do not download",
+      "ready": "Ready to download",
+      "session": "Session only — download before leaving",
+      "summary": "Dataset Summary",
+      "format": "Format:",
+      "records": "Records:",
+      "fields": "Fields:"
+    },
+    "table": {
+      "title": "Preview Records",
+      "showing": "Showing {{shown}} of {{total}} records",
+      "total": "{{total}} records",
+      "columns": "Columns",
+      "action": "Action",
+      "view": "View",
+      "viewRecord": "View {{id}}",
+      "loadFailed": "Couldn't load records: {{message}}"
+    },
+    "panel": {
+      "title": "Compliance Validation",
+      "framework": "Framework:",
+      "risk": "Risk level:",
+      "exportStatus": "Export status:",
+      "safe": "Safe to download",
+      "doNotDownload": "Do not download",
+      "checks": "Validation checks",
+      "validating": "Validating",
+      "identifiersFound": "Direct identifiers found — do not download",
+      "failed": "Validation failed — do not download",
+      "fieldsToReview_one": "{{count}} field requires review before export",
+      "fieldsToReview_other": "{{count}} fields require review before export",
+      "qualityReview": "Data quality needs review before export",
+      "lowConfidence_one": "{{count}} low-confidence field may require review",
+      "lowConfidence_other": "{{count}} low-confidence fields may require review",
+      "details": "View validation details",
+      "issues": "View issues",
+      "validateFailed": "Couldn't validate the dataset: {{message}}"
+    },
+    "validation": {
+      "detailsTitle": "Validation Details",
+      "issuesTitle": "Validation Issues",
+      "adjust": "Adjust settings",
+      "passed": "Passed",
+      "passedNotes": "Passed with review notes",
+      "checks": "Checks",
+      "warnings": "Warnings",
+      "warningsNote": "Review warnings before using this dataset in regulated workflows",
+      "failedTitle": "Validation failed",
+      "identifiersDetected": "Direct identifiers detected. Do not download this dataset.",
+      "checksFailed": "Some checks failed. Do not download this dataset.",
+      "issues": "Issues",
+      "passedSection": "Passed",
+      "recommended": "Recommended: Regenerate the dataset or adjust configuration settings.",
+      "detectedCount": "Detected ({{count}})",
+      "riskLevel": "Risk level",
+      "dataQuality": "Data quality",
+      "consistency": "Consistency",
+      "consistencyState": "{{level}} ({{rate}})",
+      "checksText": {
+        "dates_transformed": {
+          "label": "Dates",
+          "passed": "Transformed",
+          "failed": "Out of range"
+        },
+        "free_text_checked": {
+          "label": "Free-text fields",
+          "passed": "Checked",
+          "failed": "Identifiers found"
+        },
+        "export_format_validated": {
+          "label": "Export format",
+          "passed": "Valid",
+          "failed": "Invalid"
+        },
+        "synthetic_identifiers_generated": {
+          "label": "Synthetic identifiers",
+          "passed": "Generated",
+          "failed": "Not unique"
+        },
+        "direct_identifiers_removed": {
+          "label": "Direct identifiers",
+          "passed": "Removed",
+          "failed": "Detected"
+        }
+      }
+    },
+    "regenerate": {
+      "title": "Regenerate dataset?",
+      "text": "Current data exists only in this session.<br/>Download before regenerating to avoid data loss."
+    },
+    "download": {
+      "title": "Download synthetic dataset",
+      "format": "Format",
+      "records": "Records",
+      "fields": "Fields",
+      "framework": "Framework",
+      "validation": "Validation",
+      "inProgress": "In progress…",
+      "passed": "Passed",
+      "warning": "Passed with warnings",
+      "failed": "Failed",
+      "notice": "Generated data will not be stored after this session.",
+      "report": "Include validation report",
+      "schema": "Include schema summary"
+    },
+    "columns": {
+      "title": "Customize columns",
+      "subtitle": "Choose fields to display",
+      "notice": "This only affects the preview table. Downloaded dataset includes all {{count}} fields",
+      "selected": "Selected {{count}} of {{total}}",
+      "additional": "Additional fields",
+      "reset": "Reset to default"
+    },
+    "record": {
+      "title": "Record details",
+      "summary": "Summary",
+      "compliance": "Compliance",
+      "identifiersDetected": "Identifiers detected",
+      "passed": "Passed",
+      "quality": "Quality",
+      "fields": "Generated fields",
+      "loadFailed": "Couldn't load the record: {{message}}",
+      "detectedLabel": "Direct identifiers detected:",
+      "noneDetected": "No direct identifiers detected",
+      "consistency": "Field consistency:",
+      "high": "High"
+    },
+    "page": {
+      "goToSettings": "Go to Generation Settings",
+      "noDataset": "No dataset to review",
+      "noDatasetText": "Configure the generation settings to create a synthetic dataset.",
+      "expired": "This dataset has expired",
+      "expiredText": "Generated data is kept only for the session. Generate a new dataset.",
+      "loadFailed": "Couldn't load the dataset",
+      "validateFailed": "Couldn't validate the dataset",
+      "validateFailedText": "{{message}}. Review the records before downloading.",
+      "regenerateFailed": "Couldn't regenerate the dataset"
+    },
+    "checks": {
+      "dates_transformed": "Dates transformed",
+      "free_text_checked": "Free-text fields checked",
+      "export_format_validated": "Export format validated",
+      "synthetic_identifiers_generated": "Synthetic identifiers generated",
+      "direct_identifiers_removed": "Direct identifiers removed"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { colors, radius, typography } from '../../theme'
 
 export type Status = 'completed' | 'processing' | 'failed'
@@ -18,11 +19,6 @@ const palette: Record<Status, { background: string; color: string }> = {
   failed: { background: colors.errorLight, color: colors.error },
 }
 
-const defaultLabels: Record<Status, string> = {
-  completed: 'Completed',
-  processing: 'Processing',
-  failed: 'Failed',
-}
 
 const Root = styled('span')({
   ...typography.labelM,
@@ -44,9 +40,10 @@ const Root = styled('span')({
 
 /** Job status pill: Completed / Processing / Failed. */
 export function StatusBadge({ status, children, className }: StatusBadgeProps) {
+  const { t } = useTranslation()
   return (
     <Root className={className} style={palette[status]}>
-      {children ?? defaultLabels[status]}
+      {children ?? t(`status.${status}`)}
     </Root>
   )
 }

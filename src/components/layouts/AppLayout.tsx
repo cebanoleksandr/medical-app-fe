@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useMatches } from 'react-router-dom'
 import { wakeDetectionService } from '../../api/wakeDetection'
 import { useSession } from '../../hooks'
@@ -32,6 +33,7 @@ const Content = styled('main')({
 })
 
 const AppLayout = () => {
+  const { t } = useTranslation('app')
   const { data: session } = useSession()
   const handle = useMatches()
     .map((match) => match.handle as RouteHandle | undefined)
@@ -56,8 +58,8 @@ const AppLayout = () => {
       <Sidebar />
       <Main>
         <Header
-          title={handle?.title ?? ''}
-          subtitle={handle?.subtitle}
+          title={handle ? t(handle.title) : ''}
+          subtitle={handle?.subtitle && t(handle.subtitle)}
           email={session?.user.email}
         />
         <Content>

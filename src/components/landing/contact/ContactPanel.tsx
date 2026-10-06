@@ -4,6 +4,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { styled } from '@mui/material/styles'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useForm, useWatch } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import checkIcon from '../../../assets/landing/check-circle.svg'
 import errorIcon from '../../../assets/landing/error.svg'
@@ -131,6 +132,7 @@ const Result = styled(View)({
 
 /** Contact form; swaps to a success or failure message after sending. */
 export function ContactPanel() {
+  const { t } = useTranslation(['landing', 'common'])
   const navigate = useNavigate()
   const send = useSendContactMessage()
   // Lives above the success / failure views, so "Try again" gets the
@@ -187,9 +189,9 @@ export function ContactPanel() {
                 <img src={checkIcon} alt="" />
               </motion.span>
               <div className="ContactPanel-text">
-                <h3>Message sent!</h3>
-                <p>Thank you for reaching out</p>
-                <p>We&apos;ll get back to you within 24 hours.</p>
+                <h3>{t('contact.success.title')}</h3>
+                <p>{t('contact.success.thanks')}</p>
+                <p>{t('contact.success.reply')}</p>
               </div>
             </div>
             <Button
@@ -198,7 +200,7 @@ export function ContactPanel() {
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate('/')}
             >
-              Back Home
+              {t('contact.success.home')}
             </Button>
           </Result>
         )}
@@ -217,8 +219,8 @@ export function ContactPanel() {
                 <img src={errorIcon} alt="" />
               </motion.span>
               <div className="ContactPanel-text">
-                <h3>Message not sent</h3>
-                <p>Something went wrong</p>
+                <h3>{t('contact.failure.title')}</h3>
+                <p>{t('contact.failure.description')}</p>
                 <p>
                   Please try again or email us directly{' '}
                   <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
@@ -227,7 +229,7 @@ export function ContactPanel() {
             </div>
             {/* Back to the form with everything still filled in. */}
             <Button size="medium" onClick={() => send.reset()}>
-              Try again
+              {t('common:actions.tryAgain')}
             </Button>
           </Result>
         )}
@@ -235,44 +237,44 @@ export function ContactPanel() {
         {view === 'form' && (
           <View key="form" {...swapProps}>
             <Heading>
-              <h3>Send us a message</h3>
-              <p>We&apos;ll get back to you within 24 hours</p>
+              <h3>{t('contact.form.title')}</h3>
+              <p>{t('contact.form.subtitle')}</p>
             </Heading>
             <Form noValidate onSubmit={handleSubmit(submit)}>
               <div className="ContactPanel-names">
                 <TextField
-                  label="First Name"
-                  placeholder="Enter your first name"
+                  label={t('contact.form.firstName')}
+                  placeholder={t('contact.form.firstNamePlaceholder')}
                   autoComplete="given-name"
                   required
                   {...field('firstName')}
                 />
                 <TextField
-                  label="Last Name"
-                  placeholder="Enter your last name"
+                  label={t('contact.form.lastName')}
+                  placeholder={t('contact.form.lastNamePlaceholder')}
                   autoComplete="family-name"
                   required
                   {...field('lastName')}
                 />
               </div>
               <TextField
-                label="Company"
-                placeholder="Your organization"
+                label={t('contact.form.company')}
+                placeholder={t('contact.form.companyPlaceholder')}
                 autoComplete="organization"
                 {...field('company')}
               />
               <TextField
-                label="Email"
+                label={t('contact.form.email')}
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('contact.form.emailPlaceholder')}
                 autoComplete="email"
                 required
                 {...field('email')}
               />
               <TextField
                 className="ContactPanel-message"
-                label="Message"
-                placeholder="Tell us how we can help you"
+                label={t('contact.form.message')}
+                placeholder={t('contact.form.messagePlaceholder')}
                 multiline
                 rows={3}
                 maxLength={MESSAGE_MAX}
@@ -286,7 +288,7 @@ export function ContactPanel() {
                   endIcon={<ArrowForwardIcon />}
                   disabled={!isValid || send.isPending}
                 >
-                  {send.isPending ? 'Sending…' : 'Send message'}
+                  {send.isPending ? t('contact.form.sending') : t('contact.form.send')}
                 </Button>
               </div>
             </Form>

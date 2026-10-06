@@ -2,6 +2,7 @@ import { type CSSProperties, useId, useLayoutEffect, useRef, useState, type Keyb
 import FormControlLabel from '@mui/material/FormControlLabel'
 import RadioGroup from '@mui/material/RadioGroup'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { visuallyHidden } from '@mui/utils'
 import type { Dashboard } from '../../api/types'
 import { colors, radius, shadows, typography } from '../../theme'
@@ -11,9 +12,10 @@ import { formatDay, formatLongDay, formatNumber, niceScale } from './dashboardMo
 
 type Series = 'documents' | 'entities'
 
-const SERIES: Record<Series, { label: string; color: string }> = {
-  documents: { label: 'Documents', color: colors.primary[500] },
-  entities: { label: 'Entities', color: colors.accent[400] },
+// Labels are `dashboard:activity.<series>`.
+const SERIES: Record<Series, { color: string }> = {
+  documents: { color: colors.primary[500] },
+  entities: { color: colors.accent[400] },
 }
 
 // Plot geometry in px; the width follows the card.
@@ -90,13 +92,15 @@ interface ActivityChartProps {
 
 /** Analyses or detected entities per day of the period. */
 export function ActivityChart({ activity, busy }: ActivityChartProps) {
+  const { t } = useTranslation('dashboard')
   const headingId = useId()
   const gradientId = useId()
   const [series, setSeries] = useState<Series>('documents')
   const [active, setActive] = useState<number | null>(null)
   const [ref, width] = useWidth()
 
-  const { color, label } = SERIES[series]
+  const { color } = SERIES[series]
+  const label = t(`activity.${series}`)
   const values = activity.map((day) => day[series])
   const scale = niceScale(Math.max(0, ...values))
   const empty = values.every((v) => v === 0)
@@ -146,17 +150,17 @@ export function ActivityChart({ activity, busy }: ActivityChartProps) {
   return (
     <ChartCard
       id={headingId}
-      title="Processing Activity"
-      subtitle="Based on selected date range"
+      title={t('activity.title')}
+      subtitle={t('activity.subtitle')}
       busy={busy}
       action={
         <Switch
           value={series}
           onChange={(_, value) => setSeries(value as Series)}
-          aria-label="Chart data"
+          aria-label={t('activity.switch')}
         >
           {(Object.keys(SERIES) as Series[]).map((key) => (
-            <FormControlLabel key={key} value={key} control={<Radio />} label={SERIES[key].label} />
+            <FormControlLabel key={key} value={key} control={<Radio />} label={t(`activity.${key}`)} />
           ))}
         </Switch>
       }
@@ -165,7 +169,7 @@ export function ActivityChart({ activity, busy }: ActivityChartProps) {
         ref={ref}
         tabIndex={0}
         role="img"
-        aria-label={`${label} per day. Use the arrow keys to read each day.`}
+        aria-label={t('activity.plotLabel', { series: label })}
         onPointerMove={pick}
         onPointerLeave={() => setActive(null)}
         onFocus={() => setActive((current) => current ?? activity.length - 1)}
@@ -260,7 +264,7 @@ export function ActivityChart({ activity, busy }: ActivityChartProps) {
             <dl>
               {(Object.keys(SERIES) as Series[]).map((key) => (
                 <div key={key} style={{ display: 'contents', '--key': SERIES[key].color } as CSSProperties}>
-                  <dt>{SERIES[key].label}</dt>
+                  <dt>{t(`activity.${key}`)}</dt>
                   <dd>{formatNumber(point[key])}</dd>
                 </div>
               ))}
@@ -270,12 +274,12 @@ export function ActivityChart({ activity, busy }: ActivityChartProps) {
       </Plot>
 
       <table style={visuallyHidden}>
-        <caption>Processing activity per day</caption>
+        <caption>{t('activity.tableCaption')}</caption>
         <thead>
           <tr>
-            <th scope="col">Day</th>
-            <th scope="col">Documents</th>
-            <th scope="col">Entities</th>
+            <th scope="col">{t('activity.day')}</th>
+            <th scope="col">{t('activity.documents')}</th>
+            <th scope="col">{t('activity.entities')}</th>
           </tr>
         </thead>
         <tbody>

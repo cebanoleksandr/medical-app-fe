@@ -3,24 +3,23 @@ import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined'
 import PasswordOutlinedIcon from '@mui/icons-material/PasswordOutlined'
 import ShuffleOutlinedIcon from '@mui/icons-material/ShuffleOutlined'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type {
   AnalysisOptions,
-  DeidMethod,
   FrameworkOption,
   Language,
   MethodOption,
   OutputMode,
-  Sensitivity,
 } from '../../api/types'
 import hideSourceIcon from '../../assets/configuration/hide-source.svg'
 import languageIcon from '../../assets/configuration/language.svg'
 import warningIcon from '../../assets/configuration/warning.svg'
+import { useCatalog } from '../../i18n/useCatalog'
 import { colors, typography } from '../../theme'
 import type { DeIdentifyDraft, DraftPatch } from '../layouts/de-identify/context'
 import { Dropdown, MaskIcon, type DropdownOption } from '../ui'
 import { Banner, Cards, Description, NARROW, Rail, Section, Stack } from './configStyles'
 import { IdentifierPicker } from './IdentifierPicker'
-import { LANGUAGE_NAMES } from './languages'
 import { OptionCard } from './OptionCard'
 
 export interface HipaaSettingsProps {
@@ -67,42 +66,13 @@ const OUTPUT_ICONS: Record<OutputMode, ReactNode> = {
   PSEUDONYMIZE: <ShuffleOutlinedIcon />,
 }
 
-const SENSITIVITY: Record<Sensitivity, { title: string; note: string; help: [string, string] }> = {
-  CONSERVATIVE: {
-    title: 'Conservative',
-    note: 'Fewer false alerts',
-    help: [
-      'Conservative flags only confident matches.',
-      'Fewer false positives, but some identifiers may be missed.',
-    ],
-  },
-  BALANCED: {
-    title: 'Balanced',
-    note: 'Recommended for most documents',
-    help: [
-      'Balanced is recommended for most documents.',
-      'Detects most sensitive entities while keeping false positives manageable.',
-    ],
-  },
-  AGGRESSIVE: {
-    title: 'Aggressive',
-    note: 'Catches potentially sensitive data',
-    help: [
-      'Aggressive flags anything that might be sensitive.',
-      'Misses the least, but expect more false positives to review.',
-    ],
-  },
-}
+// Texts are `deIdentify:hipaa.sensitivity.<level>`.
 
-/** Second line of a method card that needs no review. */
-function methodHint(method: DeidMethod, frameworkName: string) {
-  return method === 'SAFE_HARBOR'
-    ? `Best for standard ${frameworkName} workflows`
-    : 'Best for sharing data outside your organisation'
-}
 
 /** HIPAA: method, identifiers and output settings. */
 export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaSettingsProps) {
+  const { t } = useTranslation(['deIdentify', 'common'])
+  const catalog = useCatalog()
   const method = framework.methods.find((item) => item.id === draft.method)
   const identifiers = draft.identifiers ?? []
   const identifiersReady = method && (!method.customizable || identifiers.length > 0)
@@ -114,21 +84,21 @@ export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaS
 
   const outputOptions: DropdownOption<OutputMode>[] = options.outputModes.map((mode) => ({
     value: mode.id,
-    label: mode.name,
-    description: mode.description,
+    label: catalog.outputMode(mode).name,
+    description: catalog.outputMode(mode).description,
     icon: OUTPUT_ICONS[mode.id],
   }))
   const languageOptions: DropdownOption<Language>[] = options.languages.map((code) => ({
     value: code,
-    label: LANGUAGE_NAMES[code] ?? code,
+    label: catalog.language(code),
     icon: <MaskIcon src={languageIcon} />,
   }))
-  const sensitivityHelp = SENSITIVITY[draft.sensitivity ?? 'BALANCED'].help
+  const sensitivityLevel = draft.sensitivity ?? 'BALANCED'
 
   return (
     <>
       <Section aria-labelledby="method-heading">
-        <h3 id="method-heading">1. Choose Method</h3>
+        <h3 id="method-heading">{t('hipaa.method')}</h3>
         <Rail>
           <Cards role="radiogroup" aria-labelledby="method-heading">
             {framework.methods.map((item) => (
@@ -136,19 +106,23 @@ export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaS
                 key={item.id}
                 name="method"
                 value={item.id}
-                title={item.name}
-                badge={item.recommended ? 'Recommended' : undefined}
+                title={catalog.method(item).name}
+                badge={item.recommended ? t('common:recommended') : undefined}
                 checked={item.id === draft.method}
                 onChange={() => selectMethod(item)}
               >
-                <CardText>{item.description}</CardText>
+                <CardText>{catalog.method(item).description}</CardText>
                 {item.requiresReview ? (
                   <ReviewNote>
                     <MaskIcon src={warningIcon} aria-hidden />
-                    Requires expert review before use
+                    {t('hipaa.requiresReview')}
                   </ReviewNote>
                 ) : (
-                  <CardHint>{methodHint(item.id, framework.name)}</CardHint>
+                  <CardHint>
+                    {item.id === 'SAFE_HARBOR'
+                      ? t('hipaa.hintSafeHarbor', { framework: catalog.framework(framework).name })
+                      : t('hipaa.hintOther')}
+                  </CardHint>
                 )}
               </OptionCard>
             ))}
@@ -160,27 +134,23 @@ export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaS
         <Banner role="note">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Expert review required</strong>
-            <p>Results must be validated by a qualified statistician before use in production</p>
+            <strong>{t('hipaa.reviewTitle')}</strong>
+            <p>{t('hipaa.reviewText')}</p>
           </div>
         </Banner>
       )}
 
       <Section aria-labelledby="identifiers-heading" data-locked={!method || undefined}>
-        <h3 id="identifiers-heading">2. Applied Identifiers</h3>
+        <h3 id="identifiers-heading">{t('hipaa.identifiers')}</h3>
         {method && (
           <Rail>
             <Stack>
               <Description>
                 <strong>
-                  {method.customizable
-                    ? 'Choose which identifiers to remove from your document.'
-                    : 'These identifiers are removed from your document.'}
+                  {method.customizable ? t('hipaa.chooseIdentifiers') : t('hipaa.fixedIdentifiers')}
                 </strong>
                 <span>
-                  {method.customizable
-                    ? 'All categories are deselected by default'
-                    : 'Switch to a customizable method to pick them yourself'}
+                  {method.customizable ? t('hipaa.chooseHint') : t('hipaa.fixedHint')}
                 </span>
               </Description>
               <IdentifierPicker
@@ -195,35 +165,35 @@ export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaS
       </Section>
 
       <Section aria-labelledby="output-heading" data-locked={!identifiersReady || undefined}>
-        <h3 id="output-heading">3. Output Settings</h3>
+        <h3 id="output-heading">{t('hipaa.output')}</h3>
         {identifiersReady && (
           <Rail>
             <Stack sx={{ gap: '32px' }}>
               <Stack>
                 <Description>
-                  <strong>De-Identification Settings</strong>
-                  <span>Configure how to handle sensitive information</span>
+                  <strong>{t('hipaa.settingsTitle')}</strong>
+                  <span>{t('hipaa.settingsText')}</span>
                 </Description>
                 <Dropdowns>
                   <Dropdown
                     options={outputOptions}
                     value={draft.outputMode ?? 'REDACT'}
                     onChange={(next) => updateDraft({ outputMode: next })}
-                    aria-label="Output mode"
+                    aria-label={t('configuration.outputMode')}
                   />
                   <Dropdown
                     options={languageOptions}
                     value={draft.language ?? 'en'}
                     onChange={(next) => updateDraft({ language: next })}
-                    aria-label="Document language"
+                    aria-label={t('configuration.documentLanguage')}
                   />
                 </Dropdowns>
               </Stack>
 
               <Stack>
                 <Description>
-                  <strong id="sensitivity-heading">Detection sensitivity</strong>
-                  <span>Controls how carefully the system detects sensitive data.</span>
+                  <strong id="sensitivity-heading">{t('hipaa.sensitivityTitle')}</strong>
+                  <span>{t('hipaa.sensitivityText')}</span>
                 </Description>
                 <Cards role="radiogroup" aria-labelledby="sensitivity-heading" data-size="small">
                   {options.sensitivities.map((level) => (
@@ -232,18 +202,18 @@ export function HipaaSettings({ framework, options, draft, updateDraft }: HipaaS
                       compact
                       name="sensitivity"
                       value={level}
-                      title={SENSITIVITY[level].title}
-                      badge={level === 'BALANCED' ? 'Recommended' : undefined}
+                      title={t(`hipaa.sensitivity.${level}.title`)}
+                      badge={level === 'BALANCED' ? t('common:recommended') : undefined}
                       checked={draft.sensitivity === level}
                       onChange={() => updateDraft({ sensitivity: level })}
                     >
-                      <CardNote>{SENSITIVITY[level].note}</CardNote>
+                      <CardNote>{t(`hipaa.sensitivity.${level}.note`)}</CardNote>
                     </OptionCard>
                   ))}
                 </Cards>
                 <SensitivityHelp aria-live="polite">
-                  <strong>{sensitivityHelp[0]}</strong>
-                  <span>{sensitivityHelp[1]}</span>
+                  <strong>{t(`hipaa.sensitivity.${sensitivityLevel}.help`)}</strong>
+                  <span>{t(`hipaa.sensitivity.${sensitivityLevel}.detail`)}</span>
                 </SensitivityHelp>
               </Stack>
             </Stack>

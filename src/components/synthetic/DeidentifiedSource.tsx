@@ -1,4 +1,5 @@
 import { styled, type CSSObject } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { colors, shadows, typography } from '../../theme'
 
 export interface DeidentifiedSourceProps {
@@ -86,19 +87,20 @@ export function DeidentifiedSource({
   disabled = false,
   onToggle,
 }: DeidentifiedSourceProps) {
+  const { t } = useTranslation('synthetic')
   const expanded = variant === 'static' || selected
   const body = (
     <>
       <Title>
-        <strong>Use de-identified data as source</strong>
+        <strong>{t('deidentifiedSource.title')}</strong>
         <span>
-          {disabled ? 'De-identify a document first to use it here' : 'Use previously de-identified data'}
+          {disabled ? t('deidentifiedSource.unavailable') : t('deidentifiedSource.available')}
         </span>
       </Title>
       {expanded && (
         <Preview>
           <span className="DeidentifiedSource-text">{preview ?? fallback}</span>
-          <span className="DeidentifiedSource-note">Passed from current session</span>
+          <span className="DeidentifiedSource-note">{t('deidentifiedSource.note')}</span>
         </Preview>
       )}
     </>
@@ -106,7 +108,7 @@ export function DeidentifiedSource({
 
   if (variant === 'static') {
     return (
-      <Card data-variant="static" aria-label="Data source">
+      <Card data-variant="static" aria-label={t('deidentifiedSource.label')}>
         {body}
       </Card>
     )

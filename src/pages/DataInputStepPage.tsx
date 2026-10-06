@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { styled } from '@mui/material/styles'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import type { ApiError } from '../api/errors'
 import { FileDropZone, type DropZoneState } from '../components/de-identify/FileDropZone'
 import { InputModeTabs } from '../components/de-identify/InputModeTabs'
@@ -51,25 +53,30 @@ function activeText(draft: DeIdentifyDraft) {
 function describeUploadError(error: ApiError): UploadProblem {
   if (error.isRateLimited) {
     return {
-      title: 'Too many uploads',
-      message: 'Please wait a minute and try again',
-      note: 'Upload limit reached',
+      title: i18n.t('deIdentify:input.problems.rateLimited.title'),
+      message: i18n.t('deIdentify:input.problems.rateLimited.message'),
+      note: i18n.t('deIdentify:input.problems.rateLimited.note'),
     }
   }
   if (error.isNetworkError || error.status >= 500) {
     return {
-      title: 'Upload failed',
+      title: i18n.t('deIdentify:input.problems.failed.title'),
       message: error.isNetworkError
-        ? "Couldn't reach the server. Check your connection"
-        : 'Something went wrong on our side. Please try again',
-      note: 'The file was not uploaded',
+        ? i18n.t('deIdentify:input.problems.failed.unreachable')
+        : i18n.t('deIdentify:input.problems.failed.server'),
+      note: i18n.t('deIdentify:input.problems.failed.note'),
     }
   }
   // 422 from text extraction: unreadable, scanned, too long, not UTF-8.
-  return { title: "Couldn't read the file", message: error.message, note: 'Try a different file' }
+  return {
+    title: i18n.t('deIdentify:input.problems.unreadable.title'),
+    message: error.message,
+    note: i18n.t('deIdentify:input.problems.unreadable.note'),
+  }
 }
 
 const DataInputStepPage = () => {
+  const { t } = useTranslation('deIdentify')
   const { draft, updateDraft } = useDeIdentify()
   const extract = useExtractText()
   const [problem, setProblem] = useState<UploadProblem | null>(null)
@@ -117,8 +124,8 @@ const DataInputStepPage = () => {
   return (
     <Root>
       <Header>
-        <h2>Enter Your Data</h2>
-        <p>Paste text or upload a file to anonymize</p>
+        <h2>{t('input.title')}</h2>
+        <p>{t('input.subtitle')}</p>
       </Header>
 
       <Tabs>

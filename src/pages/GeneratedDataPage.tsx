@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/errors'
 import type { Dataset, DatasetRecord } from '../api/types'
@@ -109,6 +110,7 @@ function ErrorBanner({ title, message }: { title: string; message: string }) {
 
 /** Shown without a dataset: nothing generated yet, it expired, or it failed to load. */
 function NoDataset({ title, message }: { title: string; message: string }) {
+  const { t } = useTranslation('synthetic')
   const navigate = useNavigate()
   return (
     <Body>
@@ -117,7 +119,7 @@ function NoDataset({ title, message }: { title: string; message: string }) {
           <h2>{title}</h2>
           <p>{message}</p>
           <Button variant="secondary" size="medium" onClick={() => navigate(SETTINGS_URL)}>
-            Go to Generation Settings
+            {t('result.page.goToSettings')}
           </Button>
         </Empty>
       </Wrapper>
@@ -126,6 +128,7 @@ function NoDataset({ title, message }: { title: string; message: string }) {
 }
 
 const GeneratedDataPage = () => {
+  const { t } = useTranslation('synthetic')
   const [params] = useSearchParams()
   const datasetId = params.get('dataset') ?? undefined
   const dataset = useDataset(datasetId)
@@ -133,8 +136,8 @@ const GeneratedDataPage = () => {
   if (!datasetId) {
     return (
       <NoDataset
-        title="No dataset to review"
-        message="Configure the generation settings to create a synthetic dataset."
+        title={t('result.page.noDataset')}
+        message={t('result.page.noDatasetText')}
       />
     )
   }
@@ -142,12 +145,8 @@ const GeneratedDataPage = () => {
     const gone = dataset.error instanceof ApiError && dataset.error.isGone
     return (
       <NoDataset
-        title={gone ? 'This dataset has expired' : "Couldn't load the dataset"}
-        message={
-          gone
-            ? 'Generated data is kept only for the session. Generate a new dataset.'
-            : dataset.error.message
-        }
+        title={gone ? t('result.page.expired') : t('result.page.loadFailed')}
+        message={gone ? t('result.page.expiredText') : dataset.error.message}
       />
     )
   }
@@ -167,6 +166,7 @@ const GeneratedDataPage = () => {
 type Dialog = 'columns' | 'validation' | 'regenerate' | 'download' | null
 
 function GeneratedData({ dataset }: { dataset: Dataset }) {
+  const { t } = useTranslation(['synthetic', 'common'])
   const navigate = useNavigate()
   const validation = useDatasetValidation(dataset.id)
   const [columns, setColumns] = useState(() => defaultColumns(dataset))
@@ -212,15 +212,15 @@ function GeneratedData({ dataset }: { dataset: Dataset }) {
         <Wrapper>
           {validation.isError ? (
             <ErrorBanner
-              title="Couldn't validate the dataset"
-              message={`${validation.error.message}. Review the records before downloading.`}
+              title={t('result.page.validateFailed')}
+              message={t('result.page.validateFailedText', { message: validation.error.message })}
             />
           ) : (
             <StatusBanner status={status} />
           )}
           {regenerate.isError && (
             <ErrorBanner
-              title="Couldn't regenerate the dataset"
+              title={t('result.page.regenerateFailed')}
               message={regenerate.error.message}
             />
           )}
@@ -255,7 +255,7 @@ function GeneratedData({ dataset }: { dataset: Dataset }) {
           disabled={regenerate.isPending}
           onClick={() => (status === 'failed' ? onRegenerate() : setDialog('regenerate'))}
         >
-          {regenerate.isPending ? 'Regenerating…' : 'Regenerate'}
+          {regenerate.isPending ? t('common:actions.regenerating') : t('common:actions.regenerate')}
         </Button>
         <Button
           variant="secondary"
@@ -264,7 +264,7 @@ function GeneratedData({ dataset }: { dataset: Dataset }) {
           disabled={!canDownload}
           onClick={openDownload}
         >
-          Download
+          {t('common:actions.download')}
         </Button>
       </Footer>
 

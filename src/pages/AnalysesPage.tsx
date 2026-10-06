@@ -1,16 +1,13 @@
 import Pagination from '@mui/material/Pagination'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Framework, type AnalysesFilter } from '../api/types'
 import warningIcon from '../assets/configuration/warning.svg'
 import addIcon from '../assets/review/add.svg'
 import downloadIcon from '../assets/review/report.svg'
 import { AnalysesTable } from '../components/dashboard/AnalysesTable'
-import {
-  FRAMEWORK_LABELS,
-  FRAMEWORK_ORDER,
-  type FrameworkFilter,
-} from '../components/dashboard/dashboardModel'
+import { FRAMEWORK_ORDER, type FrameworkFilter } from '../components/dashboard/dashboardModel'
 import { Banner } from '../components/de-identify/configStyles'
 import { Button, DateRangePicker, Dropdown, MaskIcon, type DateRange } from '../components/ui'
 import { useAnalysesPage, useExportAnalyses } from '../hooks'
@@ -80,10 +77,6 @@ const Pager = styled(Pagination)({
   '& .MuiPaginationItem-ellipsis': { lineHeight: '40px' },
 })
 
-const frameworkOptions = [
-  { value: 'ALL' as const, label: 'All frameworks' },
-  ...FRAMEWORK_ORDER.map((f) => ({ value: f, label: FRAMEWORK_LABELS[f] })),
-]
 
 // Days travel in the URL as yyyy-mm-dd, in the user's zone.
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -101,6 +94,7 @@ const isFramework = (value: string | null): value is Framework =>
 
 /** Every past analysis, filterable by framework and day, ten per page. */
 const AnalysesPage = () => {
+  const { t } = useTranslation(['analyses', 'common'])
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const frameworkParam = params.get('framework')
@@ -118,6 +112,10 @@ const AnalysesPage = () => {
   const data = list.data
   const pages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1
   const filtered = !!framework || !!range.from
+  const frameworkOptions = [
+    { value: 'ALL' as const, label: t('common:frameworkFilter.all') },
+    ...FRAMEWORK_ORDER.map((f) => ({ value: f, label: t(`common:frameworks.${f}`) })),
+  ]
 
   /** Changing a filter goes back to page 1. */
   const update = (changes: Record<string, string | null>) =>
@@ -140,7 +138,7 @@ const AnalysesPage = () => {
           options={frameworkOptions}
           value={framework ?? 'ALL'}
           onChange={(value) => update({ framework: value === 'ALL' ? null : value })}
-          aria-label="Framework"
+          aria-label={t('common:frameworkFilter.label')}
         />
         <DateRangePicker
           className="Analyses-filter"
@@ -148,7 +146,7 @@ const AnalysesPage = () => {
           onChange={({ from, to }) =>
             update({ from: from && toParam(from), to: to && toParam(to) })
           }
-          aria-label="Date"
+          aria-label={t('table.date')}
         />
         <Button
           variant="secondary"
@@ -156,7 +154,7 @@ const AnalysesPage = () => {
           startIcon={<MaskIcon src={addIcon} />}
           onClick={() => navigate(NEW_ANALYSIS_URL)}
         >
-          New analysis
+          {t('common:actions.newAnalysis')}
         </Button>
       </Toolbar>
 
@@ -164,18 +162,18 @@ const AnalysesPage = () => {
         <Banner role="alert" data-tone="error">
           <MaskIcon src={warningIcon} aria-hidden />
           <div>
-            <strong>Couldn&apos;t export the analyses</strong>
+            <strong>{t('exportFailed')}</strong>
             <p>{exportCsv.error.message}</p>
           </div>
         </Banner>
       )}
 
-      <Card aria-label="All analyses" aria-busy={list.isPlaceholderData || undefined}>
+      <Card aria-label={t('table.label')} aria-busy={list.isPlaceholderData || undefined}>
         <AnalysesTable
           layout="full"
           rows={data?.items}
           error={list.error}
-          emptyText={filtered ? 'No analyses match these filters' : 'No analyses yet'}
+          emptyText={filtered ? t('table.noMatch') : t('table.empty')}
         />
         {!!data?.total && (
           <Footer>
@@ -187,7 +185,16 @@ const AnalysesPage = () => {
               showLastButton
               siblingCount={1}
               boundaryCount={1}
-              aria-label="Pages"
+              aria-label={t('common:pagination.label')}
+              getItemAriaLabel={(type, value, selected) =>
+                type === 'page'
+                  ? selected
+                    ? t('common:pagination.current', { page: value })
+                    : t('common:pagination.page', { page: value })
+                  : type === 'start-ellipsis' || type === 'end-ellipsis'
+                    ? t('common:pagination.ellipsis')
+                    : t(`common:pagination.${type}`)
+              }
             />
             <Button
               variant="ghost"
@@ -196,7 +203,7 @@ const AnalysesPage = () => {
               disabled={exportCsv.isPending}
               onClick={() => exportCsv.mutate(filter)}
             >
-              {exportCsv.isPending ? 'Exporting…' : 'Export CSV'}
+              {exportCsv.isPending ? t('common:actions.exporting') : t('common:actions.exportCsv')}
             </Button>
           </Footer>
         )}

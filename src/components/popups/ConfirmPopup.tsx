@@ -3,6 +3,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import CloseIcon from '@mui/icons-material/Close'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import warningIcon from '../../assets/popups/warning.svg'
 import { colors, radius, shadows, typography } from '../../theme'
 import { Button, IconButton } from '../ui'
@@ -65,6 +66,7 @@ export function ConfirmPopup({
   confirmLabel,
   pending = false,
 }: ConfirmPopupProps) {
+  const { t } = useTranslation()
   const titleId = useId()
   const descriptionId = useId()
 
@@ -77,7 +79,7 @@ export function ConfirmPopup({
       style={panelStyle}
     >
       <Close>
-        <IconButton variant="ghost" aria-label="Close" onClick={onClose}>
+        <IconButton variant="ghost" aria-label={t('actions.close')} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Close>
@@ -90,7 +92,7 @@ export function ConfirmPopup({
         <hr />
         <Actions>
           <Button variant="ghost" size="medium" startIcon={<ArrowBackIcon />} onClick={onClose}>
-            Cancel
+            {t('actions.cancel')}
           </Button>
           <Button
             variant="secondary"

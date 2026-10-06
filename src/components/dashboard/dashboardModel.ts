@@ -1,15 +1,13 @@
 import type { DashboardParams, EntityMethod, EntityType, Framework } from '../../api/types'
+import { formatDate, formatDayMonth, formatNumber } from '../../i18n/format'
 import { colors } from '../../theme'
 
 export const ALL_ANALYSES_URL = '/app/analyses'
 
 export type PeriodDays = '7' | '30' | '90'
 
-export const PERIOD_OPTIONS: { value: PeriodDays; label: string }[] = [
-  { value: '7', label: 'Last 7 days' },
-  { value: '30', label: 'Last 30 days' },
-  { value: '90', label: 'Last 90 days' },
-]
+/** Labels are `dashboard:periods.<value>`. */
+export const PERIODS: PeriodDays[] = ['7', '30', '90']
 
 export type FrameworkFilter = Framework | 'ALL'
 
@@ -25,14 +23,8 @@ export function periodParams(days: PeriodDays, framework: FrameworkFilter): Dash
   }
 }
 
-export const FRAMEWORK_LABELS: Record<Framework, string> = {
-  HIPAA: 'HIPAA',
-  EU_GDPR: 'EU GDPR',
-  UK_GDPR: 'UK GDPR',
-  SWISS_FADP: 'Swiss FADP',
-}
-
-export const FRAMEWORK_ORDER = Object.keys(FRAMEWORK_LABELS) as Framework[]
+/** Labels are `common:frameworks.<id>`. */
+export const FRAMEWORK_ORDER: Framework[] = ['HIPAA', 'EU_GDPR', 'UK_GDPR', 'SWISS_FADP']
 
 /** Fixed per framework (never by rank), so a filter never repaints a slice. */
 export const FRAMEWORK_COLORS: Record<Framework, string> = {
@@ -42,7 +34,10 @@ export const FRAMEWORK_COLORS: Record<Framework, string> = {
   SWISS_FADP: colors.accent[600],
 }
 
-/** Order from the design; Token sits next to the placeholder it resembles. */
+/**
+ * Order from the design; Token sits next to the placeholder it resembles.
+ * Labels are `common:methods.<id>`.
+ */
 export const METHOD_ORDER: EntityMethod[] = [
   'REDACT',
   'PLACEHOLDER',
@@ -55,56 +50,42 @@ export const METHOD_ORDER: EntityMethod[] = [
   'NLP_REDACTION',
 ]
 
-export const METHOD_LABELS: Record<EntityMethod, string> = {
-  REDACT: 'Redact',
-  PLACEHOLDER: 'Replace',
-  TOKEN: 'Token',
-  MASK: 'Mask',
-  HASH: 'Hash',
-  GENERALISE: 'Generalise',
-  PSEUDONYMISE: 'Pseudonymise',
-  SYNTHETIC: 'Synthetic',
-  NLP_REDACTION: 'NLP redaction',
-}
+/** Catalogue entity types have labels; others are raw detector names (US_BANK_NUMBER). */
+export const isEntityType = (type: string): type is EntityType => ENTITY_TYPES.includes(type as EntityType)
 
-const ENTITY_LABELS: Record<EntityType, string> = {
-  PERSON: 'Person',
-  ORGANIZATION: 'Organisation',
-  LOCATION: 'Location',
-  DATE_TIME: 'Date / Time',
-  IP: 'IP Address',
-  GEOPOINT: 'Geopoint',
-  NATIONAL_ID: 'National ID',
-  ID_NUMBER: 'ID Number',
-  PASSPORT: 'Passport',
-  CREDIT_CARD: 'Credit Card',
-  BANK_ACCOUNT: 'Bank Account',
-  EMAIL: 'Email',
-  PHONE: 'Phone',
-  MEDICAL_RECORD_NUMBER: 'MRN',
-  DEVICE_ID: 'Device ID',
-  FREE_TEXT: 'Free Text PHI',
-  BIOLOGICAL_DATA: 'Bio. Data',
-  PHOTO: 'Photo / Image',
-}
+const ENTITY_TYPES: EntityType[] = [
+  'PERSON',
+  'ORGANIZATION',
+  'LOCATION',
+  'DATE_TIME',
+  'IP',
+  'GEOPOINT',
+  'NATIONAL_ID',
+  'ID_NUMBER',
+  'PASSPORT',
+  'CREDIT_CARD',
+  'BANK_ACCOUNT',
+  'EMAIL',
+  'PHONE',
+  'MEDICAL_RECORD_NUMBER',
+  'DEVICE_ID',
+  'FREE_TEXT',
+  'BIOLOGICAL_DATA',
+  'PHOTO',
+]
 
-/** Types outside the catalogue arrive as raw detector names, e.g. US_BANK_NUMBER. */
-export const entityLabel = (type: string) =>
-  ENTITY_LABELS[type as EntityType] ?? type.replace(/_/g, ' ')
-
-const numberFormat = new Intl.NumberFormat('en-US')
-export const formatNumber = (value: number) => numberFormat.format(value)
+export { formatNumber } from '../../i18n/format'
 
 export const formatRate = (rate: number | null) =>
-  rate === null ? '—' : `${(rate * 100).toFixed(1)}%`
-
-const shortDate = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short' })
-const longDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  rate === null
+    ? '—'
+    : formatNumber(rate, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 })
 
 /** "2026-04-01" (a calendar day, no zone) → "01 Apr". */
-export const formatDay = (day: string) => shortDate.format(new Date(`${day}T00:00:00`))
-export const formatLongDay = (day: string) => longDate.format(new Date(`${day}T00:00:00`))
-export const formatDate = (iso: string) => longDate.format(new Date(iso))
+export const formatDay = (day: string) => formatDayMonth(`${day}T00:00:00`)
+const LONG_DATE = { month: 'short', day: 'numeric', year: 'numeric' } as const
+export const formatLongDay = (day: string) => formatDate(`${day}T00:00:00`, LONG_DATE)
+export const formatDateTime = (iso: string) => formatDate(iso, LONG_DATE)
 
 /** A round top for the axis and evenly spaced ticks: 0, 200, … 1000. */
 export function niceScale(max: number, ticks = 5) {

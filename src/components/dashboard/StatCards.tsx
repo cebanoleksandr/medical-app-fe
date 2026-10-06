@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { Dashboard } from '../../api/types'
 import descriptionIcon from '../../assets/dashboard/description.svg'
 import financeModeIcon from '../../assets/dashboard/finance-mode.svg'
@@ -58,20 +59,21 @@ interface StatCardsProps {
 
 /** Documents, entities, anonymization rate and synthetic records for the period. */
 export function StatCards({ data, empty }: StatCardsProps) {
+  const { t } = useTranslation('dashboard')
   const stats = [
-    { label: 'Total Documents', icon: descriptionIcon, value: data && formatNumber(data.analyses.count) },
+    { label: t('stats.documents'), icon: descriptionIcon, value: data && formatNumber(data.analyses.count) },
     {
-      label: 'Entities Detected',
+      label: t('stats.entities'),
       icon: manageSearchIcon,
       value: data && formatNumber(data.analyses.entitiesDetected),
     },
     {
-      label: 'Anonymization Rate',
+      label: t('stats.rate'),
       icon: playlistCheckIcon,
-      value: data && (empty ? '0' : formatRate(data.analyses.anonymizationRate)),
+      value: data && (empty ? formatNumber(0) : formatRate(data.analyses.anonymizationRate)),
     },
     {
-      label: 'Synthetic Records',
+      label: t('stats.records'),
       icon: financeModeIcon,
       value: data && formatNumber(data.datasets.recordsGenerated),
     },

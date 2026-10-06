@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import adminPanelIcon from '../../assets/landing/admin-panel-settings.svg'
 import databaseIcon from '../../assets/landing/database.svg'
 import descriptionIcon from '../../assets/landing/description.svg'
@@ -12,8 +13,8 @@ import { SectionHeader } from './SectionHeader'
 type CardVariant = 'glow' | 'solid'
 
 interface Feature {
-  title: string
-  description: string
+  /** Key under `features` in the `landing` namespace. */
+  id: 'signal' | 'synthetic' | 'compliance' | 'privacy'
   icon: string
   variant: CardVariant
   /** Share of the row, from the Figma widths. */
@@ -24,16 +25,13 @@ interface Feature {
 const rows: Feature[][] = [
   [
     {
-      title: 'Deep Signal Detection',
-      description: 'Align with global regulations through a single adaptive compliance layer.',
+      id: 'signal',
       icon: manageSearchIcon,
       variant: 'glow',
       grow: 486,
     },
     {
-      title: 'Synthetic Intelligence Layer',
-      description:
-        'Generate high-fidelity synthetic datasets that preserve patterns — without exposing real identities.',
+      id: 'synthetic',
       icon: databaseIcon,
       variant: 'solid',
       grow: 689,
@@ -41,15 +39,13 @@ const rows: Feature[][] = [
   ],
   [
     {
-      title: 'Unified Compliance Engine',
-      description: 'Align with global regulations through a single adaptive compliance layer.',
+      id: 'compliance',
       icon: descriptionIcon,
       variant: 'solid',
       grow: 690,
     },
     {
-      title: 'Adaptive Privacy Shield',
-      description: 'Continuously anonymize and protect data while maintaining analytical value.',
+      id: 'privacy',
       icon: adminPanelIcon,
       variant: 'glow',
       grow: 486,
@@ -173,25 +169,26 @@ const Outro = styled(motion.div)({
 })
 
 export function Features() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Inner>
         <SectionHeader
-          title="Protect Patient Privacy Without Compromising Data Value"
-          description="Comprehensive tools for healthcare organizations to securely manage clinical data"
+          title={t('features.title')}
+          description={t('features.description')}
         />
         <Grid>
           {rows.map((row, index) => (
             <Row key={index} features={row} {...reveal} variants={stagger(0.12)}>
               {row.map((feature) => (
-                <Card key={feature.title} variant={feature.variant} variants={fadeUp} whileHover={{ y: -4 }}>
+                <Card key={feature.id} variant={feature.variant} variants={fadeUp} whileHover={{ y: -4 }}>
                   <div className="Feature-top">
-                    <p>{feature.description}</p>
+                    <p>{t(`features.${feature.id}.description`)}</p>
                     <span className="Feature-icon">
                       <img src={feature.icon} alt="" />
                     </span>
                   </div>
-                  <h3>{feature.title}</h3>
+                  <h3>{t(`features.${feature.id}.title`)}</h3>
                 </Card>
               ))}
             </Row>
@@ -199,11 +196,8 @@ export function Features() {
         </Grid>
         <Divider {...reveal} variants={drawLine} />
         <Outro {...reveal} variants={stagger(0.12)}>
-          <motion.h2 variants={fadeUp}>From Data Intelligence to Compliance</motion.h2>
-          <motion.p variants={fadeUp}>
-            Seamlessly transition from data intelligence to regulatory compliance with
-            built-in frameworks tailored to your industry.
-          </motion.p>
+          <motion.h2 variants={fadeUp}>{t('features.outroTitle')}</motion.h2>
+          <motion.p variants={fadeUp}>{t('features.outro')}</motion.p>
         </Outro>
       </Inner>
     </Root>

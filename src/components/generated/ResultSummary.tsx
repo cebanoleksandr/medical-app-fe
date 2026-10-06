@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { Dataset, ValidationReport } from '../../api/types'
 import arrowCircleDownIcon from '../../assets/generated/arrow-circle-down.svg'
 import bannerErrorIcon from '../../assets/generated/banner-error.svg'
@@ -16,9 +17,9 @@ import { formatRecords } from '../synthetic/generationSettings'
 import { Glyph } from './parts'
 import { TONE_COLOR } from './styles'
 import {
-  FRAMEWORK_NAMES,
-  LEVEL_LABELS,
-  QUALITY,
+  frameworkName,
+  levelLabel,
+  qualityLabel,
   STATUS_TONE,
   type ResultStatus,
   type Tone,
@@ -57,27 +58,28 @@ const BannerRoot = styled('div')({
   },
 })
 
-const BANNER: Record<ResultStatus, { icon: string; text: string }> = {
-  passed: { icon: bannerSuccessIcon, text: 'Generation completed' },
-  warning: { icon: bannerWarningIcon, text: 'Passed with warnings' },
-  failed: { icon: bannerErrorIcon, text: 'Failed' },
+// Texts are `synthetic:result.banner.<status>`.
+const BANNER_ICONS: Record<ResultStatus, string> = {
+  passed: bannerSuccessIcon,
+  warning: bannerWarningIcon,
+  failed: bannerErrorIcon,
 }
 
 /** Verdict of the validation; a spinner while it runs. */
 export function StatusBanner({ status }: { status: ResultStatus | undefined }) {
+  const { t } = useTranslation('synthetic')
   if (!status) {
     return (
       <BannerRoot data-status="pending" role="status">
         <CircularProgress size={28} thickness={4} color="inherit" />
-        <p>Validating dataset…</p>
+        <p>{t('result.banner.pending')}</p>
       </BannerRoot>
     )
   }
-  const { icon, text } = BANNER[status]
   return (
     <BannerRoot data-status={status} role="status">
-      <Glyph src={icon} size={36} />
-      <p>{text}</p>
+      <Glyph src={BANNER_ICONS[status]} size={36} />
+      <p>{t(`result.banner.${status}`)}</p>
     </BannerRoot>
   )
 }
@@ -122,7 +124,7 @@ const Card = styled('section')({
 const Facts = styled('dl')({
   ...typography.bodyS,
   display: 'grid',
-  gridTemplateColumns: 'var(--key) minmax(0, 1fr)',
+  gridTemplateColumns: 'minmax(var(--key), max-content) minmax(0, 1fr)',
   columnGap: 8,
   rowGap: 4,
   margin: 0,
@@ -201,6 +203,7 @@ interface SummaryCardsProps {
 
 /** Compliance, data quality, export readiness and the dataset's shape. */
 export function SummaryCards({ dataset, report, status }: SummaryCardsProps) {
+  const { t } = useTranslation('synthetic')
   const pendingAccent = colors.neutral[200]
   const statusAccent = status ? TONE_COLOR[STATUS_TONE[status]] : pendingAccent
   const detected = report?.compliance.directIdentifiers === 'DETECTED'
@@ -213,17 +216,17 @@ export function SummaryCards({ dataset, report, status }: SummaryCardsProps) {
     <Row>
       <SummaryCard
         icon={<Glyph src={verifiedIcon} size={24} slot={16} />}
-        title="Compliance"
+        title={t('result.cards.compliance')}
         accent={report ? TONE_COLOR[complianceTone] : pendingAccent}
       >
         {facts(100, [
-          ['Framework:', FRAMEWORK_NAMES[dataset.framework].short],
-          ['Risk level:', report ? LEVEL_LABELS[report.compliance.riskLevel] : PENDING],
+          [t('result.cards.framework'), frameworkName(dataset.framework, 'short')],
+          [t('result.cards.risk'), report ? levelLabel(report.compliance.riskLevel) : PENDING],
           [
-            'Direct identifiers:',
+            t('result.cards.identifiers'),
             report ? (
               <span style={detected ? { color: colors.error } : undefined}>
-                {detected ? 'Detected' : 'Not detected'}
+                {detected ? t('result.cards.detected') : t('result.cards.notDetected')}
               </span>
             ) : (
               PENDING
@@ -234,22 +237,24 @@ export function SummaryCards({ dataset, report, status }: SummaryCardsProps) {
 
       <SummaryCard
         icon={<Glyph src={financeModeIcon} size={16} />}
-        title="Data Quality"
+        title={t('result.cards.quality')}
         accent={statusAccent}
       >
         {facts(75, [
-          ['Quality:', report ? QUALITY[report.quality.quality].label : PENDING],
-          ['Consistency:', report ? LEVEL_LABELS[report.quality.consistency] : PENDING],
+          [t('result.cards.qualityRow'), report ? qualityLabel(report.quality.quality) : PENDING],
+          [t('result.cards.consistency'), report ? levelLabel(report.quality.consistency) : PENDING],
           [
-            'Warnings:',
+            t('result.cards.warnings'),
             !report ? (
               PENDING
             ) : detected ? (
-              <Badge data-tone="error">Direct identifiers</Badge>
+              <Badge data-tone="error">{t('result.cards.directIdentifiers')}</Badge>
             ) : warnings ? (
-              <Badge data-tone="warning">{warnings} low-confidence</Badge>
+              <Badge data-tone="warning">
+                {t('result.cards.lowConfidence', { count: warnings })}
+              </Badge>
             ) : (
-              'None'
+              t('result.cards.none')
             ),
           ],
         ])}
@@ -257,7 +262,7 @@ export function SummaryCards({ dataset, report, status }: SummaryCardsProps) {
 
       <SummaryCard
         icon={<Glyph src={arrowCircleDownIcon} size={16} />}
-        title="Export"
+        title={t('result.cards.export')}
         accent={statusAccent}
       >
         <Note>
@@ -266,23 +271,27 @@ export function SummaryCards({ dataset, report, status }: SummaryCardsProps) {
           ) : (
             <Glyph src={checkCircleIcon} size={16} color={status ? colors.success : colors.neutral[400]} />
           )}
-          {!status ? 'Checking…' : failed ? 'Do not download' : 'Ready to download'}
+          {!status
+            ? t('result.cards.checking')
+            : failed
+              ? t('result.cards.doNotDownload')
+              : t('result.cards.ready')}
         </Note>
         <Note>
           <Glyph src={arrowCircleDownIcon} size={16} color={colors.neutral[500]} />
-          Session only — download before leaving
+          {t('result.cards.session')}
         </Note>
       </SummaryCard>
 
       <SummaryCard
         icon={<Glyph src={tableChartIcon} size={24} slot={16} />}
-        title="Dataset Summary"
+        title={t('result.cards.summary')}
         accent={colors.neutral[100]}
       >
         {facts(52, [
-          ['Format:', dataset.format],
-          ['Records:', formatRecords(dataset.records)],
-          ['Fields:', formatRecords(dataset.fields)],
+          [t('result.cards.format'), dataset.format],
+          [t('result.cards.records'), formatRecords(dataset.records)],
+          [t('result.cards.fields'), formatRecords(dataset.fields)],
         ])}
       </SummaryCard>
     </Row>

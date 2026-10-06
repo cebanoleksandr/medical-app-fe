@@ -1,0 +1,51 @@
+{
+  "nav": {
+    "label": "Main",
+    "dashboard": "Dashboard",
+    "allAnalyses": "All Analyses",
+    "deIdentify": "De-Identify",
+    "synthetic": "Synthetic Data",
+    "generationSettings": "Generation Settings",
+    "generatedData": "Generated Data",
+    "signOut": "Sign out"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Monitor anonymization activity and compliance performance"
+    },
+    "analyses": {
+      "title": "All Analyses",
+      "subtitle": "Complete history of de-identification jobs"
+    },
+    "deIdentify": {
+      "title": "New Analysis",
+      "subtitle": "Configure your anonymization pipeline"
+    },
+    "synthetic": {
+      "title": "Synthetic Data Generator",
+      "subtitle": "Generate realistic but completely fake clinical data for development"
+    },
+    "generatedData": {
+      "title": "Generated Data",
+      "subtitle": "Review your dataset before downloading"
+    }
+  },
+  "steps": {
+    "compliance": "Compliance",
+    "input": "Data Input",
+    "configuration": "Configuration",
+    "review": "Review & Run"
+  },
+  "logout": {
+    "title": "Sign out?",
+    "description": "You will be signed out of your account.<br/>You can sign back in at any time.",
+    "confirm": "Continue",
+    "pending": "Signing out…"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist<br/>or may have been moved.",
+    "home": "Go to home"
+  }
+}

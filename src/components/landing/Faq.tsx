@@ -2,34 +2,13 @@ import { useId, useState } from 'react'
 import Collapse from '@mui/material/Collapse'
 import { styled } from '@mui/material/styles'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import chevronIcon from '../../assets/landing/chevron-down.svg'
 import { Container, NARROW, TABLET, sectionPadding } from '../layouts/landing/styles'
 import { colors, typography } from '../../theme'
 import { fadeUp, reveal, stagger } from './motion'
 import { SectionHeader } from './SectionHeader'
 
-const questions = [
-  {
-    question: 'Do you have GDPR compliance?',
-    answer:
-      'Yes. Clinical Data Studio fully supports GDPR requirements for personal data protection. Our platform automatically detects and anonymizes PII according to GDPR standards, ensuring your organization meets EU data protection obligations while maintaining full data utility for analysis and research.',
-  },
-  {
-    question: 'Do you have HIPAA compliance?',
-    answer:
-      'Yes. We provide full HIPAA compliance support with two de-identification methods: Safe Harbor (removing all 18 PHI identifiers) and Expert Determination (statistical risk-based approach with justification). Both methods produce audit-ready compliance reports accepted by healthcare regulatory bodies.',
-  },
-  {
-    question: 'Can I export the anonymized or synthetic data after processing?',
-    answer:
-      'Yes. After processing, you can download your anonymized or synthetic data in PDF format. A compliance report with full audit trail is also available for download directly from the results screen.',
-  },
-  {
-    question: 'What are the pricing plans?',
-    answer:
-      "We offer a free trial so you can explore the platform before purchasing. For enterprise pricing and volume-based plans, reach out to our team and we'll find the best option for your organization.",
-  },
-]
 
 const Root = styled('section')({
   ...sectionPadding,
@@ -114,15 +93,16 @@ function FaqItem({ question, answer, defaultOpen }: {
 }
 
 export function Faq() {
+  const { t } = useTranslation('landing')
   return (
     <Root>
       <Inner>
         <SectionHeader
-          title="Frequently Asked Questions"
-          description="Got questions? We've got answers. Find everything you need to know about using our platform, plans, and features."
+          title={t('faq.title')}
+          description={t('faq.description')}
         />
         <List {...reveal} variants={stagger(0.08)}>
-          {questions.map((item, index) => (
+          {t('faq.items', { returnObjects: true }).map((item, index) => (
             <FaqItem key={item.question} {...item} defaultOpen={index === 0} />
           ))}
         </List>

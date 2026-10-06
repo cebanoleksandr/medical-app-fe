@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../api/errors'
 import {
@@ -34,6 +35,8 @@ import {
   useSource,
   useSyntheticOptions,
 } from '../hooks'
+import i18n from '../i18n'
+import { useCatalog } from '../i18n/useCatalog'
 import { colors, shadows, typography } from '../theme'
 
 const STACK = '@media (max-width: 960px)'
@@ -183,12 +186,14 @@ type SourceMode = 'type' | 'file' | 'document'
 
 function problemOf(error: unknown) {
   return {
-    title: "Couldn't read this file",
-    message: error instanceof Error ? error.message : 'Please try another file',
+    title: i18n.t('synthetic:settings.fileUnreadable'),
+    message: error instanceof Error ? error.message : i18n.t('synthetic:settings.fileTryAnother'),
   }
 }
 
 const GenerationSettingsPage = () => {
+  const { t } = useTranslation(['synthetic', 'common'])
+  const catalog = useCatalog()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   // Set by Review's "Generate Synthetic Data": the source already exists.
@@ -299,34 +304,34 @@ const GenerationSettingsPage = () => {
 
   const frameworkOptions = (options.data?.frameworks ?? []).map((f) => ({
     value: f.id,
-    label: f.name,
-    description: f.description,
+    label: catalog.framework(f).name,
+    description: catalog.framework(f).description,
   }))
   const formatOptions = (options.data?.formats ?? []).map((f) => ({ value: f, label: f }))
-  const typeOptions = (options.data?.datasetTypes ?? []).map((t) => ({
-    value: t.id,
-    label: t.name,
+  const typeOptions = (options.data?.datasetTypes ?? []).map((type) => ({
+    value: type.id,
+    label: t(`datasetTypes.${type.id}`, { defaultValue: type.name }),
   }))
 
   const single = !!passedSourceId && !passedFailed
   const generateError = generate.error
   const generateErrorText =
     generateError instanceof ApiError && generateError.isGone
-      ? 'The data source has expired. Choose the source again.'
+      ? t('settings.sourceExpired')
       : generateError?.message
 
   const dataSourceCard = (
     <Card data-fit aria-labelledby="data-source-heading">
-      <h3 id="data-source-heading">Data source</h3>
+      <h3 id="data-source-heading">{t('settings.dataSource')}</h3>
       <Field>
-        <span id="dataset-type-label">Dataset type</span>
+        <span id="dataset-type-label">{t('settings.datasetType')}</span>
         <Dropdown<DatasetType>
           size="field"
           options={typeOptions}
           value={datasetType}
           onChange={setDatasetType}
           triggerIcon={<FieldIcon src={articleIcon} />}
-          placeholder="Dataset type"
+          placeholder={t('settings.datasetType')}
           // A source brings its own columns.
           disabled={mode === 'document' || fileMode || !options.data}
           aria-labelledby="dataset-type-label"
@@ -345,7 +350,7 @@ const GenerationSettingsPage = () => {
       ) : (
         <UploadBlock>
           <Field>
-            <span>Upload your file</span>
+            <span>{t('settings.uploadFile')}</span>
             <SourceDropZone
               state={upload}
               onFile={(file) => {
@@ -355,7 +360,7 @@ const GenerationSettingsPage = () => {
               onRemove={removeFile}
             />
           </Field>
-          <Or>or</Or>
+          <Or>{t('settings.or')}</Or>
           <DeidentifiedSource
             variant="toggle"
             preview={sessionText}
@@ -372,16 +377,16 @@ const GenerationSettingsPage = () => {
       <Body>
         <Wrapper>
           <PageHeader>
-            <h2>Generation Settings</h2>
-            <p>Configure the synthetic data parameters</p>
+            <h2>{t('settings.title')}</h2>
+            <p>{t('settings.subtitle')}</p>
           </PageHeader>
 
           {passedFailed && (
             <Banner role="alert" data-tone="error">
               <MaskIcon src={warningIcon} aria-hidden />
               <div>
-                <strong>The de-identified source is no longer available</strong>
-                <p>{passedSource.error.message}. Choose a data source below.</p>
+                <strong>{t('settings.sourceGone')}</strong>
+                <p>{t('settings.sourceGoneText', { message: passedSource.error.message })}</p>
               </div>
             </Banner>
           )}
@@ -389,7 +394,7 @@ const GenerationSettingsPage = () => {
             <Banner role="alert" data-tone="error">
               <MaskIcon src={warningIcon} aria-hidden />
               <div>
-                <strong>Couldn&apos;t load generation options</strong>
+                <strong>{t('settings.optionsFailed')}</strong>
                 <p>{options.error.message}</p>
               </div>
             </Banner>
@@ -400,22 +405,22 @@ const GenerationSettingsPage = () => {
               {!single && dataSourceCard}
 
               <Card aria-labelledby="configuration-heading">
-                <h3 id="configuration-heading">Configuration</h3>
+                <h3 id="configuration-heading">{t('settings.configuration')}</h3>
                 <ConfigGrid data-wide={single || undefined}>
                   <TextField
                     className="GenerationSettings-records"
-                    label="Number of Records"
+                    label={t('settings.records')}
                     inputMode="numeric"
                     placeholder={String(DEFAULT_RECORDS)}
                     value={records}
                     onChange={(event) => setRecords(event.target.value.replace(/\D/g, '').slice(0, 7))}
-                    helperText={`Max ${formatRecords(maxRecords)} records`}
+                    helperText={t('settings.recordsMax', { max: formatRecords(maxRecords) })}
                     error={recordsProblem ?? false}
                   />
                   {single && <span aria-hidden />}
                   <Field>
                     <span id="framework-label">
-                      Choose Framework
+                      {t('settings.framework')}
                       <span className="GenerationSettings-required" aria-hidden>*</span>
                     </span>
                     <Dropdown<Framework>
@@ -424,20 +429,20 @@ const GenerationSettingsPage = () => {
                       value={framework}
                       onChange={setFramework}
                       triggerIcon={<FieldIcon src={shieldIcon} />}
-                      placeholder="Compliance Framework"
+                      placeholder={t('settings.frameworkPlaceholder')}
                       disabled={!options.data}
                       aria-labelledby="framework-label"
                     />
                   </Field>
                   <Field>
-                    <span id="format-label">Choose Format</span>
+                    <span id="format-label">{t('settings.format')}</span>
                     <Dropdown<OutputFormat>
                       size="field"
                       options={formatOptions}
                       value={format}
                       onChange={setFormat}
                       triggerIcon={<FieldIcon src={formatIcon} />}
-                      placeholder="Output Format"
+                      placeholder={t('settings.formatPlaceholder')}
                       disabled={!options.data}
                       aria-labelledby="format-label"
                     />
@@ -449,10 +454,12 @@ const GenerationSettingsPage = () => {
                         preview={passedPreview}
                         fallback={
                           passed?.kind === 'DOCUMENT'
-                            ? `De-identified document · ${passed.summary.identifiersReplaced} identifiers replaced`
+                            ? t('settings.documentSource', {
+                                count: passed.summary.identifiersReplaced,
+                              })
                             : passed
-                              ? `Uploaded file · ${passed.summary.rows} rows`
-                              : 'Loading…'
+                              ? t('settings.fileSource', { count: passed.summary.rows })
+                              : t('common:actions.loading')
                         }
                       />
                     </div>
@@ -460,19 +467,19 @@ const GenerationSettingsPage = () => {
                 </ConfigGrid>
                 {estimate && (
                   <Estimate>
-                    Estimated output: <strong>{estimate}</strong>
+                    {t('settings.estimate')} <strong>{estimate}</strong>
                   </Estimate>
                 )}
               </Card>
             </Columns>
-            {!complete && <Hint>Complete required fields to generate dataset</Hint>}
+            {!complete && <Hint>{t('settings.incomplete')}</Hint>}
           </Blocks>
 
           {generateErrorText && (
             <Banner role="alert" data-tone="error">
               <MaskIcon src={warningIcon} aria-hidden />
               <div>
-                <strong>Couldn&apos;t generate the dataset</strong>
+                <strong>{t('settings.generateFailed')}</strong>
                 <p>{generateErrorText}</p>
               </div>
             </Banner>
@@ -488,7 +495,7 @@ const GenerationSettingsPage = () => {
           disabled={!complete || generate.isPending}
           onClick={() => generate.mutate()}
         >
-          {generate.isPending ? 'Generating…' : 'Generate Synthetic Data'}
+          {generate.isPending ? t('settings.generating') : t('settings.generate')}
         </Button>
       </Footer>
     </Root>

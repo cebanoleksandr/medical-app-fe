@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import logo from '../../../assets/logo-landing.svg'
 import { colors, typography } from '../../../theme'
 import { NARROW } from './styles'
@@ -17,10 +18,11 @@ const LogoLink = styled(Link)({
 })
 
 export function Logo() {
+  const { t } = useTranslation()
   return (
     <LogoLink to="/">
       <img src={logo} alt="" />
-      De-ID Studio
+      {t('brand.name')}
     </LogoLink>
   )
 }

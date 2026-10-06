@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import Drawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { Dataset } from '../../api/types'
 import { colors, typography } from '../../theme'
 import { Button, Checkbox } from '../ui'
@@ -59,6 +60,7 @@ interface ColumnsDrawerProps {
 
 /** Picks the preview table's columns; the drawer opens with the current set. */
 export function ColumnsDrawer({ open, onClose, dataset, columns, onApply }: ColumnsDrawerProps) {
+  const { t } = useTranslation('synthetic')
   const titleId = useId()
   return (
     <Drawer
@@ -70,8 +72,8 @@ export function ColumnsDrawer({ open, onClose, dataset, columns, onApply }: Colu
       <DrawerPanel>
         <DrawerHeader
           titleId={titleId}
-          title="Customize columns"
-          subtitle="Choose fields to display"
+          title={t('result.columns.title')}
+          subtitle={t('result.columns.subtitle')}
           onClose={onClose}
         />
         {/* Remounts on open, so unapplied changes are dropped. */}
@@ -97,6 +99,7 @@ interface ColumnsFormProps {
 }
 
 function ColumnsForm({ dataset, columns, onApply }: ColumnsFormProps) {
+  const { t } = useTranslation(['synthetic', 'common'])
   const { defaults, additional } = columnOptions(dataset)
   const locked = defaults.filter((c) => c.locked).map((c) => c.key)
   const [selected, setSelected] = useState(() => new Set([...locked, ...columns]))
@@ -131,18 +134,17 @@ function ColumnsForm({ dataset, columns, onApply }: ColumnsFormProps) {
   return (
     <DrawerContent>
       <Notice tone="info">
-        This only affects the preview table. Downloaded dataset includes all {dataset.fields}{' '}
-        fields
+        {t('result.columns.notice', { count: dataset.fields })}
       </Notice>
       <Selected aria-labelledby="columns-selected">
         <h3 id="columns-selected">
-          Selected {selected.size} of {total}
+          {t('result.columns.selected', { count: selected.size, total })}
         </h3>
         <List>{defaults.map(option)}</List>
       </Selected>
       {additional.length > 0 && (
         <Additional aria-labelledby="columns-additional">
-          <SectionLabel id="columns-additional">Additional fields</SectionLabel>
+          <SectionLabel id="columns-additional">{t('result.columns.additional')}</SectionLabel>
           <Grid>{additional.map(option)}</Grid>
         </Additional>
       )}
@@ -152,10 +154,10 @@ function ColumnsForm({ dataset, columns, onApply }: ColumnsFormProps) {
           size="medium"
           onClick={() => setSelected(new Set([...locked, ...defaultColumns(dataset)]))}
         >
-          Reset to default
+          {t('result.columns.reset')}
         </Button>
         <Button variant="secondary" size="medium" onClick={apply}>
-          Apply
+          {t('common:actions.apply')}
         </Button>
       </Footer>
     </DrawerContent>

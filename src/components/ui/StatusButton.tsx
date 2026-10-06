@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import RemoveIcon from '@mui/icons-material/Remove'
 import ButtonBase, { type ButtonBaseProps } from '@mui/material/ButtonBase'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { colors, radius, typography } from '../../theme'
 
 export interface StatusButtonLabels {
@@ -18,13 +19,6 @@ export interface StatusButtonLabels {
 export interface StatusButtonProps extends Omit<ButtonBaseProps, 'children'> {
   included: boolean
   labels?: StatusButtonLabels
-}
-
-const defaultLabels: StatusButtonLabels = {
-  included: 'Included',
-  excluded: 'Excluded',
-  exclude: 'Exclude',
-  include: 'Include',
 }
 
 const BORDER = 1
@@ -77,9 +71,16 @@ const Root = styled(ButtonBase, {
  */
 export function StatusButton({
   included,
-  labels = defaultLabels,
+  labels: customLabels,
   ...props
 }: StatusButtonProps) {
+  const { t } = useTranslation()
+  const labels = customLabels ?? {
+    included: t('status.included'),
+    excluded: t('status.excluded'),
+    exclude: t('status.exclude'),
+    include: t('status.include'),
+  }
   return (
     <Root included={included} aria-pressed={included} disableRipple {...props}>
       <span className="StatusButton-label StatusButton-status">

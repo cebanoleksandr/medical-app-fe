@@ -15,6 +15,7 @@ import ListSubheader from '@mui/material/ListSubheader'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { colors, radius, shadows, typography } from '../../theme'
 
 export interface DropdownOption<T extends string = string> {
@@ -180,7 +181,7 @@ export function Dropdown<T extends string = string>({
   value,
   onChange,
   size = 'default',
-  placeholder = 'Select…',
+  placeholder,
   triggerLabel,
   triggerDescription,
   triggerIcon,
@@ -191,6 +192,7 @@ export function Dropdown<T extends string = string>({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
 }: DropdownProps<T>) {
+  const { t } = useTranslation()
   const generatedId = useId()
   const triggerId = id ?? generatedId
   const listId = `${triggerId}-list`
@@ -260,7 +262,7 @@ export function Dropdown<T extends string = string>({
               color: selected || triggerLabel || size === 'field' ? undefined : colors.neutral[400],
             }}
           >
-            {triggerLabel ?? selected?.label ?? placeholder}
+            {triggerLabel ?? selected?.label ?? placeholder ?? t('select.placeholder')}
           </Label>
           {size === 'default' && description && (
             <span

@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles'
 import { MotionConfig } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { Link, Outlet } from 'react-router-dom'
 import logo from '../../assets/logo-landing.svg'
 import { colors, radius, shadows, typography } from '../../theme'
@@ -60,6 +61,7 @@ const Card = styled('div')({
 
 /** Sign-in screens: logo on a dark band and the page in a centered card. */
 const AuthLayout = () => {
+  const { t } = useTranslation()
   return (
     <MotionConfig reducedMotion="user">
       <Root>
@@ -67,8 +69,8 @@ const AuthLayout = () => {
           <LogoLink to="/">
             <img src={logo} alt="" />
             <span>
-              <div className="AuthLayout-title">De-ID Studio</div>
-              <div className="AuthLayout-subtitle">De-ID &amp; Synthesis</div>
+              <div className="AuthLayout-title">{t('brand.name')}</div>
+              <div className="AuthLayout-subtitle">{t('brand.tagline')}</div>
             </span>
           </LogoLink>
         </Header>

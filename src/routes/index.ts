@@ -63,24 +63,24 @@ export const routes: RouteObject[] = [
             index: true,
             Component: DashboardPage,
             handle: {
-              title: 'Dashboard',
-              subtitle: 'Monitor anonymization activity and compliance performance',
+              title: 'pages.dashboard.title',
+              subtitle: 'pages.dashboard.subtitle',
             } satisfies RouteHandle,
           },
           {
             path: 'analyses',
             Component: AnalysesPage,
             handle: {
-              title: 'All Analyses',
-              subtitle: 'Complete history of de-identification jobs',
+              title: 'pages.analyses.title',
+              subtitle: 'pages.analyses.subtitle',
             } satisfies RouteHandle,
           },
           {
             path: 'de-identify',
             Component: DeIdentifyLayout,
             handle: {
-              title: 'New Analysis',
-              subtitle: 'Configure your anonymization pipeline',
+              title: 'pages.deIdentify.title',
+              subtitle: 'pages.deIdentify.subtitle',
             } satisfies RouteHandle,
             children: [
               // No index route: DeIdentifyLayout resumes at the draft's step.
@@ -105,8 +105,8 @@ export const routes: RouteObject[] = [
           {
             path: 'synthetic',
             handle: {
-              title: 'Synthetic Data Generator',
-              subtitle: 'Generate realistic but completely fake clinical data for development',
+              title: 'pages.synthetic.title',
+              subtitle: 'pages.synthetic.subtitle',
             } satisfies RouteHandle,
             children: [
               {
@@ -121,8 +121,8 @@ export const routes: RouteObject[] = [
                 path: 'result',
                 Component: GeneratedDataPage,
                 handle: {
-                  title: 'Generated Data',
-                  subtitle: 'Review your dataset before downloading',
+                  title: 'pages.generatedData.title',
+                  subtitle: 'pages.generatedData.subtitle',
                 } satisfies RouteHandle,
               },
             ],

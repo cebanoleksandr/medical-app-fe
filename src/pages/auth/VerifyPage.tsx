@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import { AnimatePresence } from 'framer-motion'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { ApiError } from '../../api/errors'
 import errorIcon from '../../assets/landing/error.svg'
@@ -20,19 +22,18 @@ const ErrorIcon = styled('span')({
   backgroundColor: colors.errorLight,
 })
 
-function describeError(error: ApiError | null) {
-  if (!error) return 'This sign-in link is incomplete. Request a new one to continue.'
-  if (error.isUnauthorized) {
-    return 'This link has expired or was already used. Links work once and expire after 15 minutes.'
-  }
-  if (error.isRateLimited) return 'Too many attempts. Please wait a few minutes and try again.'
-  if (error.isNetworkError) return "Couldn't reach the server. Check your connection and try again."
-  if (error.status >= 500) return 'Something went wrong on our side. Please try again.'
+function describeError(error: ApiError | null, t: TFunction<['auth', 'common']>) {
+  if (!error) return t('verify.incomplete')
+  if (error.isUnauthorized) return t('verify.expired')
+  if (error.isRateLimited) return t('verify.rateLimited')
+  if (error.isNetworkError) return t('common:errors.unreachable')
+  if (error.status >= 500) return t('common:errors.server')
   return error.message
 }
 
 /** Landing page of the magic link: redeems ?token= and moves on to /app. */
 const VerifyPage = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const token = params.get('token')
@@ -62,14 +63,14 @@ const VerifyPage = () => {
             <img src={errorIcon} alt="" />
           </ErrorIcon>
           <Headline>
-            <h1>Couldn&apos;t sign you in</h1>
-            <p>{describeError(verify.error)}</p>
+            <h1>{t('verify.failedTitle')}</h1>
+            <p>{describeError(verify.error, t)}</p>
           </Headline>
           {canRetry && token ? (
             <Button variant="secondary" sx={ctaSx} onClick={() => verify.mutate(token, {
               onSuccess: () => navigate('/app', { replace: true }),
             })}>
-              Try again
+              {t('common:actions.tryAgain')}
             </Button>
           ) : (
             <Button
@@ -77,7 +78,7 @@ const VerifyPage = () => {
               sx={ctaSx}
               onClick={() => navigate('/auth/login', { replace: true })}
             >
-              Request a new link
+              {t('verify.requestNew')}
             </Button>
           )}
         </Status>
@@ -85,8 +86,8 @@ const VerifyPage = () => {
         <Status key="pending" {...swapProps} role="status" aria-live="polite">
           <CircularProgress className="Auth-icon" size={40} sx={{ color: colors.accent[500] }} />
           <Headline>
-            <h1>Signing you in…</h1>
-            <p>Verifying your sign-in link</p>
+            <h1>{t('verify.pendingTitle')}</h1>
+            <p>{t('verify.pendingDescription')}</p>
           </Headline>
         </Status>
       )}

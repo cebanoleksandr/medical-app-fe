@@ -5,6 +5,8 @@ import {
   type OutputFormat,
   type SyntheticOptions,
 } from '../../api/types'
+import i18n from '../../i18n'
+import { formatNumber } from '../../i18n/format'
 import { formatFileSize } from '../de-identify/dataInput'
 
 /** The formats POST /synthetic/sources/file reads. */
@@ -25,20 +27,23 @@ export interface SourceFileProblem {
 export function checkSourceFile(file: File): SourceFileProblem | null {
   const name = file.name.toLowerCase()
   if (!SOURCE_EXTENSIONS.some((extension) => name.endsWith(extension))) {
-    return { title: 'File format not supported', message: 'Please upload .xlsx, .csv or .json' }
+    return {
+      title: i18n.t('synthetic:settings.fileUnsupported'),
+      message: i18n.t('synthetic:settings.fileUnsupportedText'),
+    }
   }
   if (file.size > MAX_UPLOAD_BYTES) {
     return {
-      title: 'File is too large',
-      message: `Please upload a file up to ${formatFileSize(MAX_UPLOAD_BYTES)}`,
+      title: i18n.t('synthetic:settings.fileTooLarge'),
+      message: i18n.t('synthetic:settings.fileTooLargeText', { max: formatFileSize(MAX_UPLOAD_BYTES) }),
     }
   }
   return null
 }
 
-/** "100000" → "100,000", as the design writes record counts. */
+/** "100000" → "100,000" in English, as the design writes record counts. */
 export function formatRecords(value: number) {
-  return value.toLocaleString('en-US')
+  return formatNumber(value)
 }
 
 /** Shown in the empty field; also the count the size estimate assumes. */
@@ -48,8 +53,8 @@ export const DEFAULT_RECORDS = 1000
 export function recordsError(value: string, max = MAX_RECORDS): string | null {
   if (value === '') return null
   const count = Number(value)
-  if (count < 1) return 'Enter at least 1 record'
-  if (count > max) return `Max ${formatRecords(max)} records`
+  if (count < 1) return i18n.t('synthetic:settings.recordsMin')
+  if (count > max) return i18n.t('synthetic:settings.recordsMax', { max: formatRecords(max) })
   return null
 }
 

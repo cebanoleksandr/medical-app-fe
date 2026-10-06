@@ -2,6 +2,7 @@ import { useId, type CSSProperties } from 'react'
 import Drawer from '@mui/material/Drawer'
 import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import type { Dataset, DatasetRecord, ValidationReport } from '../../api/types'
 import cancelIcon from '../../assets/generated/cancel.svg'
 import checkCircleIcon from '../../assets/generated/check-circle-small.svg'
@@ -10,7 +11,7 @@ import { useDatasetRecord } from '../../hooks'
 import { DrawerContent, DrawerHeader, DrawerPanel, DrawerSection } from './drawerStyles'
 import { CheckItem, Glyph, Notice } from './parts'
 import { Checklist, Dot, MetaList, MetaRow, SectionLabel, TONE_COLOR } from './styles'
-import { QUALITY, entityLabel, formatCell } from './resultModel'
+import { entityLabel, formatCell, QUALITY, qualityLabel } from './resultModel'
 
 const TextBlock = styled('p')({
   ...typography.bodyS,
@@ -36,6 +37,7 @@ interface RecordDrawerProps {
 
 /** Every generated field of one record, plus its compliance notes. */
 export function RecordDrawer({ dataset, record, report, onClose }: RecordDrawerProps) {
+  const { t } = useTranslation('synthetic')
   const titleId = useId()
   return (
     <Drawer
@@ -47,7 +49,7 @@ export function RecordDrawer({ dataset, record, report, onClose }: RecordDrawerP
       <DrawerPanel>
         <DrawerHeader
           titleId={titleId}
-          title="Record details"
+          title={t('result.record.title')}
           subtitle={record?.recordId}
           onClose={onClose}
         />
@@ -64,6 +66,7 @@ interface RecordBodyProps {
 }
 
 function RecordBody({ dataset, row, report }: RecordBodyProps) {
+  const { t } = useTranslation('synthetic')
   const query = useDatasetRecord(dataset.id, row.recordId)
   const record = query.data
   const idKey = dataset.columns.find((c) => c.role === 'id')?.key
@@ -77,31 +80,31 @@ function RecordBody({ dataset, row, report }: RecordBodyProps) {
 
   return (
     <DrawerContent>
-      <DrawerSection aria-label="Summary">
+      <DrawerSection aria-label={t('result.record.summary')}>
         <MetaList>
           <MetaRow>
-            <dt>Compliance</dt>
+            <dt>{t('result.record.compliance')}</dt>
             <dd>
               {!report ? (
                 '…'
               ) : detected.length ? (
                 <>
                   <Glyph src={cancelIcon} size={24} slot={14} color={colors.error} />
-                  Identifiers detected
+                  {t('result.record.identifiersDetected')}
                 </>
               ) : (
                 <>
                   <Glyph src={checkCircleIcon} size={14} color={colors.success} />
-                  Passed
+                  {t('result.record.passed')}
                 </>
               )}
             </dd>
           </MetaRow>
           <MetaRow>
-            <dt>Quality</dt>
+            <dt>{t('result.record.quality')}</dt>
             <dd>
               <Dot style={{ '--dot': TONE_COLOR[quality.tone] } as CSSProperties}>
-                {quality.label}
+                {qualityLabel(row.quality)}
               </Dot>
             </dd>
           </MetaRow>
@@ -110,12 +113,12 @@ function RecordBody({ dataset, row, report }: RecordBodyProps) {
 
       {query.isError ? (
         <DrawerSection>
-          <Notice tone="error">Couldn&apos;t load the record: {query.error.message}</Notice>
+          <Notice tone="error">{t('result.record.loadFailed', { message: query.error.message })}</Notice>
         </DrawerSection>
       ) : (
         <>
           <DrawerSection aria-labelledby="record-fields">
-            <SectionLabel id="record-fields">Generated fields</SectionLabel>
+            <SectionLabel id="record-fields">{t('result.record.fields')}</SectionLabel>
             <MetaList>
               {fields.map((column) => (
                 <MetaRow key={column.key}>
@@ -146,23 +149,27 @@ function RecordBody({ dataset, row, report }: RecordBodyProps) {
       )}
 
       <DrawerSection aria-labelledby="record-compliance">
-        <SectionLabel id="record-compliance">Compliance</SectionLabel>
+        <SectionLabel id="record-compliance">{t('result.record.compliance')}</SectionLabel>
         <Checklist>
           {report &&
             (detected.length ? (
               <CheckItem
                 tone="error"
                 emphasis
-                label="Direct identifiers detected:"
+                label={t('result.record.detectedLabel')}
                 state={detected.join(', ')}
               />
             ) : (
-              <CheckItem tone="success" label="No direct identifiers detected" />
+              <CheckItem tone="success" label={t('result.record.noneDetected')} />
             ))}
           {row.issues.length ? (
             row.issues.map((issue) => <CheckItem key={issue} tone="warning" label={issue} />)
           ) : (
-            <CheckItem tone="success" label="Field consistency:" state="High" />
+            <CheckItem
+              tone="success"
+              label={t('result.record.consistency')}
+              state={t('result.record.high')}
+            />
           )}
           {report?.checks
             .filter((check) => RECORD_CHECKS.has(check.id))
@@ -171,7 +178,7 @@ function RecordBody({ dataset, row, report }: RecordBodyProps) {
                 key={check.id}
                 tone={check.passed ? 'success' : 'error'}
                 emphasis={!check.passed}
-                label={check.label}
+                label={t(`result.checks.${check.id}`, { defaultValue: check.label })}
               />
             ))}
         </Checklist>

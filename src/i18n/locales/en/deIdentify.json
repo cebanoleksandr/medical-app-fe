@@ -1,0 +1,464 @@
+{
+  "compliance": {
+    "title": "Select Compliance Framework",
+    "subtitle": "Choose the regulation that applies to your data",
+    "loadFailed": "Couldn't load the compliance frameworks."
+  },
+  "input": {
+    "title": "Enter Your Data",
+    "subtitle": "Paste text or upload a file to anonymize",
+    "tabs": {
+      "label": "Input type",
+      "text": "Enter Text",
+      "file": "Upload File"
+    },
+    "text": {
+      "label": "Text to anonymize",
+      "placeholder": "Paste your text here — minimum {{min}} characters required",
+      "count": "{{current}} / {{max}} characters",
+      "tooShort": "Please enter at least {{min}} characters to continue",
+      "tooLong": "Text is too long: the limit is {{max}} characters"
+    },
+    "file": {
+      "upload": "Upload your file",
+      "dragDrop": "Drag & drop",
+      "or": "or",
+      "browse": "Browse file",
+      "formats": "Supported formats: .txt, .pdf, .docx — max 5 MB",
+      "reading": "Reading your file…",
+      "replace": "Replace file",
+      "remove": "Remove {{name}}",
+      "extracted": "{{characters}} characters extracted",
+      "continueHint": "Upload a file to continue"
+    },
+    "problems": {
+      "unsupported": {
+        "title": "Unsupported file format",
+        "message": "Please upload .txt, .pdf or .docx",
+        "note": "File format not supported"
+      },
+      "tooLarge": {
+        "title": "File is too large",
+        "message": "Please upload a file up to {{max}}",
+        "note": "This file is {{size}}"
+      },
+      "rateLimited": {
+        "title": "Too many uploads",
+        "message": "Please wait a minute and try again",
+        "note": "Upload limit reached"
+      },
+      "failed": {
+        "title": "Upload failed",
+        "unreachable": "Couldn't reach the server. Check your connection",
+        "server": "Something went wrong on our side. Please try again",
+        "note": "The file was not uploaded"
+      },
+      "unreadable": {
+        "title": "Couldn't read the file",
+        "note": "Try a different file"
+      }
+    }
+  },
+  "configuration": {
+    "title": "Configure De-Identification",
+    "subtitleRisk": "Select a privacy risk level or customize how each entity type is handled",
+    "subtitleMethod": "Choose how patient data will be anonymized under {{framework}}",
+    "loadFailed": "Couldn't load the settings",
+    "analysisFailed": "Analysis failed",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing…",
+    "errors": {
+      "rateLimited": "Too many analyses in a short time. Please wait a minute and try again.",
+      "starting": "The detection service is starting up. Please try again in a minute."
+    },
+    "outputMode": "Output mode",
+    "documentLanguage": "Document language"
+  },
+  "hipaa": {
+    "method": "1. Choose Method",
+    "requiresReview": "Requires expert review before use",
+    "hintSafeHarbor": "Best for standard {{framework}} workflows",
+    "hintOther": "Best for sharing data outside your organisation",
+    "reviewTitle": "Expert review required",
+    "reviewText": "Results must be validated by a qualified statistician before use in production",
+    "identifiers": "2. Applied Identifiers",
+    "chooseIdentifiers": "Choose which identifiers to remove from your document.",
+    "fixedIdentifiers": "These identifiers are removed from your document.",
+    "chooseHint": "All categories are deselected by default",
+    "fixedHint": "Switch to a customizable method to pick them yourself",
+    "output": "3. Output Settings",
+    "settingsTitle": "De-Identification Settings",
+    "settingsText": "Configure how to handle sensitive information",
+    "sensitivityTitle": "Detection sensitivity",
+    "sensitivityText": "Controls how carefully the system detects sensitive data.",
+    "sensitivity": {
+      "CONSERVATIVE": {
+        "title": "Conservative",
+        "note": "Fewer false alerts",
+        "help": "Conservative flags only confident matches.",
+        "detail": "Fewer false positives, but some identifiers may be missed."
+      },
+      "BALANCED": {
+        "title": "Balanced",
+        "note": "Recommended for most documents",
+        "help": "Balanced is recommended for most documents.",
+        "detail": "Detects most sensitive entities while keeping false positives manageable."
+      },
+      "AGGRESSIVE": {
+        "title": "Aggressive",
+        "note": "Catches potentially sensitive data",
+        "help": "Aggressive flags anything that might be sensitive.",
+        "detail": "Misses the least, but expect more false positives to review."
+      }
+    }
+  },
+  "methods": {
+    "REDACT": {
+      "label": "Redact — Remove entirely",
+      "short": "Redact",
+      "description": "Replaces detected data with [REDACTED]"
+    },
+    "PLACEHOLDER": {
+      "label": "Replace — Use placeholder",
+      "short": "Replace",
+      "description": "Uses labels like [NAME], [DATE]"
+    },
+    "TOKEN": {
+      "label": "Replace with token — Stable pseudonym",
+      "short": "Replace with token",
+      "description": "Assigns a consistent token, allows re-linking"
+    },
+    "SYNTHETIC": {
+      "label": "Synthetic — Generate fake values",
+      "short": "Synthetic",
+      "description": "Generates realistic fake values"
+    },
+    "MASK": {
+      "label": "Mask — Hide partially",
+      "short": "Mask",
+      "description": "Hides parts of the value"
+    },
+    "HASH": {
+      "label": "Hash — One-way encryption",
+      "short": "Hash",
+      "description": "Converts to irreversible hash, preserves uniqueness"
+    },
+    "GENERALISE": {
+      "label": "Generalise — Reduce precision",
+      "short": "Generalise",
+      "description": "Converts to broader category or range"
+    },
+    "PSEUDONYMISE": {
+      "label": "Pseudonymise — Store mapping",
+      "short": "Pseudonymise",
+      "description": "Replaces with token, mapping stored securely"
+    },
+    "NLP_REDACTION": {
+      "label": "NLP redaction — Free text PHI",
+      "short": "NLP redaction",
+      "description": "Applies NLP model to unstructured text"
+    }
+  },
+  "methodGroups": {
+    "remove": "Remove",
+    "replace": "Replace",
+    "protect": "Protect",
+    "transform": "Transform"
+  },
+  "entities": {
+    "PERSON": "PERSON",
+    "ORGANIZATION": "ORGANIZATION",
+    "LOCATION": "LOCATION",
+    "DATE_TIME": "DATE/TIME",
+    "IP": "IP",
+    "GEOPOINT": "GEOPOINT",
+    "NATIONAL_ID": "NATIONAL_ID",
+    "ID_NUMBER": "ID_NUMBER",
+    "PASSPORT": "PASSPORT",
+    "CREDIT_CARD": "CREDIT_CARD",
+    "BANK_ACCOUNT": "BANK_ACCOUNT",
+    "EMAIL": "EMAIL",
+    "PHONE": "PHONE",
+    "MEDICAL_RECORD_NUMBER": "MEDICAL_RECORD_NUMBER",
+    "DEVICE_ID": "DEVICE_ID",
+    "FREE_TEXT": "FREE_TEXT (PHI)",
+    "BIOLOGICAL_DATA": "BIOLOGICAL_DATA",
+    "PHOTO": "PHOTO / IMAGE"
+  },
+  "entityGroups": {
+    "identity": "Identity",
+    "datesLocation": "Dates & Location",
+    "sensitive": "Sensitive identifiers",
+    "unstructured": "Unstructured data",
+    "special": "Special category",
+    "specialArticle": "Special category — {{article}}"
+  },
+  "risk": {
+    "LOW": {
+      "title": "Low",
+      "line1": "Minimal anonymization.",
+      "line2": "Higher data utility."
+    },
+    "MEDIUM": {
+      "title": "Medium",
+      "line1": "Balanced privacy and utility.",
+      "line2": "{{note}}"
+    },
+    "HIGH": {
+      "title": "High",
+      "line1": "Maximum anonymization.",
+      "line2": "Reduced data usability."
+    }
+  },
+  "laws": {
+    "EU_GDPR": {
+      "name": "GDPR",
+      "mediumNote": "Meets standard GDPR guidelines.",
+      "specialArticle": "GDPR Art. 9",
+      "articleShort": "Art. 9",
+      "articleLong": "GDPR Article 9"
+    },
+    "UK_GDPR": {
+      "name": "UK GDPR",
+      "mediumNote": "Based on UK GDPR guidelines.",
+      "specialArticle": "UK GDPR Art. 9",
+      "articleShort": "Art. 9",
+      "articleLong": "UK GDPR Article 9"
+    },
+    "SWISS_FADP": {
+      "name": "Swiss FADP",
+      "mediumNote": "Based on Swiss FADP guidelines.",
+      "specialArticle": "FADP Art. 5(c)",
+      "articleShort": "Art. 5",
+      "articleLong": "FADP Art. 5(c)"
+    }
+  },
+  "dataProtection": {
+    "risk": "1. Choose privacy risk level",
+    "lowTitle": "Low risk may not fully protect sensitive health data.",
+    "lowText": "Biological data and photos will still be removed ({{article}}).",
+    "howTitle": "How this configuration works",
+    "howText": "Methods are automatically selected based on {{law}} risk guidelines and entity sensitivity levels. You can review or override any setting below.",
+    "viewLogic": "View logic",
+    "entities": "2. Entity Configuration",
+    "entitiesTitle": "Choose which identifiers to remove from your document.",
+    "entitiesText": "Methods follow the risk level. Customize any entity type below.",
+    "resetTitle": "Reset to {{level}} defaults?",
+    "resetText": "Your custom settings will be lost.",
+    "reset": "Reset"
+  },
+  "entityTable": {
+    "title": "Entity configuration",
+    "summary": "{{count}} types · {{state}}",
+    "customized": "Customized",
+    "auto": "Auto-configured",
+    "reset": "Reset to default",
+    "customize": "Customize",
+    "groupLabel": "Methods per entity type",
+    "sensitive": "Sensitive",
+    "specialTrigger": "{{article}} — Special category"
+  },
+  "logic": {
+    "title": "Configuration logic",
+    "intro": "Methods are automatically selected based on {{law}} risk level.<br/>You can review how each entity is processed below.",
+    "specialNote": "These entity types are legally protected under {{article}}.<br/>Only Remove is permitted. This cannot be overridden",
+    "medium": {
+      "PERSON": {
+        "method": "Replace with stable token",
+        "rationale": "Assigns a consistent token, allows re-linking if legally required"
+      },
+      "ORGANIZATION": {
+        "method": "Mask",
+        "rationale": "Hides part of the value if organisation is considered sensitive"
+      },
+      "DATE_TIME": {
+        "method": "Generalise",
+        "rationale": "Converts DOB to age range (e.g. 40–50). Timestamps rounded to month or quarter"
+      },
+      "LOCATION": {
+        "method": "Generalise",
+        "rationale": "Reduces to region or 3-digit postcode. EDPB recommends geographic generalisation"
+      },
+      "IP": {
+        "method": "Generalise",
+        "rationale": "Last segment of the IP address is removed. Only the network range is kept, making it impossible to identify the specific device or user."
+      },
+      "GEOPOINT": {
+        "method": "Generalise",
+        "rationale": "Exact coordinates rounded to city or regional centroid"
+      },
+      "NATIONAL_ID": {
+        "method": "Remove",
+        "rationale": "One-way removal. No plaintext mapping stored in dataset"
+      },
+      "CREDIT_CARD": {
+        "method": "Remove",
+        "rationale": "Removes full numbers. BIN or last 4 digits may be kept only if business-necessary and documented."
+      },
+      "EMAIL": {
+        "method": "Redact",
+        "rationale": "Full address and number removed. Domain may be preserved if business-necessary"
+      },
+      "MEDICAL_RECORD_NUMBER": {
+        "method": "Pseudonymise",
+        "rationale": "Stable token assigned. Mapping stored server-side under access control"
+      },
+      "DEVICE_ID": {
+        "method": "Hash",
+        "rationale": "One-way encryption with salt. Keys stored under strict access control"
+      },
+      "FREE_TEXT": {
+        "method": "NLP redaction",
+        "rationale": "NLP model scans unstructured text. Manual QA recommended before sharing"
+      },
+      "BIOLOGICAL_DATA": {
+        "method": "Remove",
+        "rationale": "Treated as highest-risk data. No alternative methods permitted"
+      },
+      "PHOTO": {
+        "method": "Remove",
+        "rationale": "Biometric data. Removal mandatory under {{article}}"
+      }
+    }
+  },
+  "identifierPicker": {
+    "label": "Identifiers",
+    "included": "{{count}} identifiers included",
+    "none": "No identifiers selected",
+    "selected": "{{count}} of {{total}} identifiers selected",
+    "allRemoved": "{{method}} removes all of them automatically",
+    "selectHint": "Select identifiers to customize de-identification",
+    "groups": {
+      "personal": "Personal Information",
+      "contact": "Contact Information",
+      "location": "Location Data",
+      "financial": "Financial Information",
+      "medical": "Medical Identifiers",
+      "technical": "Technical Identifiers",
+      "biometric": "Biometric & Unique",
+      "context": "Context",
+      "other": "Other"
+    },
+    "short": {
+      "names": "Names",
+      "dates": "Dates",
+      "fax": "Fax",
+      "email": "Email",
+      "phone": "Phone",
+      "geographic": "Address & geographic data",
+      "ssn": "SSN",
+      "account": "Account number",
+      "mrn": "Medical record",
+      "health_plan": "Health plan",
+      "ip": "IP address",
+      "device": "Device ID",
+      "url": "URL",
+      "biometric": "Fingerprints",
+      "photo": "Face photos",
+      "vehicle": "Vehicle ID",
+      "license": "Certificate",
+      "other": "Other unique IDs",
+      "organization": "Organizations",
+      "special_category": "Nationality, religion, politics"
+    }
+  },
+  "review": {
+    "title": "Review results",
+    "meta": "{{source}} · Analyzed {{date}}",
+    "pastedText": "Pasted text",
+    "adjust": "Adjust Settings",
+    "stats": {
+      "detected": "Detected entities",
+      "processed": "Processed entities",
+      "confidence": "Avg. confidence",
+      "time": "Processing time"
+    },
+    "seconds": "{{value}}s",
+    "warnings": {
+      "clean": "No identifiers highlighted — document appears clean",
+      "allExcluded": "All entities are excluded — the de-identified version will be identical to the original document.",
+      "toReview_one": "{{count}} field requires review before export",
+      "toReview_other": "{{count}} fields require review before export"
+    },
+    "sourceFailed": "Couldn't prepare synthetic data",
+    "generate": "Generate Synthetic Data",
+    "preparing": "Preparing…",
+    "newTitle": "Start a new analysis?",
+    "newText": "The current results will be cleared. Copy or download anything you need first.",
+    "newConfirm": "Start new",
+    "document": {
+      "label": "Document",
+      "tabs": "Document version",
+      "original": "Original",
+      "deidentified": "De-identified",
+      "copy": "Copy",
+      "copied": "Copied",
+      "report": "Report",
+      "failedTitle": "Failed to generate de-identified version",
+      "failedText": "Something went wrong while processing the document.<br/>Please try again."
+    },
+    "entities": {
+      "title": "Detected entities",
+      "count_one": "{{count}} entity",
+      "count_other": "{{count}} entities",
+      "sortBy": "Sort by",
+      "sortLabel": "Sort entities",
+      "filterLabel": "Filter by type",
+      "all": "All ({{count}})",
+      "emptyText": "No entities detected.<br/>The document appears to contain no identifiable patient data.",
+      "unchanged": "unchanged",
+      "toggle": "{{action}} {{category}} {{text}}",
+      "lowConfidence": "Low confidence"
+    },
+    "sort": {
+      "document": "Order in document",
+      "confidence": "Confidence",
+      "type": "Type"
+    },
+    "categories": {
+      "PERSON": "PERSON",
+      "LOCATION": "LOCATION",
+      "DATE": "DATE",
+      "PHONE": "PHONE",
+      "FAX": "FAX",
+      "EMAIL": "EMAIL",
+      "SSN": "SSN",
+      "MRN": "MRN",
+      "BENEFICIARY": "BENEFICIARY",
+      "ACCOUNT": "ACCOUNT",
+      "LICENSE": "LICENSE",
+      "VEHICLE": "VEHICLE",
+      "DEVICE": "DEVICE",
+      "URL": "URL",
+      "IP": "IP",
+      "BIOMETRIC": "BIOMETRIC",
+      "PHOTO": "PHOTO",
+      "OTHER": "OTHER",
+      "ORG": "ORG",
+      "NRP": "NRP",
+      "GEO": "GEO",
+      "NATIONAL ID": "NATIONAL ID",
+      "ID NUMBER": "ID NUMBER",
+      "PASSPORT": "PASSPORT",
+      "CARD": "CARD",
+      "FREE TEXT": "FREE TEXT"
+    },
+    "report": {
+      "title": "De-identification report",
+      "source": "Source: {{value}}",
+      "analyzed": "Analyzed: {{value}}",
+      "framework": "Framework: {{framework}} · Language: {{language}}",
+      "risk": "Risk level: {{value}}",
+      "settings": "Method: {{method}} · Output: {{output}} · Sensitivity: {{sensitivity}}",
+      "detected": "Detected entities: {{value}}",
+      "processed": "Processed entities: {{value}}",
+      "confidence": "Avg. confidence: {{value}}",
+      "time": "Processing time: {{value}}",
+      "entities": "Entities (original values omitted)",
+      "excluded": "unchanged (excluded)",
+      "lowConfidence": "⚠ low confidence",
+      "none": "None detected",
+      "text": "De-identified text"
+    }
+  }
+}

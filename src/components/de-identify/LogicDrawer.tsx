@@ -2,7 +2,9 @@ import { Fragment, useId } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import Drawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
-import type { RiskLevel } from '../../api/types'
+import type { TFunction } from 'i18next'
+import { Trans, useTranslation } from 'react-i18next'
+import type { EntityType, RiskLevel } from '../../api/types'
 import type { RiskPresets } from './configRequest'
 import arrowIcon from '../../assets/configuration/arrow-right.svg'
 import { colors, shadows, typography } from '../../theme'
@@ -10,10 +12,10 @@ import { IconButton, MaskIcon } from '../ui'
 import {
   ENTITIES,
   ENTITY_GROUPS,
-  METHODS,
-  mediumLogic,
+  MEDIUM_LOGIC,
+  useLawText,
+  type EntityGroupId,
   type LawInfo,
-  type LogicItem,
 } from './entityConfig'
 
 export interface LogicDrawerProps {
@@ -122,36 +124,65 @@ const Divider = styled('span')({
 })
 
 /** Low and High have no hand-written rationale: describe their methods. */
-function presetLogic(level: RiskLevel, law: LawInfo, presets: RiskPresets) {
+/** One line of the drawer: entity types, the method they get, and why. */
+interface LogicLine {
+  entities: EntityType[]
+  method: string
+  rationale: string
+}
+
+interface LogicGroup {
+  id: EntityGroupId
+  special?: boolean
+  items: LogicLine[]
+}
+
+/** Low and High have no hand-written rationale: describe their methods. */
+function presetLogic(level: RiskLevel, presets: RiskPresets, t: TFunction<'deIdentify'>): LogicGroup[] {
   const preset = presets[level]
   return ENTITY_GROUPS.map((group) => {
-    const items: LogicItem[] = []
+    const items: LogicLine[] = []
     for (const entity of group.entities) {
-      const method = METHODS[preset[entity.type]]
+      const method = preset[entity.type]
+      const name = t(`methods.${method}.short`)
       const last = items.at(-1)
       // Neighbours with the same method share a line, as in the design.
-      if (last && last.method === method.label.split(' — ')[0]) last.entities.push(entity.type)
+      if (last && last.method === name) last.entities.push(entity.type)
       else
         items.push({
           entities: [entity.type],
-          method: method.label.split(' — ')[0],
-          rationale: method.description,
+          method: name,
+          rationale: t(`methods.${method}.description`),
         })
     }
-    return {
-      title: group.special ? `Special category — ${law.specialArticle}` : group.title,
-      special: group.special,
-      items,
-    }
+    return { id: group.id, special: group.special, items }
   })
+}
+
+/** The Medium preset's hand-written explanation. */
+function mediumLogic(articleShort: string, t: TFunction<'deIdentify'>): LogicGroup[] {
+  return MEDIUM_LOGIC.map((group) => ({
+    id: group.group,
+    special: group.special,
+    items: group.items.map((item) => ({
+      entities: item.entities,
+      method: t(`logic.medium.${item.key}.method`),
+      rationale: t(`logic.medium.${item.key}.rationale`, { article: articleShort }),
+    })),
+  }))
 }
 
 const entityInfo = new Map(ENTITIES.map((entity) => [entity.type, entity]))
 
 /** Side panel explaining which method each entity type gets and why. */
 export function LogicDrawer({ open, onClose, law, level, presets }: LogicDrawerProps) {
+  const { t } = useTranslation(['deIdentify', 'common'])
+  const lawText = useLawText(law)
   const titleId = useId()
-  const groups = !level || level === 'MEDIUM' ? mediumLogic(law) : presetLogic(level, law, presets)
+  const groups =
+    !level || level === 'MEDIUM'
+      ? mediumLogic(lawText.articleShort, t)
+      : presetLogic(level, presets, t)
 
   return (
     <Drawer
@@ -163,27 +194,31 @@ export function LogicDrawer({ open, onClose, law, level, presets }: LogicDrawerP
       <Panel>
         <Header>
           <div>
-            <h2 id={titleId}>Configuration logic</h2>
-            <IconButton variant="ghost" aria-label="Close" onClick={onClose}>
+            <h2 id={titleId}>{t('logic.title')}</h2>
+            <IconButton variant="ghost" aria-label={t('common:actions.close')} onClick={onClose}>
               <CloseIcon />
             </IconButton>
           </div>
           <p>
-            Methods are automatically selected based on {law.name} risk level.
-            <br />
-            You can review how each entity is processed below.
+            <Trans t={t} i18nKey="logic.intro" values={{ law: lawText.name }} />
           </p>
         </Header>
         <Content>
           {groups.map((group) => (
-            <Group key={group.title} data-special={group.special || undefined}>
+            <Group key={group.id} data-special={group.special || undefined}>
               <GroupHeader>
-                <h3>{group.title}</h3>
+                <h3>
+                  {group.special
+                    ? t('entityGroups.specialArticle', { article: lawText.specialArticle })
+                    : t(`entityGroups.${group.id}`)}
+                </h3>
                 {group.special && (
                   <p>
-                    These entity types are legally protected under {law.articleLong}.
-                    <br />
-                    Only Remove is permitted. This cannot be overridden
+                    <Trans
+                      t={t}
+                      i18nKey="logic.specialNote"
+                      values={{ article: lawText.articleLong }}
+                    />
                   </p>
                 )}
               </GroupHeader>
@@ -197,7 +232,7 @@ export function LogicDrawer({ open, onClose, law, level, presets }: LogicDrawerP
                           {index > 0 && <Divider aria-hidden />}
                           <Entity>
                             <MaskIcon src={entity.icon} aria-hidden />
-                            {entity.label}
+                            {t(`entities.${entity.type}`)}
                           </Entity>
                         </Fragment>
                       )
