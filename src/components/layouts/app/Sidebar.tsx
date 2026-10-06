@@ -2,7 +2,9 @@ import { useState, type ReactNode } from 'react'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import ScatterPlotIcon from '@mui/icons-material/ScatterPlotOutlined'
 import SettingsIcon from '@mui/icons-material/SettingsOutlined'
+import Drawer from '@mui/material/Drawer'
 import { styled } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import type { ParseKeys } from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { NavLink, matchPath, useLocation } from 'react-router-dom'
@@ -11,7 +13,7 @@ import databaseIcon from '../../../assets/icons/database.svg'
 import deIdentifyIcon from '../../../assets/icons/de-identify.svg'
 import listIcon from '../../../assets/icons/list.svg'
 import logo from '../../../assets/logo.svg'
-import { colors, radius, typography } from '../../../theme'
+import { breakpoints, colors, radius, typography } from '../../../theme'
 import { LogoutPopup } from '../../popups/LogoutPopup'
 import { Button, MaskIcon } from '../../ui'
 
@@ -52,6 +54,7 @@ const Root = styled('aside')({
   flexDirection: 'column',
   flexShrink: 0,
   width: SIDEBAR_WIDTH,
+  maxWidth: '100%',
   height: '100%',
   paddingBottom: 24,
   overflowY: 'auto',
@@ -121,7 +124,13 @@ const Link = styled(NavLink, {
     : { backgroundColor: colors.accent[400], color: colors.primary[800] },
 }))
 
-function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
+interface NavEntryProps {
+  item: NavItem
+  nested?: boolean
+  onNavigate?: () => void
+}
+
+function NavEntry({ item, nested, onNavigate }: NavEntryProps) {
   const { t } = useTranslation('app')
   const { pathname } = useLocation()
   // Sub-items show only while their section is open; the section's own item
@@ -138,6 +147,7 @@ function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
         // A plain string: styled() would stringify a className function.
         // NavLink still adds "active" itself on its own path.
         className={!nested && inSection ? 'active' : undefined}
+        onClick={onNavigate}
       >
         <span className="Sidebar-icon" aria-hidden>
           {item.icon}
@@ -145,15 +155,56 @@ function NavEntry({ item, nested }: { item: NavItem; nested?: boolean }) {
         {t(item.label)}
       </Link>
       {inSection && item.children?.map((child) => (
-        <NavEntry key={child.to} item={child} nested />
+        <NavEntry key={child.to} item={child} nested onNavigate={onNavigate} />
       ))}
     </>
   )
 }
 
-export function Sidebar() {
-  const { t } = useTranslation(['app', 'common'])
+interface SidebarProps {
+  /** Below the nav breakpoint the sidebar is a drawer: its open state. */
+  open: boolean
+  onClose: () => void
+}
+
+export function Sidebar({ open, onClose }: SidebarProps) {
+  const compact = useMediaQuery(`(max-width: ${breakpoints.nav}px)`)
+  // Outside the drawer, which closes first so the popup isn't behind it.
   const [confirmingLogout, setConfirmingLogout] = useState(false)
+  const content = (
+    <SidebarContent
+      onNavigate={compact ? onClose : undefined}
+      onSignOut={() => {
+        if (compact) onClose()
+        setConfirmingLogout(true)
+      }}
+    />
+  )
+  return (
+    <>
+      {compact ? (
+        <Drawer
+          open={open}
+          onClose={onClose}
+          slotProps={{ paper: { sx: { border: 0, maxWidth: '85vw' } } }}
+        >
+          {content}
+        </Drawer>
+      ) : (
+        content
+      )}
+      <LogoutPopup isVisible={confirmingLogout} onClose={() => setConfirmingLogout(false)} />
+    </>
+  )
+}
+
+interface SidebarContentProps {
+  onNavigate?: () => void
+  onSignOut: () => void
+}
+
+function SidebarContent({ onNavigate, onSignOut }: SidebarContentProps) {
+  const { t } = useTranslation(['app', 'common'])
 
   return (
     <Root>
@@ -167,22 +218,18 @@ export function Sidebar() {
 
       <Items aria-label={t('nav.label')}>
         {nav.map((item) => (
-          <NavEntry key={item.to} item={item} />
+          <NavEntry key={item.to} item={item} onNavigate={onNavigate} />
         ))}
       </Items>
 
       <Button
         variant="ghost"
         endIcon={<ArrowForwardIcon />}
-        onClick={() => setConfirmingLogout(true)}
+        onClick={onSignOut}
         sx={signOutSx}
       >
         {t('nav.signOut')}
       </Button>
-      <LogoutPopup
-        isVisible={confirmingLogout}
-        onClose={() => setConfirmingLogout(false)}
-      />
     </Root>
   )
 }

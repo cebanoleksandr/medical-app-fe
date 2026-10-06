@@ -200,5 +200,8 @@
       "organization": "Organizations (employers, facilities)",
       "special_category": "Nationality, religious or political affiliation"
     }
+  },
+  "stepper": {
+    "caption": "Step {{current}} of {{total}} · {{label}}"
   }
 }

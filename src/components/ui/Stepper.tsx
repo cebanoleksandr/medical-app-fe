@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 import { styled } from '@mui/material/styles'
-import { colors, typography } from '../../theme'
+import { useTranslation } from 'react-i18next'
+import { colors, media, typography } from '../../theme'
 
 export interface StepperStep {
   label: string
@@ -25,6 +26,17 @@ const List = styled('ol')({
   // Room for the labels, which hang below the circles.
   padding: '0 0 32px',
   listStyle: 'none',
+  // Phones: the trails shrink to fit and one caption replaces the labels.
+  [media.mobile]: { gap: 8, width: '100%', padding: 0 },
+})
+
+const Caption = styled('p')({
+  ...typography.labelM,
+  display: 'none',
+  margin: '8px 0 0',
+  textAlign: 'center',
+  color: colors.primary[500],
+  [media.mobile]: { display: 'block' },
 })
 
 const Step = styled('li', {
@@ -55,6 +67,18 @@ const Step = styled('li', {
       color: state === 'upcoming' ? colors.neutral[400] : colors.primary[500],
       whiteSpace: 'nowrap',
     },
+    [media.mobile]: {
+      width: isActive ? 44 : 28,
+      height: isActive ? 44 : 28,
+      fontSize: isActive ? 24 : 18,
+      // Still read by screen readers; the caption below shows it visually.
+      '& .Stepper-label': {
+        width: 1,
+        height: 1,
+        overflow: 'hidden',
+        clipPath: 'inset(50%)',
+      },
+    },
   }
 })
 
@@ -66,29 +90,40 @@ const Trail = styled('li', {
   height: completed ? 2 : 1,
   borderRadius: 1,
   backgroundColor: completed ? colors.primary[500] : colors.neutral[200],
+  [media.mobile]: { flexShrink: 1, flexGrow: 1, width: 'auto', minWidth: 8 },
 }))
 
 /** Horizontal wizard stepper: completed steps get a check mark. */
 export function Stepper({ steps, activeStep, className }: StepperProps) {
+  const { t } = useTranslation()
   return (
-    <List className={className}>
-      {steps.map((step, index) => {
-        const state: StepState =
-          index < activeStep ? 'completed' : index === activeStep ? 'active' : 'upcoming'
-        return [
-          index > 0 && (
-            <Trail key={`trail-${index}`} aria-hidden completed={index <= activeStep} />
-          ),
-          <Step
-            key={step.label}
-            state={state}
-            aria-current={state === 'active' ? 'step' : undefined}
-          >
-            {state === 'completed' ? <CheckIcon /> : step.icon}
-            <span className="Stepper-label">{step.label}</span>
-          </Step>,
-        ]
-      })}
-    </List>
+    <div className={className}>
+      <List>
+        {steps.map((step, index) => {
+          const state: StepState =
+            index < activeStep ? 'completed' : index === activeStep ? 'active' : 'upcoming'
+          return [
+            index > 0 && (
+              <Trail key={`trail-${index}`} aria-hidden completed={index <= activeStep} />
+            ),
+            <Step
+              key={step.label}
+              state={state}
+              aria-current={state === 'active' ? 'step' : undefined}
+            >
+              {state === 'completed' ? <CheckIcon /> : step.icon}
+              <span className="Stepper-label">{step.label}</span>
+            </Step>,
+          ]
+        })}
+      </List>
+      <Caption aria-hidden>
+        {t('stepper.caption', {
+          current: activeStep + 1,
+          total: steps.length,
+          label: steps[activeStep]?.label,
+        })}
+      </Caption>
+    </div>
   )
 }

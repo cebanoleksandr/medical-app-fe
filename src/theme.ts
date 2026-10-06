@@ -121,6 +121,17 @@ declare module '@mui/material/Typography' {
   }
 }
 
+/**
+ * Layout breakpoints. Below `nav` the sidebar becomes a drawer opened from the
+ * header; below `mobile` pages drop to one column and tighter padding.
+ */
+export const breakpoints = { nav: 1024, mobile: 720 } as const
+
+export const media = {
+  nav: `@media (max-width: ${breakpoints.nav}px)`,
+  mobile: `@media (max-width: ${breakpoints.mobile}px)`,
+} as const
+
 export const theme = createTheme({
   // Base unit for sx: `borderRadius: 2` is 16px (radius.xl).
   shape: { borderRadius: radius.md },

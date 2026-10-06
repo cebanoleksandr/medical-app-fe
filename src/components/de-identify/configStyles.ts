@@ -80,5 +80,10 @@ export const Banner = styled('div')({
     '& > span:first-of-type': { alignSelf: 'flex-start', color: colors.info },
     '& strong': { color: colors.neutral[900] },
   },
-  [NARROW]: { flexWrap: 'wrap' },
+  // The action drops below the text, in line with it.
+  [NARROW]: {
+    flexWrap: 'wrap',
+    '& > div': { flexBasis: 'calc(100% - 28px)' },
+    '& > button': { marginLeft: 20 },
+  },
 })

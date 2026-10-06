@@ -260,6 +260,8 @@ export function Dropdown<T extends string = string>({
             sx={{
               // A field's placeholder names the field, so it isn't greyed out.
               color: selected || triggerLabel || size === 'field' ? undefined : colors.neutral[400],
+              // One line: narrow toolbars (phones) cut the value instead of growing.
+              ...(isCompact && { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
             }}
           >
             {triggerLabel ?? selected?.label ?? placeholder ?? t('select.placeholder')}

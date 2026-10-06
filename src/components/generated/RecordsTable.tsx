@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { ColumnDefinition, Dataset, DatasetRecord, RecordsPage } from '../../api/types'
 import descriptionIcon from '../../assets/generated/description.svg'
 import settingsIcon from '../../assets/review/settings.svg'
-import { colors, shadows, typography } from '../../theme'
+import { colors, media, shadows, typography } from '../../theme'
 import { Button, MaskIcon } from '../ui'
 import { formatRecords } from '../synthetic/generationSettings'
 import { Glyph } from './parts'
@@ -37,8 +37,12 @@ const Header = styled('div')({
 
 const Scroller = styled('div')({ overflowX: 'auto' })
 
+// --cols: the shown data columns. Phones scroll sideways instead of cutting
+// every value to a few letters.
 const Table = styled('table')({
   width: '100%',
+  minWidth: 'calc(var(--cols) * 100px + 125px)',
+  [media.mobile]: { minWidth: 'calc(var(--cols) * 140px + 125px)' },
   borderCollapse: 'collapse',
   tableLayout: 'fixed',
   '& th': {
@@ -146,7 +150,7 @@ export function RecordsTable({ dataset, columns, page, error, onCustomize, onVie
         </Button>
       </Header>
       <Scroller>
-        <Table style={{ minWidth: shown.length * 100 + 125 }}>
+        <Table style={{ '--cols': shown.length } as CSSProperties}>
           <thead>
             <tr>
               {shown.map((column) => (

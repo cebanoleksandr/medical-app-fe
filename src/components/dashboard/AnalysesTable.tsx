@@ -2,7 +2,7 @@ import { styled } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import type { AnalysisSummary } from '../../api/types'
 import descriptionIcon from '../../assets/generated/description.svg'
-import { colors, typography } from '../../theme'
+import { colors, media, typography } from '../../theme'
 import { Glyph } from '../generated/parts'
 import { Dot } from '../generated/styles'
 import { formatDateTime, formatNumber } from './dashboardModel'
@@ -34,10 +34,17 @@ const Table = styled('table')({
     textOverflow: 'ellipsis',
   },
   '& tbody tr:last-of-type td': { borderBottom: 0 },
+  // Phones scroll sideways; tighter cells keep the values readable.
+  [media.mobile]: {
+    minWidth: 680,
+    '& th': { ...typography.labelM, padding: '8px 12px' },
+    '& td': { ...typography.bodyS, padding: '0 12px' },
+  },
   // The full list (All Analyses): taller header, numbers and dates on the right.
   '&[data-layout="full"]': {
     '& th': { padding: '16px 16px 8px 24px' },
     '& .AnalysesTable-end': { textAlign: 'right' },
+    [media.mobile]: { '& th': { padding: '12px 12px 8px' } },
   },
 })
 

@@ -22,7 +22,7 @@ import { StatCards } from '../components/dashboard/StatCards'
 import { Banner } from '../components/de-identify/configStyles'
 import { Button, Dropdown, MaskIcon } from '../components/ui'
 import { useDashboard } from '../hooks'
-import { colors, typography } from '../theme'
+import { colors, media, typography } from '../theme'
 
 const NEW_ANALYSIS_URL = '/app/de-identify'
 
@@ -45,6 +45,13 @@ const Toolbar = styled('div')({
   gap: 8,
   '& > .Dashboard-filter': { width: 180 },
   '& > button:last-of-type': { marginLeft: 'auto' },
+  // Phones: both filters share a row, the action takes the next one.
+  [media.mobile]: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    '& > .Dashboard-filter': { width: 'auto', minWidth: 0 },
+    '& > button:last-of-type': { gridColumn: '1 / -1', marginLeft: 0 },
+  },
 })
 
 const Welcome = styled('div')({

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { styled } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { colors } from '../../theme'
+import { colors, media } from '../../theme'
 import { Stepper } from '../ui'
 import type { DeIdentifyContext } from './de-identify/context'
 import { resumeUrl, useDraftStore } from './de-identify/draftStore'
@@ -24,6 +24,8 @@ const StepperBar = styled('div')({
   borderBottom: `1px solid ${colors.neutral[200]}`,
   backgroundColor: colors.white,
   overflowX: 'auto',
+  [media.nav]: { padding: '16px 24px' },
+  [media.mobile]: { padding: '12px 16px', '& > div': { width: '100%' } },
 })
 
 const Body = styled('div')({
@@ -43,6 +45,14 @@ const Footer = styled('div')({
   padding: '16px 48px',
   borderTop: `1px solid ${colors.neutral[200]}`,
   backgroundColor: colors.white,
+  [media.nav]: { padding: '16px 24px' },
+  // Phones: buttons share the width and wrap to full rows when they don't fit.
+  [media.mobile]: {
+    flexWrap: 'wrap',
+    padding: '12px 16px',
+    gap: 8,
+    '& > *': { flex: '1 1 auto' },
+  },
   // Steps without a StepFooter get no bar.
   '&:empty': { display: 'none' },
 })

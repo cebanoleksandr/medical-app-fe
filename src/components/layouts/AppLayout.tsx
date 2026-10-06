@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { styled } from '@mui/material/styles'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useMatches } from 'react-router-dom'
@@ -13,6 +13,8 @@ import { Sidebar } from './app/Sidebar'
 const Root = styled('div')({
   display: 'flex',
   height: '100vh',
+  // Mobile browsers' 100vh includes the hidden URL bar.
+  '@supports (height: 100dvh)': { height: '100dvh' },
   backgroundColor: colors.neutral[50],
 })
 
@@ -35,6 +37,7 @@ const Content = styled('main')({
 const AppLayout = () => {
   const { t } = useTranslation('app')
   const { data: session } = useSession()
+  const [navOpen, setNavOpen] = useState(false)
   const handle = useMatches()
     .map((match) => match.handle as RouteHandle | undefined)
     .findLast((handle) => handle?.title)
@@ -55,12 +58,13 @@ const AppLayout = () => {
 
   return (
     <Root>
-      <Sidebar />
+      <Sidebar open={navOpen} onClose={() => setNavOpen(false)} />
       <Main>
         <Header
           title={handle ? t(handle.title) : ''}
           subtitle={handle?.subtitle && t(handle.subtitle)}
           email={session?.user.email}
+          onMenu={() => setNavOpen(true)}
         />
         <Content>
           <DraftProvider>

@@ -11,7 +11,7 @@ import { FRAMEWORK_ORDER, type FrameworkFilter } from '../components/dashboard/d
 import { Banner } from '../components/de-identify/configStyles'
 import { Button, DateRangePicker, Dropdown, MaskIcon, type DateRange } from '../components/ui'
 import { useAnalysesPage, useExportAnalyses } from '../hooks'
-import { colors, shadows, typography } from '../theme'
+import { colors, media, shadows, typography } from '../theme'
 
 const PAGE_SIZE = 10
 const NEW_ANALYSIS_URL = '/app/de-identify'
@@ -34,6 +34,13 @@ const Toolbar = styled('div')({
   gap: 8,
   '& > .Analyses-filter': { width: 180 },
   '& > button:last-of-type': { marginLeft: 'auto' },
+  // Phones: both filters share a row, the action takes the next one.
+  [media.mobile]: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    '& > .Analyses-filter': { width: 'auto', minWidth: 0 },
+    '& > button:last-of-type': { gridColumn: '1 / -1', marginLeft: 0 },
+  },
 })
 
 const Card = styled('section')({

@@ -5,7 +5,7 @@ import descriptionIcon from '../../assets/dashboard/description.svg'
 import financeModeIcon from '../../assets/dashboard/finance-mode.svg'
 import manageSearchIcon from '../../assets/dashboard/manage-search.svg'
 import playlistCheckIcon from '../../assets/dashboard/playlist-check.svg'
-import { colors, shadows, typography } from '../../theme'
+import { colors, media, shadows, typography } from '../../theme'
 import { MaskIcon } from '../ui'
 import { formatNumber, formatRate } from './dashboardModel'
 
@@ -14,7 +14,7 @@ const Row = styled('div')({
   gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
   gap: 16,
   '@media (max-width: 1100px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' },
-  '@media (max-width: 560px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
+  [media.mobile]: { gap: 12 },
 })
 
 const Card = styled('section')({
@@ -36,6 +36,13 @@ const Card = styled('section')({
   '& > div': { display: 'flex', alignItems: 'center', gap: 16, padding: '20px 0' },
   '& h2': { ...typography.bodyM, margin: 0, color: colors.neutral[500], whiteSpace: 'nowrap' },
   '& p': { ...typography.h3, margin: '4px 0 0', color: colors.neutral[900] },
+  // Phones: two per row, the icon above the label.
+  [media.mobile]: {
+    padding: '0 16px',
+    '& > div': { flexDirection: 'column', alignItems: 'flex-start', gap: 8, padding: '16px 0' },
+    '& h2': { ...typography.bodyS, whiteSpace: 'normal' },
+    '& p': { ...typography.h4 },
+  },
 })
 
 const Icon = styled('span')({
@@ -49,6 +56,7 @@ const Icon = styled('span')({
   backgroundColor: colors.primary[50],
   color: colors.primary[500],
   fontSize: 24,
+  [media.mobile]: { width: 32, height: 32, fontSize: 20 },
   '[data-empty] &': { backgroundColor: colors.neutral[100], color: colors.neutral[500] },
 })
 

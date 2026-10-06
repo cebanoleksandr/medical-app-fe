@@ -78,7 +78,7 @@ const Footer = styled('div')({
   padding: '16px 32px',
   borderTop: `1px solid ${colors.neutral[200]}`,
   backgroundColor: colors.white,
-  '@media (max-width: 720px)': { padding: 16 },
+  '@media (max-width: 720px)': { padding: 16, gap: 8, '& > button': { flex: 1 } },
 })
 
 const Empty = styled('section')({

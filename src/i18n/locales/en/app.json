@@ -7,7 +7,8 @@
     "synthetic": "Synthetic Data",
     "generationSettings": "Generation Settings",
     "generatedData": "Generated Data",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "open": "Open menu"
   },
   "pages": {
     "dashboard": {

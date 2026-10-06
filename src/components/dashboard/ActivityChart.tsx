@@ -22,6 +22,8 @@ const SERIES: Record<Series, { color: string }> = {
 const HEIGHT = 300
 const PAD = { top: 8, right: 12, bottom: 28, left: 44 }
 const MAX_X_LABELS = 8
+/** Room per x-axis date label ("30 Sep" plus a gap): fewer labels on phones. */
+const X_LABEL_SPACE = 56
 /** Above this many days the markers would merge into a band. */
 const MAX_MARKERS = 31
 
@@ -114,7 +116,8 @@ export function ActivityChart({ activity, busy }: ActivityChartProps) {
 
   const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i)},${y(v)}`).join('')
   const area = `${line}L${x(values.length - 1)},${baseline}L${x(0)},${baseline}Z`
-  const labelStep = Math.ceil(activity.length / MAX_X_LABELS)
+  const maxLabels = Math.max(2, Math.min(MAX_X_LABELS, Math.floor(plotWidth / X_LABEL_SPACE)))
+  const labelStep = Math.ceil(activity.length / maxLabels)
   // Every `labelStep`-th day plus the last one, which replaces a tick too close to it.
   const labelled = new Set<number>()
   for (let i = 0; i < activity.length; i += labelStep) labelled.add(i)

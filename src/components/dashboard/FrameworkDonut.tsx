@@ -17,6 +17,8 @@ const INNER = 57
 const ELBOW = 14
 const UNDERLINE = 64
 const LABEL_GAP = 34
+/** A label's two lines sit above its underline: keep the top one inside the chart. */
+const LABEL_TOP = 32
 
 const Root = styled('div')({
   display: 'flex',
@@ -81,6 +83,7 @@ function placeLabels(slices: Slice[]) {
   })
   for (const side of [true, false]) {
     const column = placed.filter((p) => p.right === side).sort((a, b) => a.y - b.y)
+    if (column[0]) column[0].y = Math.max(column[0].y, LABEL_TOP)
     for (let i = 1; i < column.length; i++) {
       column[i].y = Math.max(column[i].y, column[i - 1].y + LABEL_GAP)
     }

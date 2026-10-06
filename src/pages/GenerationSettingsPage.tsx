@@ -177,7 +177,7 @@ const Footer = styled('div')({
   padding: '16px 70px 16px 48px',
   borderTop: `1px solid ${colors.neutral[200]}`,
   backgroundColor: colors.white,
-  '@media (max-width: 720px)': { padding: '16px' },
+  '@media (max-width: 720px)': { padding: '16px', '& > button': { flex: 1 } },
 })
 
 const FieldIcon = styled(MaskIcon)({ fontSize: 24 })

@@ -101,7 +101,11 @@ const Pair = styled('div')({
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   gap: 16,
-  '@media (max-width: 720px)': { gridTemplateColumns: 'minmax(0, 1fr)' },
+  '@media (max-width: 720px)': {
+    gridTemplateColumns: 'minmax(0, 1fr)',
+    // The two date fields still fit side by side.
+    '&.DateRangePicker-fields': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 },
+  },
 })
 
 const Field = styled('label')({
@@ -216,6 +220,16 @@ const Actions = styled('div')({
   padding: '0 12px',
   '& > :first-of-type': { marginRight: 'auto' },
   '& .DateRangePicker-cancel': { color: colors.neutral[500] },
+  // Phones stack the months, so the popover scrolls: keep the buttons in view.
+  '@media (max-width: 720px)': {
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 1,
+    margin: '0 -16px -16px',
+    padding: '8px 16px 16px',
+    borderTop: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: colors.white,
+  },
 })
 
 // ---------- components ----------
@@ -441,7 +455,7 @@ export function DateRangePicker({
       >
         <Panel>
           <h2 id={titleId}>{t('datePicker.title')}</h2>
-          <Pair>
+          <Pair className="DateRangePicker-fields">
             <DateField label={t('datePicker.start')} value={draft.from} onCommit={setStart} />
             <DateField label={t('datePicker.end')} value={draft.to} onCommit={setEnd} />
           </Pair>
