@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    base: '/medical-app-fe/',
     plugins: [react(), tailwindcss()],
     server: {
       // Same-origin /api keeps the httpOnly refresh cookie first-party.
